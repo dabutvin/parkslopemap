@@ -34,6 +34,23 @@
         "type": "Point",
         "coordinates": [-73.9741, 40.669]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "plane-crash-1960",
+        "name": "1960 Plane Crash Site",
+        "category": "History",
+        "building": "plane-crash",
+        "description": "On December 16, 1960, a United Air Lines DC-8 collided in midair with a TWA Super Constellation over Staten Island and came down here at Sterling Place and Seventh Avenue, striking the Pillar of Fire Church. All 128 people aboard the two airliners and 6 on the ground were killed \u2014 134 in all, then the deadliest aviation disaster in history. An 11-year-old passenger, Stephen Baltz, was thrown clear into a snowbank and survived the impact but died the next day. You can still spot the wound today: look up at 126 Sterling Place and the top courses of brick below the rebuilt roofline are lighter and newer where the DC-8's right wing knifed through, and \u2014 unlike its two matching neighbors \u2014 its ornamental cornice was never replaced.",
+        "photo": "/photos/plane-crash-1960.jpg",
+        "photoAlt": "Wreckage of the United DC-8 in the street at Seventh Avenue and Sterling Place the day after the December 1960 crash",
+        "photoCredit": "AP file photo, December 17, 1960"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9744, 40.6771]
+      }
     }
   ]
 }

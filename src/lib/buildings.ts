@@ -58,6 +58,10 @@ const C = {
   brownTrim: "#cf9a61", // carved stone bands, lintels, stoop
   carve: "#c2854f", // carved foliate band beneath the bay
   rail: "#3f3327",
+  // Airliner tones (for the 1960 crash-site marker).
+  plane: "#d3d2cb", // silver/off-white fuselage
+  planeDark: "#a7a79f", // shaded under-surfaces (wings, engines, tail)
+  planeTrim: "#7d96a0", // muted steel-blue cheatline
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -656,10 +660,106 @@ function brownstone(): BuildingDrawing {
   };
 }
 
+/**
+ * A side-view four-engine airliner (a DC-8), used to mark the site of the
+ * December 16, 1960 mid-air collision at Sterling Place & Seventh Avenue rather
+ * than a building. Nose to the left, banking gently, with a faint ground shadow.
+ */
+function airliner(): BuildingDrawing {
+  const W = 132;
+  const H = 70;
+  const parts: BuildingPart[] = [];
+
+  let seed = 140;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const cy = 28; // fuselage centerline
+
+  // Faint ground shadow / impact marker.
+  push({
+    d: ellipse(W / 2, H - 3, 42, 6),
+    fill: "rgba(91,74,58,0.18)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.7,
+    fillStyle: "solid",
+  });
+
+  // Main wing, swept back beneath the belly (shaded under-surface).
+  push({
+    d: `M 44 33 L 96 52 L 110 52 L 62 33 Z`,
+    fill: C.planeDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // Engine pods slung under the wing, intake rings facing forward (left).
+  for (const [ex, ey] of [[70, 45], [88, 49]] as const) {
+    push({ d: rect(ex, ey, 13, 5), fill: C.planeDark, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+    push({ d: ellipse(ex + 0.5, ey + 2.5, 1.6, 2.6), fill: C.ink, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  }
+
+  // Vertical stabilizer (tail fin).
+  push({
+    d: `M 96 ${cy - 6} L 112 2 L 122 5 L 118 ${cy - 2} Z`,
+    fill: C.planeDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+
+  // Fuselage (drawn over the wing roots and fin base for a clean join).
+  push({
+    d:
+      `M 16 ${cy - 7} Q 6 ${cy - 5} 6 ${cy} Q 6 ${cy + 5} 16 ${cy + 7} ` +
+      `L 100 ${cy + 7} Q 116 ${cy + 7} 128 ${cy} ` +
+      `Q 116 ${cy - 7} 100 ${cy - 7} Z`,
+    fill: C.plane,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 0.8,
+    bowing: 0.5,
+    fillStyle: "solid",
+  });
+
+  // Horizontal stabilizer near the tail cone.
+  push({
+    d: `M 104 ${cy + 3} L 124 ${cy + 6} L 116 ${cy + 9} L 102 ${cy + 6} Z`,
+    fill: C.planeDark,
+    stroke: C.ink,
+    strokeWidth: 1,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+
+  // Cheatline along the fuselage.
+  push({ d: `M 10 ${cy + 1} L 122 ${cy + 1}`, stroke: C.planeTrim, strokeWidth: 2.2, roughness: 0.6 });
+
+  // Cabin windows.
+  for (const x of spread(22, 98, 13, 2)) {
+    push({ d: rect(x, cy - 4, 2, 3), fill: C.glass, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+  // Cockpit window at the nose.
+  push({
+    d: `M 9 ${cy - 3} L 16 ${cy - 4} L 16 ${cy - 1} L 10 ${cy} Z`,
+    fill: C.glass,
+    stroke: C.ink,
+    strokeWidth: 0.8,
+    roughness: 0.7,
+    fillStyle: "solid",
+  });
+
+  return { width: W, height: H, anchorX: W / 2, anchorY: H - 3, scale: 0.4, parts };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
 export const BUILDINGS: Record<string, BuildingBuilder> = {
   "montauk-club": montaukClub,
   "obama-brownstone": brownstone,
+  "plane-crash": airliner,
 };

@@ -161,8 +161,12 @@ export function buildMapModel(
     return roughen(d, opts).map((p, j) => ({ ...p, key: `${i}-${j}` }));
   });
 
-  const avenueLabels = buildStreetLabels(streets, project, "avenue");
-  const streetLabels = buildStreetLabels(streets, project, "street");
+  const pois = buildPois(places, project);
+  // Keep street/avenue labels clear of the POI buildings by feeding their
+  // on-map footprints in as points to avoid.
+  const poiAvoid = pois.map((p) => [p.x, p.y - (p.anchorY * p.scale) / 2] as [number, number]);
+  const avenueLabels = buildStreetLabels(streets, project, "avenue", poiAvoid);
+  const streetLabels = buildStreetLabels(streets, project, "street", poiAvoid);
 
   // "Prospect Park" runs along the park band, parallel to the avenues. Anchor it
   // to the reserved band in screen space so it always lands cleanly in the green.
@@ -177,8 +181,6 @@ export function buildMapModel(
     y: height * 0.42,
     angle: bandAngle,
   };
-
-  const pois = buildPois(places, project);
 
   // Heading that points to true north, so the compass rose is accurate.
   const n0 = project([-73.982, 40.665]);
@@ -263,10 +265,46 @@ function buildPois(
 const STREET_LABEL_MIN_ZOOM = 2;
 const STREET_LABEL_MAX_ZOOM = 4.5;
 
+// A label is nudged off its street's midpoint if a POI sits within this many
+// screen pixels, so building markers and labels don't overlap.
+const LABEL_POI_CLEARANCE = 46;
+
+/** Pick the polyline vertex for a label: the midpoint, unless a POI is too
+ * close, in which case the nearest-to-center vertex that clears all POIs (or,
+ * failing that, the vertex farthest from any POI). */
+function pickLabelIndex(
+  coords: [number, number][],
+  avoid: [number, number][]
+): number {
+  const mid = Math.floor(coords.length / 2);
+  if (avoid.length === 0 || coords.length < 3) return mid;
+  const minDist = (p: [number, number]) =>
+    Math.min(...avoid.map(([ax, ay]) => Math.hypot(p[0] - ax, p[1] - ay)));
+  if (minDist(coords[mid]) >= LABEL_POI_CLEARANCE) return mid;
+
+  let clearIdx = -1;
+  let clearDelta = Infinity;
+  let farIdx = mid;
+  let farDist = -Infinity;
+  for (let i = 1; i < coords.length - 1; i++) {
+    const d = minDist(coords[i]);
+    if (d >= LABEL_POI_CLEARANCE && Math.abs(i - mid) < clearDelta) {
+      clearDelta = Math.abs(i - mid);
+      clearIdx = i;
+    }
+    if (d > farDist) {
+      farDist = d;
+      farIdx = i;
+    }
+  }
+  return clearIdx >= 0 ? clearIdx : farIdx;
+}
+
 function buildStreetLabels(
   collection: FeatureCollection<LineString | MultiLineString>,
   project: (coord: [number, number]) => [number, number],
-  kind: "avenue" | "street"
+  kind: "avenue" | "street",
+  avoid: [number, number][] = []
 ): AvenueLabel[] {
   const longest = new Map<string, { coords: [number, number][]; length: number }>();
 
@@ -295,7 +333,7 @@ function buildStreetLabels(
   const labels: AvenueLabel[] = [];
   for (const [name, { coords, length }] of longest) {
     if (coords.length < 2) continue;
-    const mid = Math.floor(coords.length / 2);
+    const mid = pickLabelIndex(coords, avoid);
     const a = coords[Math.max(0, mid - 1)];
     const b = coords[Math.min(coords.length - 1, mid + 1)];
     let angle = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
