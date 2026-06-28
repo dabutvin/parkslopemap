@@ -1,0 +1,21 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Generated preview images from scripts/render-preview.ts (root only)
+/preview*.png

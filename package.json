@@ -1,0 +1,33 @@
+{
+  "name": "parkslope",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "An interactive, hand-drawn-styled map of the Park Slope neighborhood in Brooklyn.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "fetch-data": "tsx scripts/fetch-data.ts"
+  },
+  "dependencies": {
+    "d3-geo": "^3.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "roughjs": "^4.6.6"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@turf/turf": "^7.3.5",
+    "@types/d3-geo": "^3.1.0",
+    "@types/geojson": "^7946.0.14",
+    "@types/node": "^20.19.43",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "osmtogeojson": "^3.0.0-beta.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}
