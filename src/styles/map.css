@@ -27,7 +27,9 @@ body {
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  /* Default to an immersive, full-viewport map. */
+  height: 100vh;
+  overflow: hidden;
   /* Subtle vignette so the "page" feels like aged paper. */
   background:
     radial-gradient(120% 120% at 50% 0%, rgba(255, 255, 255, 0.35), transparent 55%),
@@ -35,44 +37,137 @@ body {
     var(--paper);
 }
 
+/* The header floats over the map so the map can fill the whole screen. */
 .app__header {
-  text-align: center;
-  padding: 1.6rem 1rem 0.4rem;
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  z-index: 2;
+  text-align: right;
+  pointer-events: none;
 }
 
 .app__title {
   font-family: "Caveat", "Patrick Hand", cursive;
-  font-size: clamp(2.6rem, 6vw, 4.4rem);
+  font-size: 1.8rem;
   font-weight: 700;
   margin: 0;
+  line-height: 1;
   letter-spacing: 0.02em;
   color: var(--ink);
   text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .app__subtitle {
-  font-size: clamp(1rem, 2.2vw, 1.4rem);
+  font-size: 0.7rem;
   margin: 0.1rem 0 0;
   color: var(--ink-soft);
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .app__map {
+  position: relative;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1rem 1.5rem;
+  padding: 1rem;
   min-height: 0;
+}
+
+/* When fullscreen, the map area becomes the whole screen, so it needs to
+   carry its own paper background (the body's is no longer visible). */
+.app__map:fullscreen {
+  background: var(--paper);
+  padding: 2rem;
+}
+
+.app__map:fullscreen .ps-map__wrap {
+  max-width: none;
+  max-height: 100%;
+}
+
+.app__fullscreen {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1;
+  padding: 0.4rem 0.9rem;
+  font-family: "Caveat", "Patrick Hand", cursive;
+  font-size: 1.1rem;
+  color: var(--ink);
+  background: rgba(247, 240, 223, 0.85);
+  border: 2px solid var(--ink-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  box-shadow: 1px 1px 0 rgba(91, 74, 58, 0.2);
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.app__fullscreen:hover {
+  background: var(--paper-deep);
+}
+
+.app__fullscreen:active {
+  transform: translateY(1px);
+}
+
+.ps-map__wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ps-map {
   width: 100%;
   height: 100%;
-  max-width: 1100px;
-  max-height: 82vh;
-  overflow: visible;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.ps-zoom {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ps-zoom__btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Caveat", "Patrick Hand", cursive;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--ink);
+  background: rgba(247, 240, 223, 0.9);
+  border: 2px solid var(--ink-soft);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 1px 1px 0 rgba(91, 74, 58, 0.2);
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.ps-zoom__btn:hover:not(:disabled) {
+  background: var(--paper-deep);
+}
+
+.ps-zoom__btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.ps-zoom__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .ps-map__paper {
@@ -107,6 +202,13 @@ body {
   fill: var(--ink-soft);
   text-anchor: middle;
   letter-spacing: 0.05em;
+}
+
+.ps-label--street {
+  font-size: 11px;
+  fill: var(--ink-soft);
+  text-anchor: middle;
+  letter-spacing: 0.03em;
 }
 
 .ps-compass__ring {

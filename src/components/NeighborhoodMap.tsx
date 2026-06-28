@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Feature,
   FeatureCollection,
@@ -19,19 +19,137 @@ const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLi
 
 const DESIGN_WIDTH = 1000;
 
+// How far you can zoom in: the viewBox can shrink to 1/MAX_ZOOM of full extent.
+const MAX_ZOOM = 8;
+
+type ViewBox = { x: number; y: number; w: number; h: number };
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(Math.max(value, min), max);
+
 export function NeighborhoodMap() {
   const model = useMemo(
     () => buildMapModel({ boundary, park, streets }, { width: DESIGN_WIDTH }),
     []
   );
 
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [view, setView] = useState<ViewBox>({
+    x: 0,
+    y: 0,
+    w: model.width,
+    h: model.height,
+  });
+  const panRef = useRef<{ pointerId: number; startX: number; startY: number; view: ViewBox } | null>(
+    null
+  );
+
+  // Keep the view within the map bounds and within the allowed zoom range.
+  const clampView = useCallback(
+    (next: ViewBox): ViewBox => {
+      const minW = model.width / MAX_ZOOM;
+      const w = clamp(next.w, minW, model.width);
+      const h = w * (model.height / model.width);
+      return {
+        w,
+        h,
+        x: clamp(next.x, 0, model.width - w),
+        y: clamp(next.y, 0, model.height - h),
+      };
+    },
+    [model.width, model.height]
+  );
+
+  const zoomAt = useCallback(
+    (clientX: number, clientY: number, factor: number) => {
+      const svg = svgRef.current;
+      if (!svg) return;
+      const rect = svg.getBoundingClientRect();
+      setView((v) => {
+        const fx = (clientX - rect.left) / rect.width;
+        const fy = (clientY - rect.top) / rect.height;
+        const px = v.x + fx * v.w;
+        const py = v.y + fy * v.h;
+        const w = v.w * factor;
+        return clampView({ w, h: w * (model.height / model.width), x: px - fx * w, y: py - fy * w * (model.height / model.width) });
+      });
+    },
+    [clampView, model.width, model.height]
+  );
+
+  // Native, non-passive wheel listener so we can preventDefault the page scroll.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = Math.exp(e.deltaY * 0.0015);
+      zoomAt(e.clientX, e.clientY, factor);
+    };
+    svg.addEventListener("wheel", onWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", onWheel);
+  }, [zoomAt]);
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent<SVGSVGElement>) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+      panRef.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, view };
+    },
+    [view]
+  );
+
+  const onPointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    const pan = panRef.current;
+    const svg = svgRef.current;
+    if (!pan || !svg || pan.pointerId !== e.pointerId) return;
+    const rect = svg.getBoundingClientRect();
+    const dx = ((e.clientX - pan.startX) / rect.width) * pan.view.w;
+    const dy = ((e.clientY - pan.startY) / rect.height) * pan.view.h;
+    setView(clampView({ ...pan.view, x: pan.view.x - dx, y: pan.view.y - dy }));
+  }, [clampView]);
+
+  const endPan = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
+    if (panRef.current?.pointerId === e.pointerId) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+      panRef.current = null;
+    }
+  }, []);
+
+  const zoomByButton = useCallback(
+    (factor: number) => {
+      const svg = svgRef.current;
+      if (!svg) return;
+      const rect = svg.getBoundingClientRect();
+      zoomAt(rect.left + rect.width / 2, rect.top + rect.height / 2, factor);
+    },
+    [zoomAt]
+  );
+
+  const resetView = useCallback(
+    () => setView({ x: 0, y: 0, w: model.width, h: model.height }),
+    [model.width, model.height]
+  );
+
+  const isZoomed = view.w < model.width;
+  const zoom = model.width / view.w;
+  const visibleStreetLabels = model.streetLabels.filter(
+    (label) => zoom >= (label.minZoom ?? Infinity)
+  );
+
   return (
+    <div className="ps-map__wrap">
     <svg
+      ref={svgRef}
       className="ps-map"
-      viewBox={`0 0 ${model.width} ${model.height}`}
+      viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
       preserveAspectRatio="xMidYMid meet"
       role="img"
       aria-label="Hand-drawn map of the Park Slope neighborhood in Brooklyn"
+      style={{ cursor: panRef.current ? "grabbing" : "grab", touchAction: "none" }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endPan}
+      onPointerCancel={endPan}
     >
       <defs>
         <filter id="ps-paper" x="-5%" y="-5%" width="110%" height="110%">
@@ -101,10 +219,41 @@ export function NeighborhoodMap() {
             {label.name}
           </text>
         ))}
+        {visibleStreetLabels.map((label) => (
+          <text
+            key={label.name}
+            className="ps-label ps-label--street"
+            x={label.x}
+            y={label.y}
+            transform={`rotate(${label.angle} ${label.x} ${label.y})`}
+          >
+            {label.name}
+          </text>
+        ))}
       </g>
 
       <Compass x={88} y={96} radius={40} northAngle={model.northAngle} />
     </svg>
+
+      <div className="ps-zoom" role="group" aria-label="Zoom controls">
+        <button type="button" className="ps-zoom__btn" onClick={() => zoomByButton(1 / 1.4)} aria-label="Zoom in">
+          +
+        </button>
+        <button type="button" className="ps-zoom__btn" onClick={() => zoomByButton(1.4)} aria-label="Zoom out">
+          −
+        </button>
+        <button
+          type="button"
+          className="ps-zoom__btn ps-zoom__btn--reset"
+          onClick={resetView}
+          disabled={!isZoomed}
+          aria-label="Reset zoom"
+          title="Reset"
+        >
+          ⤢
+        </button>
+      </div>
+    </div>
   );
 }
 

@@ -25,6 +25,8 @@ export interface AvenueLabel {
   x: number;
   y: number;
   angle: number;
+  /** Zoom factor (model.width / viewBox.width) at which this label appears. */
+  minZoom?: number;
 }
 
 export interface KeyedSubPath extends RoughSubPath {
@@ -40,6 +42,8 @@ export interface MapModel {
   boundaryOutline: RoughSubPath[];
   streetPaths: KeyedSubPath[];
   avenueLabels: AvenueLabel[];
+  /** Cross-street labels, revealed progressively via each label's minZoom. */
+  streetLabels: AvenueLabel[];
   parkLabel: AvenueLabel;
   /** Screen-space heading (degrees) that points to true north. */
   northAngle: number;
@@ -123,7 +127,8 @@ export function buildMapModel(
     return roughen(d, opts).map((p, j) => ({ ...p, key: `${i}-${j}` }));
   });
 
-  const avenueLabels = buildAvenueLabels(streets, project);
+  const avenueLabels = buildStreetLabels(streets, project, "avenue");
+  const streetLabels = buildStreetLabels(streets, project, "street");
 
   // "Prospect Park" runs along the park band, parallel to the avenues. Anchor it
   // to the reserved band in screen space so it always lands cleanly in the green.
@@ -153,21 +158,28 @@ export function buildMapModel(
     boundaryOutline,
     streetPaths,
     avenueLabels,
+    streetLabels,
     parkLabel,
     northAngle,
   };
 }
 
 
-function buildAvenueLabels(
+// Cross-street labels fade in between these zoom factors: the longest street
+// appears first (near MIN), the shortest last (near MAX).
+const STREET_LABEL_MIN_ZOOM = 2;
+const STREET_LABEL_MAX_ZOOM = 4.5;
+
+function buildStreetLabels(
   collection: FeatureCollection<LineString | MultiLineString>,
-  project: (coord: [number, number]) => [number, number]
+  project: (coord: [number, number]) => [number, number],
+  kind: "avenue" | "street"
 ): AvenueLabel[] {
   const longest = new Map<string, { coords: [number, number][]; length: number }>();
 
   for (const f of collection.features) {
     const name = f.properties?.name as string | undefined;
-    if (!name || f.properties?.kind !== "avenue") continue;
+    if (!name || f.properties?.kind !== kind) continue;
     const lines =
       f.geometry.type === "LineString" ? [f.geometry.coordinates] : f.geometry.coordinates;
     for (const line of lines) {
@@ -181,8 +193,14 @@ function buildAvenueLabels(
     }
   }
 
+  const entries = [...longest.values()].filter((e) => e.coords.length >= 2);
+  const lengths = entries.map((e) => e.length);
+  const maxLen = Math.max(...lengths, 1);
+  const minLen = Math.min(...lengths, 0);
+  const span = maxLen - minLen || 1;
+
   const labels: AvenueLabel[] = [];
-  for (const [name, { coords }] of longest) {
+  for (const [name, { coords, length }] of longest) {
     if (coords.length < 2) continue;
     const mid = Math.floor(coords.length / 2);
     const a = coords[Math.max(0, mid - 1)];
@@ -190,7 +208,15 @@ function buildAvenueLabels(
     let angle = (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
     if (angle > 90) angle -= 180;
     if (angle < -90) angle += 180;
-    labels.push({ name, x: coords[mid][0], y: coords[mid][1], angle });
+
+    let minZoom: number | undefined;
+    if (kind === "street") {
+      // Longer streets (t→1) reveal earlier (lower zoom threshold).
+      const t = (length - minLen) / span;
+      minZoom =
+        STREET_LABEL_MAX_ZOOM - t * (STREET_LABEL_MAX_ZOOM - STREET_LABEL_MIN_ZOOM);
+    }
+    labels.push({ name, x: coords[mid][0], y: coords[mid][1], angle, minZoom });
   }
   return labels;
 }
