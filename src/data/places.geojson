@@ -68,6 +68,23 @@
         "type": "Point",
         "coordinates": [-73.984602, 40.67301]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "litchfield-villa",
+        "name": "Litchfield Villa",
+        "category": "Landmark",
+        "building": "litchfield-villa",
+        "description": "Grace Hill, the great Italianate mansion designed by Alexander Jackson Davis and built 1854\u20131857 for railroad and real-estate developer Edwin C. Litchfield, who developed much of Gowanus and Park Slope. Davis's most celebrated villa, it is a picturesque, asymmetrical composition of a tall round turret and a square belvedere tower in buff stucco, with verandah columns capped not by classical acanthus but by native corn and wheat. The land was taken for Prospect Park in 1868 \u2014 the Litchfields stayed on as tenants until 1883 \u2014 and the house at 95 Prospect Park West is now the Brooklyn headquarters of the NYC Parks Department and the Prospect Park Alliance.",
+        "photo": "/photos/litchfield-villa-1870s.jpg",
+        "photoAlt": "Litchfield Villa seen through the trees of Prospect Park in a stereoview from the 1870s",
+        "photoCredit": "Robert N. Dennis collection of stereoscopic views, c. 1870\u20131890 \u00b7 New York Public Library (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9737048, 40.6668751]
+      }
     }
   ]
 }

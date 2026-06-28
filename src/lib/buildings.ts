@@ -62,6 +62,12 @@ const C = {
   plane: "#d3d2cb", // silver/off-white fuselage
   planeDark: "#a7a79f", // shaded under-surfaces (wings, engines, tail)
   planeTrim: "#7d96a0", // muted steel-blue cheatline
+  // Litchfield Villa tones (the buff Italianate mansion in Prospect Park).
+  villa: "#c9a571", // lit buff stucco wall
+  villaDark: "#a3814d", // shaded returns / curved tower side
+  villaTrim: "#ecdcb4", // light stone cornices, quoins, hood molds
+  balus: "#d8c499", // terrace balustrade stone
+  recess: "#5e4d3a", // shadowed arcade / open verandah openings
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -905,6 +911,252 @@ function oldStoneHouse(): BuildingDrawing {
   };
 }
 
+/**
+ * Litchfield Villa / Grace Hill (1854–1857, Alexander Jackson Davis), the great
+ * Italianate mansion that stands inside Prospect Park. Drawn as Davis's
+ * picturesque, asymmetrical composition: a tall slender round campanile-turret
+ * on the left, a square entrance tower beside it, and a lower main block on the
+ * right fronted by an open arcaded verandah — all in buff stucco with bracketed
+ * cornices, round-arched windows, and the low terrace wall that sets it off.
+ * Heights cascade left→right (turret tallest, then square tower, then block).
+ */
+function litchfieldVilla(): BuildingDrawing {
+  const parts: BuildingPart[] = [];
+
+  let seed = 260;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical reference lines (top-down).
+  const yWater = 196; // sidewalk
+  const yBase = 188; // top of the terrace wall / base course
+  const DX = 10; // shaded right-return depth on the main block
+
+  // Round campanile-turret (far left, tall & slender — the signature).
+  const tCx = 18;
+  const tRad = 11;
+  const tL = tCx - tRad; // 7
+  const tR = tCx + tRad; // 29
+  const tCapBot = 18; // base of the conical cap
+  const tRing = tCapBot + 3;
+
+  // Square entrance tower (middle).
+  const sL = 30;
+  const sR = 62;
+  const sCx = (sL + sR) / 2; // 46
+  const sRoofApex = 24;
+  const sCorTop = 40;
+  const sCorBot = 48;
+
+  // Main block (right).
+  const mL = 60;
+  const mR = 118;
+  const mCorTop = 64;
+  const mCorBot = 74;
+
+  // Ground shadow first, so the villa sits on top of it.
+  push({
+    d: ellipse((tL + mR + DX) / 2, yWater + 2, ((mR + DX) - tL) / 2 + 4, 9),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Main block: shaded right return for mass.
+  push({
+    d: `M ${r(mR)} ${r(mCorTop)} L ${r(mR + DX)} ${r(mCorTop + 7)} ` +
+      `L ${r(mR + DX)} ${r(yWater - 3)} L ${r(mR)} ${r(yWater)} Z`,
+    fill: C.villaDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1.1,
+    fillStyle: "solid",
+  });
+
+  // --- Walls (back-to-front) ---
+  push({
+    d: rect(mL, mCorTop, mR - mL, yWater - mCorTop),
+    fill: C.villa,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.6,
+    fillStyle: "solid",
+  });
+  push({
+    d: rect(sL, sCorTop, sR - sL, yWater - sCorTop),
+    fill: C.villa,
+    stroke: C.ink,
+    strokeWidth: 1.5,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // Round turret shaft, with a darker band on its right to read as curvature.
+  push({
+    d: rect(tL, tCapBot, tR - tL, yWater - tCapBot),
+    fill: C.villa,
+    stroke: C.ink,
+    strokeWidth: 1.5,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({
+    d: rect(tR - 5, tCapBot, 5, yBase - tCapBot),
+    fill: C.villaDark,
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+
+  // --- Roofs / caps (drawn over the shaft tops) ---
+  // Low hipped roof over the main block.
+  push({
+    d: `M ${r(mL)} ${r(mCorTop)} L ${r(mR)} ${r(mCorTop)} ` +
+      `L ${r(mR - 12)} ${r(mCorTop - 10)} L ${r(mL + 12)} ${r(mCorTop - 10)} Z`,
+    fill: C.roof,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // Square tower pyramidal roof (darker right slope for depth).
+  push({
+    d: `M ${r(sL - 2)} ${r(sCorTop)} L ${r(sCx)} ${r(sRoofApex)} L ${r(sR + 2)} ${r(sCorTop)} Z`,
+    fill: C.roof,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(sCx)} ${r(sRoofApex)} L ${r(sR + 2)} ${r(sCorTop)} L ${r(sCx)} ${r(sCorTop)} Z`,
+    fill: C.roofDark,
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // Turret conical cap + finial.
+  push({
+    d: `M ${r(tL)} ${r(tCapBot)} L ${r(tCx)} ${r(0)} L ${r(tR)} ${r(tCapBot)} Z`,
+    fill: C.roof,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(tCx)} ${r(0)} L ${r(tCx)} ${r(-5)}`,
+    stroke: C.ink,
+    strokeWidth: 1.1,
+    roughness: 0.7,
+  });
+
+  // --- Cornices (bracketed) ---
+  push({
+    d: rect(mL - 3, mCorTop, mR - mL + 6 + DX, mCorBot - mCorTop),
+    fill: C.villaTrim,
+    stroke: C.ink,
+    strokeWidth: 1.4,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  for (const x of spread(mL, mR, 8, 3)) {
+    push({ d: rect(x, mCorBot - 1, 3, 3), fill: C.villaDark, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+  push({
+    d: rect(sL - 2, sCorTop, sR - sL + 4, sCorBot - sCorTop),
+    fill: C.villaTrim,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  for (const x of spread(sL, sR, 5, 3)) {
+    push({ d: rect(x, sCorBot - 1, 3, 3), fill: C.villaDark, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+  // Turret ring cornice under the cap.
+  push({
+    d: rect(tL - 1, tCapBot, tR - tL + 2, tRing - tCapBot),
+    fill: C.villaTrim,
+    stroke: C.ink,
+    strokeWidth: 1.1,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+
+  // --- Quoins on the square entrance tower ---
+  for (let y = sCorBot + 2; y < yBase - 6; y += 14) {
+    push({ d: rect(sL - 1, y, 4, 7), fill: C.villaTrim, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+    push({ d: rect(sR - 3, y, 4, 7), fill: C.villaTrim, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+
+  // --- Turret openings: two small belvedere arches, then a slot window ---
+  for (const x of spread(tL + 1, tR - 1, 2, 6)) {
+    push({ d: archWindow(x, tRing + 5, 6, 14), fill: C.recess, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+  }
+  push({ d: archWindow(tCx - 4, tRing + 40, 8, 22), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  push({ d: archWindow(tCx - 4, tRing + 80, 8, 22), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+
+  // --- Square tower: tall belfry window high, entrance arch at the ground ---
+  push({ d: archWindow(sCx - 6, sCorBot + 8, 12, 30), fill: C.glass, stroke: C.ink, strokeWidth: 1.3, roughness: 0.9, fillStyle: "solid" });
+  const dW = 18;
+  const dX = sCx - dW / 2;
+  const dTop = yBase - 48;
+  push({ d: archWindow(dX, dTop, dW, 48), fill: C.door, stroke: C.ink, strokeWidth: 1.5, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(sCx)} ${r(dTop + dW / 2)} L ${r(sCx)} ${r(yBase)}`, stroke: C.villaTrim, strokeWidth: 0.8, roughness: 0.7 });
+
+  // --- Main block: upper-floor arched windows over an arcaded verandah ---
+  const upW = 12;
+  for (const x of spread(mL + 4, mR - 4, 3, upW)) {
+    push({ d: archWindow(x, mCorBot + 12, upW, 30), fill: C.glass, stroke: C.ink, strokeWidth: 1.3, roughness: 0.9, fillStyle: "solid" });
+    // Hood mold over each window.
+    push({ d: archWindow(x - 1.5, mCorBot + 9, upW + 3, 6), fill: C.villaTrim, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+  }
+  // String course between the floors.
+  push({ d: rect(mL - 1, mCorBot + 52, mR - mL + 2, 3), fill: C.villaTrim, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+
+  // Open verandah: a porch cornice over a row of round-arched openings.
+  const yArc = mCorBot + 60; // 134
+  push({
+    d: rect(mL - 2, yArc - 4, mR - mL + 4, 4),
+    fill: C.villaTrim,
+    stroke: C.ink,
+    strokeWidth: 1,
+    roughness: 0.8,
+    fillStyle: "solid",
+  });
+  for (const x of spread(mL + 2, mR - 2, 4, 10)) {
+    push({ d: archWindow(x, yArc + 2, 10, yBase - yArc - 2), fill: C.recess, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  }
+
+  // --- Terrace: a low balustraded wall across the whole front ---
+  push({
+    d: rect(tL - 2, yBase, (mR + DX) - tL + 2, yWater - yBase),
+    fill: C.balus,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  push({ d: `M ${r(tL - 3)} ${r(yBase)} L ${r(mR + DX + 1)} ${r(yBase)}`, stroke: C.ink, strokeWidth: 1, roughness: 0.7 });
+  for (const x of spread(tL, mR + DX, 22, 1.5)) {
+    push({ d: `M ${r(x)} ${r(yBase + 2)} L ${r(x)} ${r(yWater - 1)}`, stroke: C.villaDark, strokeWidth: 0.9, roughness: 0.6 });
+  }
+
+  return {
+    width: mR + DX + 4,
+    height: yWater + 6,
+    anchorX: 66,
+    anchorY: yWater,
+    scale: 0.4,
+    parts,
+  };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -913,4 +1165,5 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "obama-brownstone": brownstone,
   "plane-crash": airliner,
   "old-stone-house": oldStoneHouse,
+  "litchfield-villa": litchfieldVilla,
 };
