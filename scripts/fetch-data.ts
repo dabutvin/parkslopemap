@@ -3,10 +3,11 @@
  * static GeoJSON into src/data. Run on demand with `npm run fetch-data`; it is
  * NOT part of the app runtime (the app only reads the committed GeoJSON).
  *
- * It produces four files:
+ * It produces five files:
  *   - park-slope-boundary.geojson : the neighborhood outline
  *   - prospect-park.geojson       : the park polygon (the eastern landmark)
- *   - washington-park.geojson     : the small inner green (Old Stone House)
+ *   - washington-park.geojson     : the labeled inner green (Old Stone House)
+ *   - green-spaces.geojson        : smaller, unlabeled inner playgrounds
  *   - streets.geojson             : the avenue + cross-street grid
  *
  * The boundary is stitched from real OpenStreetMap geometry so the borders are
@@ -25,6 +26,8 @@ import {
   multiLineString,
   featureCollection,
   booleanIntersects,
+  booleanPointInPolygon,
+  centroid,
   rewind,
 } from "@turf/turf";
 import type {
@@ -288,12 +291,41 @@ async function main() {
   });
   console.log(`  trimmed streets to neighborhood: ${before} -> ${streets.features.length}`);
 
+  // Smaller playgrounds scattered through the neighborhood become unlabeled
+  // green dabs. Keep only those whose centroid lands inside the boundary, and
+  // drop Washington Park's own J.J. Byrne Playground (already drawn as a park).
+  console.log("Querying Overpass for inner playgrounds...");
+  const playRaw = await overpass(`
+    [out:json][timeout:90];
+    (
+      way["leisure"="playground"](${BBOX.s},${BBOX.w},${BBOX.n},${BBOX.e});
+      relation["leisure"="playground"](${BBOX.s},${BBOX.w},${BBOX.n},${BBOX.e});
+    );
+    out body; >; out skel qt;
+  `);
+  const playFc = osmtogeojson(playRaw) as FeatureCollection;
+  const playgrounds = playFc.features.filter((f) => {
+    if (f.geometry.type !== "Polygon" && f.geometry.type !== "MultiPolygon") return false;
+    const name = (f.properties?.name as string | undefined) ?? "";
+    if (/byrne|washington park/i.test(name)) return false;
+    try {
+      return booleanPointInPolygon(centroid(f as Feature<Polygon | MultiPolygon>), boundary);
+    } catch {
+      return false;
+    }
+  }) as Feature<Polygon | MultiPolygon>[];
+  for (const f of playgrounds) f.properties = {}; // unlabeled
+  console.log(`  kept ${playgrounds.length} inner playgrounds`);
+
   // d3-geo treats polygons as spherical and expects CLOCKWISE outer rings;
   // rings the other way are read as "the whole globe minus this shape". Rewind
   // so the app fills the actual interiors.
   const boundaryCW = rewind(boundary, { reverse: true }) as Feature<Polygon>;
   const parkCW = rewind(park, { reverse: true }) as Feature<Polygon | MultiPolygon>;
   const washingtonCW = rewind(washington, { reverse: true }) as Feature<Polygon | MultiPolygon>;
+  const greenSpacesCW = featureCollection(
+    playgrounds.map((f) => rewind(f, { reverse: true }) as Feature<Polygon | MultiPolygon>)
+  );
 
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(
@@ -309,11 +341,15 @@ async function main() {
     JSON.stringify(washingtonCW, null, 2)
   );
   await writeFile(
+    join(OUT_DIR, "green-spaces.geojson"),
+    JSON.stringify(greenSpacesCW, null, 2)
+  );
+  await writeFile(
     join(OUT_DIR, "streets.geojson"),
     JSON.stringify(featureCollection(streets.features as Feature<LineString | MultiLineString>[]), null, 2)
   );
 
-  console.log(`Done. Wrote 4 GeoJSON files to ${OUT_DIR}`);
+  console.log(`Done. Wrote 5 GeoJSON files to ${OUT_DIR}`);
 }
 
 main().catch((err) => {

@@ -91,6 +91,8 @@ export interface BuildMapInput {
   park: Feature<Polygon | MultiPolygon>;
   /** An inner green space (e.g. Washington Park) painted over the neighborhood. */
   greens?: Feature<Polygon | MultiPolygon>;
+  /** Additional, unlabeled green spaces (e.g. smaller playgrounds). */
+  greenSpaces?: FeatureCollection<Polygon | MultiPolygon>;
   streets: FeatureCollection<LineString | MultiLineString>;
   places?: FeatureCollection<Point>;
 }
@@ -107,7 +109,7 @@ export interface BuildMapOptions {
  * serializable model of everything that needs to be drawn.
  */
 export function buildMapModel(
-  { boundary, park, greens, streets, places }: BuildMapInput,
+  { boundary, park, greens, greenSpaces, streets, places }: BuildMapInput,
   { width, padding = 60, angle = DEFAULT_ANGLE }: BuildMapOptions
 ): MapModel {
   // Reserve room on the right so Prospect Park reads as a band on the east.
@@ -153,6 +155,21 @@ export function buildMapModel(
         seed: 23,
       })
     : [];
+  // Smaller, unlabeled green spaces (other playgrounds) share the park look.
+  const greenSpacePaths = (greenSpaces?.features ?? []).flatMap((f, i) => {
+    const d = path(f) ?? "";
+    if (!d) return [];
+    return roughen(d, {
+      fill: COLORS.park,
+      fillStyle: "solid",
+      stroke: COLORS.parkInk,
+      strokeWidth: 1.4,
+      roughness: 1.8,
+      bowing: 1.3,
+      seed: 41 + i,
+    });
+  });
+  greenPaths.push(...greenSpacePaths);
   let greenLabel: AvenueLabel | undefined;
   if (greens) {
     const [[gx0, gy0], [gx1, gy1]] = path.bounds(greens);

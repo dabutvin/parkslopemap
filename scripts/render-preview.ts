@@ -25,11 +25,12 @@ const read = (f: string) => JSON.parse(readFileSync(join(dataDir, f), "utf8"));
 const boundary = read("park-slope-boundary.geojson") as Feature<Polygon>;
 const park = read("prospect-park.geojson") as Feature<Polygon | MultiPolygon>;
 const greens = read("washington-park.geojson") as Feature<Polygon | MultiPolygon>;
+const greenSpaces = read("green-spaces.geojson") as FeatureCollection<Polygon | MultiPolygon>;
 const streets = read("streets.geojson") as FeatureCollection<LineString | MultiLineString>;
 const places = read("places.geojson") as FeatureCollection<Point>;
 
 const angle = process.argv[2] === undefined ? NaN : Number(process.argv[2]);
-const model = buildMapModel({ boundary, park, greens, streets, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
+const model = buildMapModel({ boundary, park, greens, greenSpaces, streets, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
