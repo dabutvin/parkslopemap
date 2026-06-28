@@ -85,6 +85,40 @@
         "type": "Point",
         "coordinates": [-73.9737048, 40.6668751]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "memorial-arch",
+        "name": "Soldiers' & Sailors' Arch",
+        "category": "Monument",
+        "building": "memorial-arch",
+        "description": "The Soldiers' and Sailors' Memorial Arch at the center of Grand Army Plaza, designed by John H. Duncan and built 1889\u20131892 as a memorial to the Union Army and Navy of the Civil War. Its bronze sculpture was added by Frederick MacMonnies around 1894\u20131901: the Army and Navy groups on the inner piers and, crowning the arch, the great quadriga of Victory riding a chariot drawn by horses.",
+        "photo": "/photos/memorial-arch-1900s.jpg",
+        "photoAlt": "The Soldiers' and Sailors' Memorial Arch at Grand Army Plaza, with the bronze quadriga on top, photographed in the early 1900s",
+        "photoCredit": "Detroit Publishing Co., c. 1905 \u00b7 Library of Congress (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9703, 40.6729]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "central-library",
+        "name": "Brooklyn Public Library",
+        "category": "Landmark",
+        "building": "central-library",
+        "description": "The Central Library of the Brooklyn Public Library, facing Grand Army Plaza. Designed by Alfred Morton Githens and Francis Keally and opened in 1941, it is a monumental Art Deco / Moderne landmark whose limestone facade curves open toward the plaza like a book. The 50-foot gilded entrance screen carries golden figures from American literature by Thomas Hudson Jones and C. Paul Jennewein.",
+        "photo": "/photos/central-library-1942.jpg",
+        "photoAlt": "The entrance facade of the Brooklyn Public Library at Grand Army Plaza, photographed in 1942 not long after it opened",
+        "photoCredit": "Gottscho-Schleisner, Inc., 1942 \u00b7 Library of Congress (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.96807, 40.67255]
+      }
     }
   ]
 }

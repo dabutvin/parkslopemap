@@ -245,6 +245,13 @@ export function NeighborhoodMap() {
         ))}
       </g>
 
+      {/* Grand Army Plaza, drawn unclipped so it spills beyond the boundary. */}
+      <g className="ps-layer ps-layer--plaza">
+        {model.plazaPaths.map((p) => (
+          <path key={p.key} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} strokeLinecap="round" />
+        ))}
+      </g>
+
       <g className="ps-layer ps-layer--places">
         {model.pois.map((poi) => (
           <g

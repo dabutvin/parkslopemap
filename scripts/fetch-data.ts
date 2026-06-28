@@ -43,7 +43,9 @@ import type {
 const OUT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "data");
 
 // Generous bounding box around Park Slope (south, west, north, east).
-const BBOX = { s: 40.6575, w: -73.9935, n: 40.6845, e: -73.968 };
+// East/north are pushed out a touch past the neighborhood so the Grand Army
+// Plaza oval (which sits beyond the NE corner) is fully captured.
+const BBOX = { s: 40.6575, w: -73.9935, n: 40.686, e: -73.966 };
 
 // Streets that form the colloquial borders, in clockwise order.
 const BORDER_STREETS = {
@@ -70,6 +72,15 @@ const WASHINGTON_CORNERS = {
   se: [-73.9843, 40.6716] as Position, // 5th Ave x 5th Street
   sw: [-73.9867, 40.6728] as Position, // 4th Ave x 5th Street
 };
+
+// The roads that trace Grand Army Plaza at the NE corner. They mostly sit
+// *outside* the neighborhood boundary, so they're exempt from the boundary trim
+// below and the app draws them unclipped to complete the plaza.
+const PLAZA_STREETS = new Set([
+  "Grand Army Plaza",
+  "Plaza Street West",
+  "Plaza Street East",
+]);
 
 // The avenues that read as the neighborhood's "spine".
 const AVENUES = new Set([
@@ -283,6 +294,9 @@ async function main() {
   // runtime stays light; the app trims the ragged ends with an SVG clip.
   const before = streets.features.length;
   streets.features = streets.features.filter((f) => {
+    // Keep the Grand Army Plaza roads even though they lie outside the boundary,
+    // so the plaza can be drawn complete and spilling past the NE corner.
+    if (PLAZA_STREETS.has(f.properties?.name as string)) return true;
     try {
       return booleanIntersects(f, boundary);
     } catch {

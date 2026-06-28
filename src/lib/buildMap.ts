@@ -22,6 +22,13 @@ export const COLORS = {
   street: "#b7a78f",
 };
 
+// Roads (by OSM name) that belong to Grand Army Plaza. They're pulled out of the
+// clipped street layer so the plaza can complete past the NE corner of the map.
+const PLAZA_STREETS = new Set(["Grand Army Plaza", "Plaza Street West", "Plaza Street East"]);
+// The two roads that actually trace the oval; an ellipse is fitted to them. The
+// other plaza roads are connectors that would only clutter the shape.
+const PLAZA_OVAL = new Set(["Plaza Street West", "Plaza Street East"]);
+
 export interface AvenueLabel {
   name: string;
   x: number;
@@ -76,6 +83,8 @@ export interface MapModel {
   neighborhoodFill: RoughSubPath[];
   boundaryOutline: RoughSubPath[];
   streetPaths: KeyedSubPath[];
+  /** Grand Army Plaza roads, drawn unclipped so the plaza spills past the boundary. */
+  plazaPaths: KeyedSubPath[];
   avenueLabels: AvenueLabel[];
   /** Cross-street labels, revealed progressively via each label's minZoom. */
   streetLabels: AvenueLabel[];
@@ -199,15 +208,28 @@ export function buildMapModel(
     seed: 13,
   });
 
-  const streetPaths: KeyedSubPath[] = streets.features.flatMap((f, i) => {
+  // Grand Army Plaza sits right on the NE corner. Rather than draw its raw OSM
+  // segments (which overshoot and double up into a messy tangle), we collect the
+  // points that trace the oval and render one clean, hand-drawn ellipse that
+  // pokes beyond the neighborhood outline.
+  const streetPaths: KeyedSubPath[] = [];
+  const plazaPts: [number, number][] = [];
+  streets.features.forEach((f, i) => {
+    if (PLAZA_STREETS.has((f.properties?.name as string) ?? "")) {
+      if (PLAZA_OVAL.has((f.properties?.name as string) ?? "")) {
+        plazaPts.push(...projectedPoints(f, project));
+      }
+      return; // never drawn as an ordinary street
+    }
     const d = path(f) ?? "";
-    if (!d) return [];
+    if (!d) return;
     const isAvenue = f.properties?.kind === "avenue";
     const opts: RoughOptions = isAvenue
       ? { stroke: COLORS.avenue, strokeWidth: 2.4, roughness: 1.5, bowing: 1.2, seed: i + 100 }
       : { stroke: COLORS.street, strokeWidth: 1.1, roughness: 1.4, bowing: 1, seed: i + 100 };
-    return roughen(d, opts).map((p, j) => ({ ...p, key: `${i}-${j}` }));
+    streetPaths.push(...roughen(d, opts).map((p, j) => ({ ...p, key: `${i}-${j}` })));
   });
+  const plazaPaths = buildPlazaOval(plazaPts);
 
   const pois = buildPois(places, project);
   // Keep street/avenue labels clear of the POI buildings by feeding their
@@ -245,6 +267,7 @@ export function buildMapModel(
     neighborhoodFill,
     boundaryOutline,
     streetPaths,
+    plazaPaths,
     avenueLabels,
     streetLabels,
     parkLabel,
@@ -348,6 +371,79 @@ function pickLabelIndex(
     }
   }
   return clearIdx >= 0 ? clearIdx : farIdx;
+}
+
+/** Flatten a (Multi)LineString feature into projected screen-space points. */
+function projectedPoints(
+  f: Feature<LineString | MultiLineString>,
+  project: (coord: [number, number]) => [number, number]
+): [number, number][] {
+  const g = f.geometry;
+  const lines = g.type === "LineString" ? [g.coordinates] : g.coordinates;
+  const out: [number, number][] = [];
+  for (const line of lines) for (const c of line) out.push(project(c as [number, number]));
+  return out;
+}
+
+/**
+ * Fit a clean, hand-drawn oval to the points tracing Grand Army Plaza. Uses the
+ * point cloud's covariance to recover the oval's center, tilt, and radii (points
+ * on an ellipse perimeter have variance r²/2 along each axis), then roughens a
+ * single ellipse path so it matches the illustrated look without the clutter of
+ * the raw road segments.
+ */
+function buildPlazaOval(pts: [number, number][]): KeyedSubPath[] {
+  if (pts.length < 4) return [];
+  const n = pts.length;
+  let cx = 0;
+  let cy = 0;
+  for (const [x, y] of pts) {
+    cx += x;
+    cy += y;
+  }
+  cx /= n;
+  cy /= n;
+
+  let sxx = 0;
+  let syy = 0;
+  let sxy = 0;
+  for (const [x, y] of pts) {
+    const dx = x - cx;
+    const dy = y - cy;
+    sxx += dx * dx;
+    syy += dy * dy;
+    sxy += dx * dy;
+  }
+  sxx /= n;
+  syy /= n;
+  sxy /= n;
+
+  const tr = sxx + syy;
+  const disc = Math.sqrt(Math.max(0, (tr * tr) / 4 - (sxx * syy - sxy * sxy)));
+  const l1 = tr / 2 + disc;
+  const l2 = tr / 2 - disc;
+  const rx = Math.sqrt(Math.max(0, 2 * l1));
+  const ry = Math.sqrt(Math.max(0, 2 * l2));
+  const angle = Math.atan2(l1 - sxx, sxy || 1e-6);
+  const deg = (angle * 180) / Math.PI;
+
+  const ca = Math.cos(angle);
+  const sa = Math.sin(angle);
+  const ax = cx + rx * ca;
+  const ay = cy + rx * sa;
+  const bx = cx - rx * ca;
+  const by = cy - rx * sa;
+  const d = `M ${ax} ${ay} A ${rx} ${ry} ${deg} 0 1 ${bx} ${by} A ${rx} ${ry} ${deg} 0 1 ${ax} ${ay} Z`;
+
+  return roughen(d, {
+    fill: COLORS.park,
+    fillStyle: "solid",
+    stroke: COLORS.parkInk,
+    strokeWidth: 2,
+    roughness: 1.6,
+    bowing: 1.2,
+    seed: 99,
+  }).map((p, j) => ({ ...p, key: `plaza-${j}` }));
 }
 
 function buildStreetLabels(

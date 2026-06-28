@@ -68,6 +68,13 @@ const C = {
   villaTrim: "#ecdcb4", // light stone cornices, quoins, hood molds
   balus: "#d8c499", // terrace balustrade stone
   recess: "#5e4d3a", // shadowed arcade / open verandah openings
+  // Civic-monument tones (Grand Army Plaza: the Memorial Arch + the Library).
+  granite: "#cdbd9c", // warm grey granite ashlar
+  graniteDark: "#aa9974", // shaded granite returns / mouldings
+  bronze: "#7c7b54", // weathered-bronze statuary (the quadriga, pier groups)
+  bronzeDark: "#565638", // deep bronze shade
+  gold: "#c8a23c", // gilded entrance screen / inscriptions
+  goldDark: "#9a7a22", // shaded gilding
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -1157,6 +1164,266 @@ function litchfieldVilla(): BuildingDrawing {
   };
 }
 
+/**
+ * The Soldiers' and Sailors' Memorial Arch (1889–1892, John H. Duncan) at the
+ * center of Grand Army Plaza: a granite triumphal arch dedicated to the Union
+ * Army. Drawn as a single tall round-arched gate with a deep attic and cornice,
+ * the two bronze sculptural groups (Army & Navy) at the pier bases, and — the
+ * silhouette everyone knows — Frederick MacMonnies's bronze quadriga on top:
+ * Victory in a chariot drawn by horses that prance outward to either side.
+ */
+function memorialArch(): BuildingDrawing {
+  const W = 96;
+  const parts: BuildingPart[] = [];
+
+  let seed = 320;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical bands (top-down). The quadriga occupies the top zone, so the stone
+  // arch is pushed down to leave room for it (kept >= 0, like Montauk's ROOF).
+  const yAtticTop = 44; // top of the granite attic block
+  const yCorTop = 66;
+  const yCorBot = 76;
+  const yOpenTop = 82; // crown of the arch opening
+  const yBase = 158; // bottom of the piers
+  const yWater = 166; // ground
+
+  const L = 10;
+  const R = 86; // pier outer edges
+  const opL = 36;
+  const opR = 60; // arch opening
+  const opCx = (opL + opR) / 2; // 48
+  const rad = (opR - opL) / 2; // 12
+  const spring = yOpenTop + rad;
+
+  // A weathered-bronze prancing horse, facing `dir` (-1 left, +1 right), with its
+  // hooves at `footY` and its body centered on `cx`.
+  const horse = (cx: number, footY: number, dir: 1 | -1) => {
+    push({ d: ellipse(cx, footY - 9, 10, 6), fill: C.bronze, stroke: C.ink, strokeWidth: 1, roughness: 1, fillStyle: "solid" }); // barrel
+    // Arched neck + wedge head reaching up and forward.
+    const nx = cx + dir * 7;
+    push({
+      d:
+        `M ${r(nx)} ${r(footY - 12)} ` +
+        `Q ${r(nx + dir * 9)} ${r(footY - 24)} ${r(nx + dir * 15)} ${r(footY - 22)} ` +
+        `L ${r(nx + dir * 12)} ${r(footY - 16)} Q ${r(nx + dir * 6)} ${r(footY - 14)} ${r(nx + dir * 4)} ${r(footY - 9)} Z`,
+      fill: C.bronze,
+      stroke: C.ink,
+      strokeWidth: 1,
+      roughness: 1,
+      fillStyle: "solid",
+    });
+    // Hind legs planted, front legs raised (prancing).
+    push({ d: `M ${r(cx - dir * 6)} ${r(footY - 6)} L ${r(cx - dir * 7)} ${r(footY)}`, stroke: C.bronzeDark, strokeWidth: 1.6, roughness: 0.9 });
+    push({ d: `M ${r(cx - dir * 2)} ${r(footY - 6)} L ${r(cx - dir * 2)} ${r(footY)}`, stroke: C.bronzeDark, strokeWidth: 1.6, roughness: 0.9 });
+    push({ d: `M ${r(cx + dir * 5)} ${r(footY - 8)} L ${r(cx + dir * 11)} ${r(footY - 5)}`, stroke: C.bronzeDark, strokeWidth: 1.5, roughness: 0.9 });
+    push({ d: `M ${r(cx + dir * 4)} ${r(footY - 8)} L ${r(cx + dir * 9)} ${r(footY - 1)}`, stroke: C.bronzeDark, strokeWidth: 1.5, roughness: 0.9 });
+    // Tail streaming off the rump.
+    push({ d: `M ${r(cx - dir * 9)} ${r(footY - 13)} Q ${r(cx - dir * 15)} ${r(footY - 9)} ${r(cx - dir * 14)} ${r(footY - 2)}`, stroke: C.bronzeDark, strokeWidth: 1.4, roughness: 1 });
+  };
+
+  // Ground shadow first.
+  push({
+    d: ellipse(W / 2, yWater + 2, W * 0.52, 9),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // --- Quadriga on top (bronze): horses prancing outward around Victory ---
+  const plinthY = yAtticTop - 3;
+  push({ d: rect(opCx - 26, plinthY, 52, 5), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+  horse(opCx - 13, plinthY, -1);
+  horse(opCx + 13, plinthY, 1);
+  // Victory: a winged figure standing at center, arms/standard raised.
+  push({ d: `M ${r(opCx - 8)} ${r(plinthY - 8)} L ${r(opCx)} ${r(plinthY - 20)} L ${r(opCx)} ${r(plinthY - 6)} Z`, fill: C.bronzeDark, stroke: C.ink, strokeWidth: 0.8, roughness: 1, fillStyle: "solid" }); // left wing
+  push({ d: `M ${r(opCx + 8)} ${r(plinthY - 8)} L ${r(opCx)} ${r(plinthY - 20)} L ${r(opCx)} ${r(plinthY - 6)} Z`, fill: C.bronze, stroke: C.ink, strokeWidth: 0.8, roughness: 1, fillStyle: "solid" }); // right wing
+  push({ d: `M ${r(opCx - 2.5)} ${r(plinthY - 4)} L ${r(opCx + 2.5)} ${r(plinthY - 4)} L ${r(opCx + 1.5)} ${r(plinthY - 22)} L ${r(opCx - 1.5)} ${r(plinthY - 22)} Z`, fill: C.bronze, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" }); // torso
+  push({ d: ellipse(opCx, plinthY - 24, 2.4, 2.8), fill: C.bronze, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" }); // head
+  push({ d: `M ${r(opCx)} ${r(plinthY - 21)} L ${r(opCx + 12)} ${r(plinthY - 30)}`, stroke: C.bronzeDark, strokeWidth: 1.4, roughness: 0.8 }); // raised arm/standard
+
+  // --- Granite arch ---
+  push({ d: rect(L, yAtticTop, R - L, yBase - yAtticTop), fill: C.granite, stroke: C.ink, strokeWidth: 1.6, roughness: 1, bowing: 0.4, fillStyle: "solid" });
+  // Attic top course.
+  push({ d: rect(L - 2, yAtticTop, R - L + 4, 5), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+  // Inscription panel on the attic.
+  push({ d: rect(L + 8, yAtticTop + 11, R - L - 16, 8), fill: C.graniteDark, stroke: C.ink, strokeWidth: 0.8, roughness: 0.8, fillStyle: "solid" });
+
+  // Bracketed cornice (overhangs).
+  push({ d: rect(L - 5, yCorTop, R - L + 10, yCorBot - yCorTop), fill: C.granite, stroke: C.ink, strokeWidth: 1.5, roughness: 0.9, fillStyle: "solid" });
+  for (const x of spread(L, R, 16, 3)) {
+    push({ d: rect(x, yCorBot - 1, 3, 3), fill: C.graniteDark, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+
+  // Arch opening: a lighter voussoir surround, then the deep recess and keystone.
+  push({ d: archWindow(opL - 4, yOpenTop - 3, opR - opL + 8, yBase - (yOpenTop - 3)), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  push({ d: archWindow(opL, yOpenTop, opR - opL, yBase - yOpenTop), fill: C.recess, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(opCx - 3.5)} ${r(spring - rad - 3)} L ${r(opCx + 3.5)} ${r(spring - rad - 3)} L ${r(opCx + 2.5)} ${r(spring - rad + 9)} L ${r(opCx - 2.5)} ${r(spring - rad + 9)} Z`, fill: C.granite, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" }); // keystone
+
+  // Bronze sculptural groups at the pier bases (Army left, Navy right).
+  for (const gx of [(L + opL) / 2, (opR + R) / 2]) {
+    push({ d: ellipse(gx, yBase - 2, 11, 5), fill: C.bronzeDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+    push({ d: `M ${r(gx - 8)} ${r(yBase - 2)} Q ${r(gx - 6)} ${r(yBase - 24)} ${r(gx)} ${r(yBase - 24)} Q ${r(gx + 6)} ${r(yBase - 24)} ${r(gx + 8)} ${r(yBase - 2)} Z`, fill: C.bronze, stroke: C.ink, strokeWidth: 1, roughness: 1, fillStyle: "solid" });
+    push({ d: ellipse(gx - 3, yBase - 25, 2, 2.4), fill: C.bronze, stroke: C.ink, strokeWidth: 0.6, roughness: 0.8, fillStyle: "solid" });
+    push({ d: ellipse(gx + 3, yBase - 23, 1.8, 2.2), fill: C.bronze, stroke: C.ink, strokeWidth: 0.6, roughness: 0.8, fillStyle: "solid" });
+  }
+
+  // Plinth / steps the arch stands on.
+  push({ d: rect(L - 7, yBase, R - L + 14, yWater - yBase), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  push({ d: `M ${r(L - 4)} ${r(yBase + 4)} L ${r(R + 4)} ${r(yBase + 4)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.7 });
+
+  return {
+    width: W,
+    height: yWater + 6,
+    anchorX: W / 2,
+    anchorY: yWater,
+    scale: 0.4,
+    parts,
+  };
+}
+
+/**
+ * The Brooklyn Public Library, Central Library (1941, Githens & Keally) at Grand
+ * Army Plaza: a monumental Art Deco / Moderne limestone block whose curved
+ * facade opens toward the plaza like a book. Drawn frontally as its signature
+ * front: a low, near-blank limestone mass whose parapet sweeps in a great
+ * concave curve down from a tall central frontispiece to lower flanking wings,
+ * with one tall, narrow gilded entrance portal (gold figures over bronze doors)
+ * at the center, a gilded inscription, and a low flight of entrance steps.
+ */
+function centralLibrary(): BuildingDrawing {
+  const W = 160;
+  const parts: BuildingPart[] = [];
+
+  let seed = 380;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical reference lines (top-down). A low, monumental limestone mass: a
+  // tall central frontispiece whose parapet sweeps concavely down to much lower
+  // flanking wings, with one tall, narrow gilded entrance portal at center.
+  const yWater = 150; // ground
+  const yBase = 142; // top of the steps
+  const pvTop = 14; // top of the central frontispiece (the tall part)
+  const pvShoulder = 40; // where the curved parapet leaves the frontispiece
+  const wingRoof = 66; // wing roofline at the outer ends (much lower)
+
+  const L = 6;
+  const R = 154;
+  const pvL = 58; // frontispiece sides
+  const pvR = 102;
+  const pvTopL = 70; // flat-top span of the frontispiece
+  const pvTopR = 90;
+  const eL = 72; // tall gilded entrance portal
+  const eR = 88;
+  const eCx = (eL + eR) / 2; // 80
+  const eTop = 44; // top of the portal opening
+
+  // Ground shadow first.
+  push({
+    d: ellipse(W / 2, yWater + 2, W * 0.52, 9),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Right wing first (slightly shaded — the side that curves away), its parapet
+  // sweeping in a concave curve up to the frontispiece.
+  push({
+    d:
+      `M ${r(pvR)} ${r(yBase)} L ${r(pvR)} ${r(pvShoulder)} ` +
+      `C ${r(pvR + 10)} ${r(pvShoulder + 3)} ${r(R - 24)} ${r(wingRoof)} ${r(R)} ${r(wingRoof)} ` +
+      `L ${r(R)} ${r(yBase)} Z`,
+    fill: C.stoneDark,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.3,
+    fillStyle: "solid",
+  });
+  // Left wing (lit), the same concave parapet sweep.
+  push({
+    d:
+      `M ${r(L)} ${r(yBase)} L ${r(L)} ${r(wingRoof)} ` +
+      `C ${r(L + 24)} ${r(wingRoof)} ${r(pvL - 10)} ${r(pvShoulder + 3)} ${r(pvL)} ${r(pvShoulder)} ` +
+      `L ${r(pvL)} ${r(yBase)} Z`,
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.3,
+    fillStyle: "solid",
+  });
+
+  // Central frontispiece (the tall block) with softly rounded upper shoulders.
+  push({
+    d:
+      `M ${r(pvL)} ${r(yBase)} L ${r(pvL)} ${r(pvShoulder)} ` +
+      `Q ${r(pvL)} ${r(pvTop)} ${r(pvTopL)} ${r(pvTop)} ` +
+      `L ${r(pvTopR)} ${r(pvTop)} ` +
+      `Q ${r(pvR)} ${r(pvTop)} ${r(pvR)} ${r(pvShoulder)} ` +
+      `L ${r(pvR)} ${r(yBase)} Z`,
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // Soft shadow down the frontispiece's right edge, so it reads as projecting.
+  push({ d: rect(pvR - 6, pvShoulder, 6, yBase - pvShoulder), fill: C.stoneDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+
+  // A few faint ashlar joints across the otherwise blank limestone.
+  for (const yy of [pvShoulder + 28, pvShoulder + 60, pvShoulder + 90]) {
+    push({ d: `M ${r(pvL + 3)} ${r(yy)} L ${r(pvR - 3)} ${r(yy)}`, stroke: C.stoneDark, strokeWidth: 0.5, roughness: 0.7 });
+  }
+
+  // Narrow vertical slot windows flanking the portal (the spare fenestration).
+  for (const x of [pvL + 5, pvR - 8]) {
+    push({ d: rect(x, eTop + 4, 3, yBase - eTop - 18), fill: C.recess, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+  }
+
+  // Gilded inscription band on the frontispiece, just above the portal.
+  push({ d: rect(eL - 8, eTop - 11, eR - eL + 16, 5), fill: C.gold, stroke: C.goldDark, strokeWidth: 0.9, roughness: 0.7, fillStyle: "solid" });
+
+  // The tall gilded entrance portal: a gold screen of figures over bronze doors.
+  push({ d: rect(eL, eTop, eR - eL, yBase - eTop), fill: C.gold, stroke: C.goldDark, strokeWidth: 1.4, roughness: 0.9, fillStyle: "solid" });
+  for (const x of spread(eL, eR, 3, 1.2)) {
+    push({ d: `M ${r(x)} ${r(eTop + 4)} L ${r(x)} ${r(yBase - 2)}`, stroke: C.goldDark, strokeWidth: 0.8, roughness: 0.6 });
+  }
+  // Two columns of small gilded relief figures climbing the screen.
+  for (const fx of [eL + 2.5, eR - 4.9]) {
+    for (let k = 0; k < 5; k++) {
+      push({ d: rect(fx, eTop + 8 + k * 15, 2.4, 8), fill: C.goldDark, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+    }
+  }
+  // Bronze doors at the foot of the portal.
+  push({ d: rect(eL + 1, yBase - 16, eR - eL - 2, 16), fill: C.recess, stroke: C.ink, strokeWidth: 1.1, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(eCx)} ${r(yBase - 16)} L ${r(eCx)} ${r(yBase)}`, stroke: C.gold, strokeWidth: 0.8, roughness: 0.7 });
+
+  // Gilded inscription line along the lower right wing (as in the 1942 photo).
+  push({ d: `M ${r(pvR + 9)} ${r(wingRoof + 20)} L ${r(R - 8)} ${r(wingRoof + 7)}`, stroke: C.gold, strokeWidth: 1.3, roughness: 0.6 });
+
+  // Low entrance steps / plinth.
+  push({ d: rect(L - 5, yBase, R - L + 10, yWater - yBase), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  for (const yy of [yBase + 3, yBase + 6]) {
+    push({ d: `M ${r(L - 3)} ${r(yy)} L ${r(R + 3)} ${r(yy)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  }
+
+  return {
+    width: W,
+    height: yWater + 6,
+    anchorX: W / 2,
+    anchorY: yWater,
+    scale: 0.32,
+    parts,
+  };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -1166,4 +1433,6 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "plane-crash": airliner,
   "old-stone-house": oldStoneHouse,
   "litchfield-villa": litchfieldVilla,
+  "memorial-arch": memorialArch,
+  "central-library": centralLibrary,
 };
