@@ -51,6 +51,23 @@
         "type": "Point",
         "coordinates": [-73.9744, 40.6771]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "old-stone-house",
+        "name": "Old Stone House",
+        "category": "Landmark",
+        "building": "old-stone-house",
+        "description": "A reconstruction of the 1699 Vechte-Cortelyou House, a Dutch-Colonial fieldstone farmhouse. During the Battle of Brooklyn in August 1776, Maryland soldiers made repeated, doomed charges against British troops holding the house so Washington's army could retreat \u2014 the stand later memorialized as 'the Maryland 400.' The original was buried and forgotten, then rebuilt from its excavated stones in 1934. Today it is a small history museum in Washington Park (J.J. Byrne Playground) at 336 Third Street, between Fourth and Fifth Avenues.",
+        "photo": "/photos/old-stone-house-1940.jpg",
+        "photoAlt": "The reconstructed Old Stone House (Vechte-Cortelyou House) in Brooklyn, photographed in 1940",
+        "photoCredit": "Stanley P. Mixon, 1940 \u00b7 Historic American Buildings Survey, Library of Congress (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.984602, 40.67301]
+      }
     }
   ]
 }

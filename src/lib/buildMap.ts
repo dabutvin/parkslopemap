@@ -69,6 +69,10 @@ export interface MapModel {
   height: number;
   boundaryD: string;
   parkPaths: RoughSubPath[];
+  /** Inner green spaces (e.g. Washington Park) drawn atop the neighborhood. */
+  greenPaths: RoughSubPath[];
+  /** Optional label for an inner green space. */
+  greenLabel?: AvenueLabel;
   neighborhoodFill: RoughSubPath[];
   boundaryOutline: RoughSubPath[];
   streetPaths: KeyedSubPath[];
@@ -85,6 +89,8 @@ export interface MapModel {
 export interface BuildMapInput {
   boundary: Feature<Polygon>;
   park: Feature<Polygon | MultiPolygon>;
+  /** An inner green space (e.g. Washington Park) painted over the neighborhood. */
+  greens?: Feature<Polygon | MultiPolygon>;
   streets: FeatureCollection<LineString | MultiLineString>;
   places?: FeatureCollection<Point>;
 }
@@ -101,7 +107,7 @@ export interface BuildMapOptions {
  * serializable model of everything that needs to be drawn.
  */
 export function buildMapModel(
-  { boundary, park, streets, places }: BuildMapInput,
+  { boundary, park, greens, streets, places }: BuildMapInput,
   { width, padding = 60, angle = DEFAULT_ANGLE }: BuildMapOptions
 ): MapModel {
   // Reserve room on the right so Prospect Park reads as a band on the east.
@@ -132,6 +138,31 @@ export function buildMapModel(
     bowing: 1.5,
     seed: 7,
   });
+
+  // Inner green spaces sit *over* the neighborhood fill, so they need their own
+  // roughened paths (and an optional label placed at the projected centroid).
+  const greenD = greens ? path(greens) ?? "" : "";
+  const greenPaths = greenD
+    ? roughen(greenD, {
+        fill: COLORS.park,
+        fillStyle: "solid",
+        stroke: COLORS.parkInk,
+        strokeWidth: 1.6,
+        roughness: 1.8,
+        bowing: 1.5,
+        seed: 23,
+      })
+    : [];
+  let greenLabel: AvenueLabel | undefined;
+  if (greens) {
+    const [[gx0, gy0], [gx1, gy1]] = path.bounds(greens);
+    greenLabel = {
+      name: (greens.properties?.name as string) ?? "",
+      x: (gx0 + gx1) / 2,
+      y: (gy0 + gy1) / 2,
+      angle: 0,
+    };
+  }
 
   const neighborhoodFill = roughen(boundaryD, {
     fill: COLORS.neighborhood,
@@ -192,6 +223,8 @@ export function buildMapModel(
     height,
     boundaryD,
     parkPaths,
+    greenPaths,
+    greenLabel,
     neighborhoodFill,
     boundaryOutline,
     streetPaths,

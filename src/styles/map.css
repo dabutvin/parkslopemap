@@ -197,6 +197,14 @@ body {
   letter-spacing: 0.04em;
 }
 
+.ps-label--green {
+  font-size: 13px;
+  font-weight: 700;
+  fill: #5a6f49;
+  text-anchor: middle;
+  letter-spacing: 0.03em;
+}
+
 .ps-label--avenue {
   font-size: 16px;
   fill: var(--ink-soft);

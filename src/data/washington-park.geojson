@@ -1,0 +1,34 @@
+{
+  "type": "Feature",
+  "id": "washington-park-block",
+  "properties": {
+    "name": "Washington Park"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -73.98571,
+          40.67397
+        ],
+        [
+          -73.983283,
+          40.672796
+        ],
+        [
+          -73.984289,
+          40.671591
+        ],
+        [
+          -73.986712,
+          40.672764
+        ],
+        [
+          -73.98571,
+          40.67397
+        ]
+      ]
+    ]
+  }
+}

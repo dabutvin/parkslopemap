@@ -24,11 +24,12 @@ const read = (f: string) => JSON.parse(readFileSync(join(dataDir, f), "utf8"));
 
 const boundary = read("park-slope-boundary.geojson") as Feature<Polygon>;
 const park = read("prospect-park.geojson") as Feature<Polygon | MultiPolygon>;
+const greens = read("washington-park.geojson") as Feature<Polygon | MultiPolygon>;
 const streets = read("streets.geojson") as FeatureCollection<LineString | MultiLineString>;
 const places = read("places.geojson") as FeatureCollection<Point>;
 
 const angle = process.argv[2] === undefined ? NaN : Number(process.argv[2]);
-const model = buildMapModel({ boundary, park, streets, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
+const model = buildMapModel({ boundary, park, greens, streets, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -37,6 +38,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
   <rect x="0" y="0" width="${model.width}" height="${model.height}" fill="${COLORS.paper}"/>
   <g>${model.parkPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}"/>`).join("")}</g>
   <g>${model.neighborhoodFill.map((p) => `<path d="${p.d}" stroke="none" fill="${p.fill ?? COLORS.neighborhood}"/>`).join("")}</g>
+  <g>${model.greenPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}"/>`).join("")}</g>
   <g clip-path="url(#c)">${model.streetPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round"/>`).join("")}</g>
   <g>${model.boundaryOutline.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`).join("")}</g>
   ${model.pois
@@ -55,6 +57,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
       )
       .join("")}
     <text x="${model.parkLabel.x}" y="${model.parkLabel.y}" font-size="30" font-weight="700" fill="#5a6f49" text-anchor="middle" transform="rotate(${model.parkLabel.angle} ${model.parkLabel.x} ${model.parkLabel.y})">${esc(model.parkLabel.name)}</text>
+    ${model.greenLabel ? `<text x="${model.greenLabel.x}" y="${model.greenLabel.y}" font-size="13" font-weight="700" fill="#5a6f49" text-anchor="middle">${esc(model.greenLabel.name)}</text>` : ""}
     ${model.avenueLabels
       .map(
         (l) =>

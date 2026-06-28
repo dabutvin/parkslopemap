@@ -755,6 +755,156 @@ function airliner(): BuildingDrawing {
   return { width: W, height: H, anchorX: W / 2, anchorY: H - 3, scale: 0.4, parts };
 }
 
+/**
+ * The Old Stone House (the 1699 Vechte-Cortelyou House, reconstructed 1934),
+ * drawn from the 1940 HABS photo: a two-story rubble-fieldstone farmhouse seen
+ * in three-quarter view. A steep side-gable roof runs front-to-back with a
+ * brick gable end on the shaded right return, a tall brick chimney at each end
+ * of the ridge, three shuttered windows on the upper floor, and an off-center
+ * door flanked by windows on the ground floor.
+ */
+function oldStoneHouse(): BuildingDrawing {
+  const FW = 94; // long (front) facade width
+  const DX = 17; // shaded right-return depth (the gable end)
+  const parts: BuildingPart[] = [];
+
+  let seed = 200;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical bands (top-down).
+  const yRidge = 12; // roof ridge
+  const yEave = 52; // eaves: roof meets the front wall
+  const yBase = 150; // bottom of the two-story stone wall
+  const yWater = 156; // base course / sidewalk
+  const apex = FW + DX / 2; // gable-end peak (x), over the return
+
+  // A paned window with a stone lintel and a pair of board shutters.
+  const shuttered = (x: number, y: number, w: number, h: number) => {
+    push({ d: rect(x - 1.5, y - 4, w + 3, 4), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" }); // lintel
+    push({ d: rect(x - 4.5, y, 3.5, h), fill: C.wallDark, stroke: C.ink, strokeWidth: 0.8, roughness: 0.9, fillStyle: "solid" }); // left shutter
+    push({ d: rect(x + w + 1, y, 3.5, h), fill: C.wallDark, stroke: C.ink, strokeWidth: 0.8, roughness: 0.9, fillStyle: "solid" }); // right shutter
+    push({ d: rect(x, y, w, h), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+    push({ d: `M ${r(x + w / 2)} ${r(y)} L ${r(x + w / 2)} ${r(y + h)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.7 });
+    push({ d: `M ${r(x)} ${r(y + h / 2)} L ${r(x + w)} ${r(y + h / 2)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.7 });
+  };
+
+  // Ground shadow first, so the house sits on top of it.
+  push({
+    d: ellipse(FW / 2 + 5, yWater + 2, FW * 0.66, 9),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Two brick chimneys, one at each end of the ridge (drawn first so the roof
+  // overlaps their bases and they read as poking through it).
+  const chimney = (cx: number) => {
+    push({ d: rect(cx - 5, 0, 10, yEave), fill: C.chimney, stroke: C.ink, strokeWidth: 1.1, roughness: 1, fillStyle: "solid" });
+    push({ d: rect(cx - 6.5, 0, 13, 4), fill: C.chimneyCap, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  };
+  chimney(20);
+  chimney(FW - 14);
+
+  // Shaded stone wall return (the building's east side).
+  push({
+    d: `M ${r(FW)} ${r(yEave)} L ${r(FW + DX)} ${r(yEave + 9)} ` +
+      `L ${r(FW + DX)} ${r(yWater - 2)} L ${r(FW)} ${r(yWater)} Z`,
+    fill: C.stoneDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1.1,
+    fillStyle: "solid",
+  });
+
+  // Brick gable end sitting on the return wall, apex at the ridge.
+  push({
+    d: `M ${r(FW)} ${r(yEave)} L ${r(apex)} ${r(yRidge)} L ${r(FW + DX)} ${r(yEave + 9)} Z`,
+    fill: C.chimney,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+
+  // Main two-story rubble-stone front wall.
+  push({
+    d: rect(0, yEave, FW, yBase - yEave),
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1.1,
+    bowing: 0.6,
+    fillStyle: "solid",
+  });
+
+  // Front roof slope (a steep gable plane), overhanging the eaves and the
+  // chimney bases. Drawn over the wall top so the eave line is crisp.
+  push({
+    d: rect(-5, yRidge, FW + 5, yEave - yRidge + 3),
+    fill: C.roof,
+    stroke: C.ink,
+    strokeWidth: 1.5,
+    roughness: 1,
+    bowing: 0.4,
+    fillStyle: "solid",
+  });
+  // Ridge line + a short cap across to the gable apex.
+  push({ d: `M ${r(-5)} ${r(yRidge)} L ${r(apex)} ${r(yRidge)}`, stroke: C.roofDark, strokeWidth: 2, roughness: 0.8 });
+  // Rake along the gable's front slope (the roof edge over the brick gable).
+  push({ d: `M ${r(FW)} ${r(yEave)} L ${r(apex)} ${r(yRidge)}`, stroke: C.roofDark, strokeWidth: 2.4, roughness: 0.8 });
+
+  // Rubble-stone texture: a few uneven coursing lines + scattered joints.
+  for (const yy of [yEave + 22, yEave + 48, yEave + 74]) {
+    push({ d: `M ${r(4)} ${r(yy)} L ${r(FW - 4)} ${r(yy)}`, stroke: C.stoneDark, strokeWidth: 0.8, roughness: 1.4, bowing: 1 });
+  }
+  const joints = [
+    [18, yEave + 10], [46, yEave + 8], [72, yEave + 12],
+    [10, yEave + 34], [38, yEave + 35], [64, yEave + 33],
+    [26, yEave + 60], [54, yEave + 61], [80, yEave + 59],
+  ] as const;
+  for (const [jx, jy] of joints) {
+    push({ d: `M ${r(jx)} ${r(jy)} L ${r(jx)} ${r(jy + 8)}`, stroke: C.stoneDark, strokeWidth: 0.7, roughness: 1.2 });
+  }
+
+  // Water table / base course (a slightly wider stone plinth).
+  push({
+    d: rect(-2, yBase, FW + 4, yWater - yBase + 2),
+    fill: C.stoneDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+
+  // Upper floor: three shuttered windows.
+  const upW = 13;
+  const upY = yEave + 18;
+  for (const x of spread(6, FW - 6, 3, upW)) shuttered(x, upY, upW, 20);
+
+  // Ground floor: an off-center door flanked by windows.
+  const dW = 15;
+  const dX = 16;
+  const dTop = yBase - 44;
+  push({ d: rect(dX - 2.5, dTop - 5, dW + 5, 5), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" }); // lintel
+  push({ d: rect(dX, dTop, dW, yBase - dTop), fill: C.door, stroke: C.ink, strokeWidth: 1.4, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(dX + dW / 2)} ${r(dTop + 3)} L ${r(dX + dW / 2)} ${r(yBase)}`, stroke: C.stone, strokeWidth: 0.7, roughness: 0.7 }); // door split
+  const loY = yBase - 34;
+  shuttered(46, loY, 13, 24);
+  shuttered(72, loY, 13, 24);
+
+  return {
+    width: FW + DX,
+    height: yWater + 6,
+    anchorX: FW / 2,
+    anchorY: yWater,
+    scale: 0.42,
+    parts,
+  };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -762,4 +912,5 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "montauk-club": montaukClub,
   "obama-brownstone": brownstone,
   "plane-crash": airliner,
+  "old-stone-house": oldStoneHouse,
 };

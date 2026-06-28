@@ -3,9 +3,10 @@
  * static GeoJSON into src/data. Run on demand with `npm run fetch-data`; it is
  * NOT part of the app runtime (the app only reads the committed GeoJSON).
  *
- * It produces three files:
+ * It produces four files:
  *   - park-slope-boundary.geojson : the neighborhood outline
  *   - prospect-park.geojson       : the park polygon (the eastern landmark)
+ *   - washington-park.geojson     : the small inner green (Old Stone House)
  *   - streets.geojson             : the avenue + cross-street grid
  *
  * The boundary is stitched from real OpenStreetMap geometry so the borders are
@@ -56,6 +57,15 @@ const EXPECTED_CORNERS = {
   ne: [-73.9701, 40.6726] as Position, // Flatbush Ave x Prospect Park West (Grand Army Plaza)
   se: [-73.98, 40.6606] as Position, // Prospect Park West x Prospect Expressway (Bartel-Pritchard Sq)
   sw: [-73.9905, 40.663] as Position, // Prospect Expressway x Fourth Ave
+};
+
+// Corners of the Washington Park superblock (4th/5th Aves x 3rd/5th Streets),
+// used to disambiguate the street crossings.
+const WASHINGTON_CORNERS = {
+  nw: [-73.9857, 40.674] as Position, // 4th Ave x 3rd Street
+  ne: [-73.9833, 40.6728] as Position, // 5th Ave x 3rd Street
+  se: [-73.9843, 40.6716] as Position, // 5th Ave x 5th Street
+  sw: [-73.9867, 40.6728] as Position, // 4th Ave x 5th Street
 };
 
 // The avenues that read as the neighborhood's "spine".
@@ -238,6 +248,23 @@ async function main() {
   const se = corner(east, south, EXPECTED_CORNERS.se);
   const sw = corner(south, west, EXPECTED_CORNERS.sw);
 
+  // Washington Park (with J.J. Byrne Playground) reads as the whole superblock
+  // from 4th to 5th Avenue between 3rd and 5th Streets — the playground entrance
+  // sits right on 5th Avenue. Stitch it from the same street geometry as the
+  // boundary so the green lines up with the drawn grid.
+  const fifthAve = streetByName(streets, "5th Avenue");
+  const thirdSt = streetByName(streets, "3rd Street");
+  const fifthSt = streetByName(streets, "5th Street");
+  const wpNW = corner(west, thirdSt, WASHINGTON_CORNERS.nw);
+  const wpNE = corner(fifthAve, thirdSt, WASHINGTON_CORNERS.ne);
+  const wpSE = corner(fifthAve, fifthSt, WASHINGTON_CORNERS.se);
+  const wpSW = corner(west, fifthSt, WASHINGTON_CORNERS.sw);
+  const washington: Feature<Polygon> = {
+    type: "Feature",
+    properties: { name: "Washington Park" },
+    geometry: { type: "Polygon", coordinates: [[wpNW, wpNE, wpSE, wpSW, wpNW]] },
+  };
+
   // Eastern edge follows the park's actual western boundary for accuracy.
   const ring = largestPolygonRing(park.geometry);
   const easternEdge = ringArc(ring, ne, se);
@@ -266,6 +293,7 @@ async function main() {
   // so the app fills the actual interiors.
   const boundaryCW = rewind(boundary, { reverse: true }) as Feature<Polygon>;
   const parkCW = rewind(park, { reverse: true }) as Feature<Polygon | MultiPolygon>;
+  const washingtonCW = rewind(washington, { reverse: true }) as Feature<Polygon | MultiPolygon>;
 
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(
@@ -277,11 +305,15 @@ async function main() {
     JSON.stringify(parkCW, null, 2)
   );
   await writeFile(
+    join(OUT_DIR, "washington-park.geojson"),
+    JSON.stringify(washingtonCW, null, 2)
+  );
+  await writeFile(
     join(OUT_DIR, "streets.geojson"),
     JSON.stringify(featureCollection(streets.features as Feature<LineString | MultiLineString>[]), null, 2)
   );
 
-  console.log(`Done. Wrote 3 GeoJSON files to ${OUT_DIR}`);
+  console.log(`Done. Wrote 4 GeoJSON files to ${OUT_DIR}`);
 }
 
 main().catch((err) => {

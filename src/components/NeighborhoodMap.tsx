@@ -12,11 +12,13 @@ import { buildMapModel } from "../lib/buildMap";
 
 import boundaryRaw from "../data/park-slope-boundary.geojson?raw";
 import parkRaw from "../data/prospect-park.geojson?raw";
+import washingtonRaw from "../data/washington-park.geojson?raw";
 import streetsRaw from "../data/streets.geojson?raw";
 import placesRaw from "../data/places.geojson?raw";
 
 const boundary = JSON.parse(boundaryRaw) as Feature<Polygon>;
 const park = JSON.parse(parkRaw) as Feature<Polygon | MultiPolygon>;
+const greens = JSON.parse(washingtonRaw) as Feature<Polygon | MultiPolygon>;
 const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLineString>;
 const places = JSON.parse(placesRaw) as FeatureCollection<Point>;
 
@@ -32,7 +34,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 export function NeighborhoodMap() {
   const model = useMemo(
-    () => buildMapModel({ boundary, park, streets, places }, { width: DESIGN_WIDTH }),
+    () => buildMapModel({ boundary, park, greens, streets, places }, { width: DESIGN_WIDTH }),
     []
   );
 
@@ -215,6 +217,12 @@ export function NeighborhoodMap() {
         ))}
       </g>
 
+      <g className="ps-layer ps-layer--green">
+        {model.greenPaths.map((p, i) => (
+          <path key={`green-${i}`} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} />
+        ))}
+      </g>
+
       <g className="ps-layer ps-layer--streets" clipPath="url(#ps-clip)">
         {model.streetPaths.map((p) => (
           <path key={p.key} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill="none" strokeLinecap="round" />
@@ -286,6 +294,15 @@ export function NeighborhoodMap() {
         >
           {model.parkLabel.name}
         </text>
+        {model.greenLabel && (
+          <text
+            className="ps-label ps-label--green"
+            x={model.greenLabel.x}
+            y={model.greenLabel.y}
+          >
+            {model.greenLabel.name}
+          </text>
+        )}
         {model.avenueLabels.map((label) => (
           <text
             key={label.name}
