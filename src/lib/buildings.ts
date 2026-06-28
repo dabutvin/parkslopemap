@@ -51,6 +51,13 @@ const C = {
   chimney: "#a06848",
   chimneyCap: "#7c4f37",
   door: "#6b4a2f",
+  // Brownstone tones (the warm terra-cotta Park Slope rowhouse at 640 2nd St).
+  brown: "#b56e41", // lit front face
+  brownMid: "#9c5d36", // bay returns / mid shade
+  brownDark: "#834b2b", // deep shade / garden base
+  brownTrim: "#cf9a61", // carved stone bands, lintels, stoop
+  carve: "#c2854f", // carved foliate band beneath the bay
+  rail: "#3f3327",
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -402,9 +409,257 @@ function montaukClub(): BuildingDrawing {
   };
 }
 
+/**
+ * The brownstone at 640 2nd Street (where Obama lived in 1984), drawn from the
+ * real facade: a warm terra-cotta three-story rowhouse whose signature is a
+ * full-height bowed bay window (parlor, 2nd, 3rd floors) with two windows per
+ * floor on its curved front and a carved foliate band at its base, capped by a
+ * bracketed cornice. The entrance sits to the right of the bay, reached by a
+ * high stoop, with a window above it on each upper floor and a garden-level
+ * iron gate tucked beside the stoop.
+ */
+function brownstone(): BuildingDrawing {
+  const FW = 64; // facade width
+  const parts: BuildingPart[] = [];
+
+  let seed = 80;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical bands (three stories over a garden level; the bay rises the full
+  // height, straight from the cornice down to the carved band — no flat top
+  // floor, matching the real house).
+  const yCorTop = 0;
+  const yCorBot = 12; // bracketed cornice
+  const yBayTop = yCorBot; // the bay begins right under the cornice
+  const yF3 = 18; // bay 3rd (top) floor
+  const yF2 = 62; // bay 2nd floor
+  const yP = 106; // bay parlor floor
+  const hBay = 30; // upper-floor window height
+  const hParlor = 34; // taller parlor windows
+  const yBand = 146; // carved foliate band beneath the bay
+  const hBand = 11;
+  const yBase = yBand + hBand; // garden base course (=157)
+  const yWater = 190; // sidewalk
+
+  // Bay geometry (left ~two-thirds of the front; the entrance is to its right).
+  const bayL = 2;
+  const bayR = 44;
+  const ret = 8; // foreshortened curved side ("return") width
+  const frontL = bayL + ret; // 10
+  const frontR = bayR - ret; // 36
+
+  // Entrance geometry (right side).
+  const dX = 47;
+  const dW = 14;
+  const dTop = yP - 2;
+  const dBot = 152; // parlor landing / top of stoop
+
+  // --- helpers ---
+  // A band whose top & bottom edges bow downward, reading as a curved bay face.
+  const bowBand = (x0: number, x1: number, y: number, h: number, dip: number): string => {
+    const mx = (x0 + x1) / 2;
+    return (
+      `M ${r(x0)} ${r(y)} Q ${r(mx)} ${r(y + dip)} ${r(x1)} ${r(y)} ` +
+      `L ${r(x1)} ${r(y + h)} Q ${r(mx)} ${r(y + h + dip)} ${r(x0)} ${r(y + h)} Z`
+    );
+  };
+  // A simple paned window (no heavy surround), for the grouped bay openings.
+  const win = (x: number, y: number, w: number, h: number, sw = 1.1) => {
+    push({ d: rect(x, y, w, h), fill: C.glass, stroke: C.ink, strokeWidth: sw, roughness: 0.6, bowing: 0.4, fillStyle: "solid" });
+    push({ d: `M ${r(x + w / 2)} ${r(y)} L ${r(x + w / 2)} ${r(y + h)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.5 });
+    push({ d: `M ${r(x)} ${r(y + h / 2)} L ${r(x + w)} ${r(y + h / 2)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.5 });
+  };
+  // A sash window with a stone lintel + sill (flat-wall openings).
+  const sash = (x: number, y: number, w: number, h: number) => {
+    push({ d: rect(x - 1.5, y - 4, w + 3, 4), fill: C.brownTrim, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+    win(x, y, w, h, 1.2);
+    push({ d: rect(x - 1, y + h, w + 2, 2.5), fill: C.brownDark, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  };
+
+  // Ground shadow first, so the house sits on top of it.
+  push({
+    d: ellipse(FW / 2, yWater + 2, FW * 0.62, 8),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Main (flat) brownstone wall.
+  push({
+    d: rect(0, yCorBot, FW, yWater - yCorBot),
+    fill: C.brown,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.6,
+    fillStyle: "solid",
+  });
+
+  // Garden-level base course (deeper shade, with score lines).
+  push({
+    d: rect(0, yBase, FW, yWater - yBase),
+    fill: C.brownDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  for (const yy of [yBase + 9, yBase + 18]) {
+    push({ d: `M ${r(2)} ${r(yy)} L ${r(FW - 2)} ${r(yy)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7 });
+  }
+
+  // Bracketed cornice along the top.
+  push({
+    d: rect(-4, yCorTop, FW + 8, yCorBot - yCorTop),
+    fill: C.brownTrim,
+    stroke: C.ink,
+    strokeWidth: 1.5,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  for (const x of spread(0, FW, 6, 3)) {
+    push({ d: rect(x, yCorBot - 1, 3, 4), fill: C.brownDark, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+
+  // Entrance-side windows on the upper floors (right of the bay).
+  sash(48, yF3, 12, hBay);
+  sash(48, yF2, 12, hBay);
+
+  // --- The projecting bowed bay (parlor, 2nd, 3rd floors) ---
+  // Side "returns" first (shaded), then the lit front face over them.
+  push({
+    d: `M ${r(bayL)} ${r(yBayTop + 3)} L ${r(frontL)} ${r(yBayTop)} L ${r(frontL)} ${r(yBand)} L ${r(bayL)} ${r(yBand)} Z`,
+    fill: C.brownMid,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(frontR)} ${r(yBayTop)} L ${r(bayR)} ${r(yBayTop + 3)} L ${r(bayR)} ${r(yBand)} L ${r(frontR)} ${r(yBand)} Z`,
+    fill: C.brownDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({
+    d: rect(frontL, yBayTop, frontR - frontL, yBand - yBayTop),
+    fill: C.brown,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // Curved cap band (the bay's own rounded cornice, just under the main one).
+  push({
+    d: bowBand(bayL, bayR, yBayTop - 2, 5, 3),
+    fill: C.brownTrim,
+    stroke: C.ink,
+    strokeWidth: 1.1,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+
+  // Bay openings: two windows per floor on the curved front, with a carved
+  // spandrel band beneath each floor.
+  for (const ty of [yF3, yF2, yP]) {
+    const h = ty === yP ? hParlor : hBay;
+    win(frontL + 2, ty, 10, h); // front-left
+    win(frontL + 14, ty, 10, h); // front-right
+    push({
+      d: bowBand(bayL + 1, bayR - 1, ty + h + 2, 3, 2),
+      fill: C.brownMid,
+      stroke: C.ink,
+      strokeWidth: 0.8,
+      roughness: 0.8,
+      fillStyle: "solid",
+    });
+  }
+
+  // Carved foliate band at the base of the parlor bay (the showpiece course).
+  push({
+    d: bowBand(bayL, bayR, yBand, hBand, 4),
+    fill: C.carve,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  for (const x of spread(bayL + 3, bayR - 3, 7, 2)) {
+    push({ d: rect(x, yBand + 4, 2, 5), fill: C.brownDark, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  }
+
+  // --- Entrance (right), recessed under a stone surround with a transom ---
+  push({
+    d: rect(dX - 3, dTop - 5, dW + 6, dBot - dTop + 5),
+    fill: C.brownTrim,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  push({ d: rect(dX, dTop, dW, 6), fill: C.glass, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" }); // transom
+  push({
+    d: rect(dX, dTop + 6, dW, dBot - dTop - 6),
+    fill: C.door,
+    stroke: C.ink,
+    strokeWidth: 1.4,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  push({ d: `M ${r(dX + dW / 2)} ${r(dTop + 8)} L ${r(dX + dW / 2)} ${r(dBot - 1)}`, stroke: C.stone, strokeWidth: 0.7, roughness: 0.7 });
+
+  // Garden-level iron gate, tucked beneath the bay to the left of the stoop.
+  const gX = 8;
+  const gW = 16;
+  push({ d: rect(gX, yBase + 2, gW, yWater - yBase - 3), fill: C.brownDark, stroke: C.ink, strokeWidth: 1.1, roughness: 0.9, fillStyle: "solid" });
+  for (const x of spread(gX, gX + gW, 4, 1)) {
+    push({ d: `M ${r(x)} ${r(yBase + 4)} L ${r(x)} ${r(yWater - 3)}`, stroke: C.rail, strokeWidth: 0.9, roughness: 0.7 });
+  }
+
+  // --- High stoop: rises from the sidewalk up to the entrance landing ---
+  const sxL = 28; // left foot of the stoop
+  push({
+    d:
+      `M ${r(sxL)} ${r(yWater)} L ${r(sxL)} ${r(yWater - 5)} ` +
+      `L ${r(dX - 1)} ${r(dBot)} L ${r(FW)} ${r(dBot)} ` +
+      `L ${r(FW)} ${r(yWater)} Z`,
+    fill: C.brownTrim,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  const steps = 7;
+  for (let i = 1; i < steps; i++) {
+    const t = i / steps;
+    const x = sxL + (dX - 1 - sxL) * t;
+    const y = yWater - 5 + (dBot - (yWater - 5)) * t;
+    push({ d: `M ${r(x)} ${r(y)} L ${r(x)} ${r(yWater)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7 });
+  }
+  // Stoop railing: a rail from the bottom newel up to the landing, on two posts.
+  push({ d: rect(sxL - 1, yWater - 15, 3, 15), fill: C.rail, stroke: C.ink, strokeWidth: 0.8, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(dX - 2, dBot - 17, 3, 17), fill: C.rail, stroke: C.ink, strokeWidth: 0.8, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(sxL)} ${r(yWater - 13)} L ${r(dX - 1)} ${r(dBot - 15)}`, stroke: C.rail, strokeWidth: 1.6, roughness: 0.9 });
+
+  return {
+    width: FW,
+    height: yWater + 4,
+    anchorX: FW / 2,
+    anchorY: yWater,
+    scale: 0.4,
+    parts,
+  };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
 export const BUILDINGS: Record<string, BuildingBuilder> = {
   "montauk-club": montaukClub,
+  "obama-brownstone": brownstone,
 };

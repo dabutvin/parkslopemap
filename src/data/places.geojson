@@ -17,6 +17,23 @@
         "type": "Point",
         "coordinates": [-73.9717, 40.6748]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "obama-brownstone",
+        "name": "Obama's Brownstone",
+        "category": "Residence",
+        "building": "obama-brownstone",
+        "description": "640 2nd Street, a 1901 brownstone on a Prospect Park block. In late 1984, fresh out of Columbia, Barack Obama shared the top-floor apartment here with his girlfriend Genevieve Cook before moving to Manhattan the following spring.",
+        "photo": "/photos/640-second-street.jpg",
+        "photoAlt": "The full brownstone facade of 640 Second Street in Park Slope, where Obama lived",
+        "photoCredit": "Real-estate listing photo of 640 Second Street"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9741, 40.669]
+      }
     }
   ]
 }
