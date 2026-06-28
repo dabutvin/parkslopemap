@@ -211,6 +211,173 @@ body {
   letter-spacing: 0.03em;
 }
 
+.ps-label--poi {
+  font-family: "Caveat", "Patrick Hand", cursive;
+  font-size: 15px;
+  font-weight: 700;
+  fill: #a8412f;
+  text-anchor: middle;
+  letter-spacing: 0.02em;
+}
+
+.ps-poi path {
+  stroke-linejoin: round;
+}
+
+.ps-poi__hit {
+  pointer-events: all;
+}
+
+.ps-poi {
+  cursor: pointer;
+  /* Soft "lift" so a landmark reads as tappable. */
+  transition: filter 0.15s ease;
+  outline: none;
+}
+
+.ps-poi:hover,
+.ps-poi:focus-visible {
+  filter: drop-shadow(0 2px 3px rgba(91, 74, 58, 0.35));
+}
+
+.ps-poi--selected,
+.ps-poi--selected:hover {
+  filter: drop-shadow(0 3px 5px rgba(168, 65, 47, 0.45));
+}
+
+/* Detail drawer (slides from the right; becomes a bottom sheet on narrow screens). */
+.ps-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: min(360px, 86%);
+  padding: 1.6rem 1.5rem 2rem;
+  box-sizing: border-box;
+  background:
+    radial-gradient(120% 80% at 100% 0%, rgba(255, 255, 255, 0.4), transparent 60%),
+    var(--paper);
+  border-left: 2px solid var(--ink-soft);
+  box-shadow: -6px 0 18px rgba(91, 74, 58, 0.18);
+  transform: translateX(102%);
+  transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+  pointer-events: none;
+  overflow-y: auto;
+  z-index: 3;
+}
+
+.ps-drawer--open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.ps-drawer__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink);
+  background: rgba(247, 240, 223, 0.9);
+  border: 2px solid var(--ink-soft);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 1px 1px 0 rgba(91, 74, 58, 0.2);
+}
+
+.ps-drawer__close:hover {
+  background: var(--paper-deep);
+}
+
+.ps-drawer__photo {
+  /* Bleed the photo to the drawer edges so it reads as a header. */
+  margin: -1.6rem -1.5rem 1.1rem;
+  background: #d8cdb4;
+  border-bottom: 2px solid var(--ink-soft);
+}
+
+.ps-drawer__photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ps-drawer__credit {
+  margin: 0;
+  padding: 0.4rem 1.2rem 0.55rem;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.66rem;
+  line-height: 1.35;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+}
+
+.ps-drawer__category {
+  margin: 0.3rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a8412f;
+}
+
+.ps-drawer__title {
+  font-family: "Caveat", "Patrick Hand", cursive;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0.1rem 0 0.6rem;
+  color: var(--ink);
+}
+
+.ps-drawer__title::after {
+  content: "";
+  display: block;
+  width: 2.4rem;
+  height: 3px;
+  margin-top: 0.5rem;
+  background: var(--ink-soft);
+  border-radius: 2px;
+}
+
+.ps-drawer__body {
+  margin: 0.8rem 0 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+@media (max-width: 640px) {
+  .ps-drawer {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 60%;
+    border-left: none;
+    border-top: 2px solid var(--ink-soft);
+    border-radius: 14px 14px 0 0;
+    box-shadow: 0 -6px 18px rgba(91, 74, 58, 0.18);
+    transform: translateY(102%);
+  }
+
+  .ps-drawer--open {
+    transform: translateY(0);
+  }
+
+  .ps-drawer__photo {
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+  }
+}
+
 .ps-compass__ring {
   fill: rgba(247, 240, 223, 0.55);
   stroke: var(--ink);

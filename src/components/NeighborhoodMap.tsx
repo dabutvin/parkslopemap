@@ -4,6 +4,7 @@ import type {
   FeatureCollection,
   LineString,
   MultiLineString,
+  Point,
   Polygon,
   MultiPolygon,
 } from "geojson";
@@ -12,10 +13,12 @@ import { buildMapModel } from "../lib/buildMap";
 import boundaryRaw from "../data/park-slope-boundary.geojson?raw";
 import parkRaw from "../data/prospect-park.geojson?raw";
 import streetsRaw from "../data/streets.geojson?raw";
+import placesRaw from "../data/places.geojson?raw";
 
 const boundary = JSON.parse(boundaryRaw) as Feature<Polygon>;
 const park = JSON.parse(parkRaw) as Feature<Polygon | MultiPolygon>;
 const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLineString>;
+const places = JSON.parse(placesRaw) as FeatureCollection<Point>;
 
 const DESIGN_WIDTH = 1000;
 
@@ -29,7 +32,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 export function NeighborhoodMap() {
   const model = useMemo(
-    () => buildMapModel({ boundary, park, streets }, { width: DESIGN_WIDTH }),
+    () => buildMapModel({ boundary, park, streets, places }, { width: DESIGN_WIDTH }),
     []
   );
 
@@ -40,9 +43,16 @@ export function NeighborhoodMap() {
     w: model.width,
     h: model.height,
   });
-  const panRef = useRef<{ pointerId: number; startX: number; startY: number; view: ViewBox } | null>(
-    null
-  );
+  const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
+  const selectedPoi = model.pois.find((p) => p.id === selectedPoiId) ?? null;
+  const panRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    view: ViewBox;
+    poiId: string | null;
+    moved: boolean;
+  } | null>(null);
 
   // Keep the view within the map bounds and within the allowed zoom range.
   const clampView = useCallback(
@@ -93,7 +103,17 @@ export function NeighborhoodMap() {
   const onPointerDown = useCallback(
     (e: React.PointerEvent<SVGSVGElement>) => {
       e.currentTarget.setPointerCapture(e.pointerId);
-      panRef.current = { pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, view };
+      // Capture which POI (if any) the press started on, before pointer capture
+      // retargets later events to the <svg>.
+      const hit = (e.target as Element).closest?.("[data-poi-id]");
+      panRef.current = {
+        pointerId: e.pointerId,
+        startX: e.clientX,
+        startY: e.clientY,
+        view,
+        poiId: hit?.getAttribute("data-poi-id") ?? null,
+        moved: false,
+      };
     },
     [view]
   );
@@ -102,6 +122,7 @@ export function NeighborhoodMap() {
     const pan = panRef.current;
     const svg = svgRef.current;
     if (!pan || !svg || pan.pointerId !== e.pointerId) return;
+    if (Math.hypot(e.clientX - pan.startX, e.clientY - pan.startY) > 4) pan.moved = true;
     const rect = svg.getBoundingClientRect();
     const dx = ((e.clientX - pan.startX) / rect.width) * pan.view.w;
     const dy = ((e.clientY - pan.startY) / rect.height) * pan.view.h;
@@ -109,9 +130,14 @@ export function NeighborhoodMap() {
   }, [clampView]);
 
   const endPan = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
-    if (panRef.current?.pointerId === e.pointerId) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-      panRef.current = null;
+    const pan = panRef.current;
+    if (pan?.pointerId !== e.pointerId) return;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    panRef.current = null;
+    // A press that didn't drag is a tap: open the building, or close the drawer
+    // when tapping empty map.
+    if (e.type === "pointerup" && !pan.moved) {
+      setSelectedPoiId(pan.poiId);
     }
   }, []);
 
@@ -129,6 +155,16 @@ export function NeighborhoodMap() {
     () => setView({ x: 0, y: 0, w: model.width, h: model.height }),
     [model.width, model.height]
   );
+
+  // Close the detail drawer with Escape.
+  useEffect(() => {
+    if (!selectedPoiId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedPoiId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedPoiId]);
 
   const isZoomed = view.w < model.width;
   const zoom = model.width / view.w;
@@ -199,6 +235,48 @@ export function NeighborhoodMap() {
         ))}
       </g>
 
+      <g className="ps-layer ps-layer--places">
+        {model.pois.map((poi) => (
+          <g
+            key={poi.id}
+            className={`ps-poi${poi.id === selectedPoiId ? " ps-poi--selected" : ""}`}
+            data-poi-id={poi.id}
+            role="button"
+            tabIndex={0}
+            aria-label={`${poi.name}${poi.category ? `, ${poi.category}` : ""}`}
+            aria-pressed={poi.id === selectedPoiId}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setSelectedPoiId(poi.id);
+              }
+            }}
+            transform={`translate(${poi.x} ${poi.y}) scale(${poi.scale}) translate(${-poi.anchorX} ${-poi.anchorY})`}
+          >
+            {/* Invisible hit area so the whole footprint is easy to click. */}
+            <rect
+              className="ps-poi__hit"
+              x={-6}
+              y={-6}
+              width={poi.width + 12}
+              height={poi.height + 12}
+              fill="transparent"
+            />
+            {poi.parts.map((p) => (
+              <path
+                key={p.key}
+                d={p.d}
+                stroke={p.stroke}
+                strokeWidth={p.strokeWidth}
+                fill={p.fill ?? "none"}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ))}
+          </g>
+        ))}
+      </g>
+
       <g className="ps-layer ps-layer--labels">
         <text
           className="ps-label ps-label--park"
@@ -230,6 +308,16 @@ export function NeighborhoodMap() {
             {label.name}
           </text>
         ))}
+        {model.pois.map((poi) => (
+          <text
+            key={poi.id}
+            className="ps-label ps-label--poi"
+            x={poi.labelX}
+            y={poi.labelY}
+          >
+            {poi.name}
+          </text>
+        ))}
       </g>
 
       <Compass x={88} y={96} radius={40} northAngle={model.northAngle} />
@@ -253,6 +341,40 @@ export function NeighborhoodMap() {
           ⤢
         </button>
       </div>
+
+      <aside
+        className={`ps-drawer${selectedPoi ? " ps-drawer--open" : ""}`}
+        role="dialog"
+        aria-modal="false"
+        aria-hidden={!selectedPoi}
+        aria-label={selectedPoi ? selectedPoi.name : "Place details"}
+      >
+        {selectedPoi && (
+          <>
+            <button
+              type="button"
+              className="ps-drawer__close"
+              onClick={() => setSelectedPoiId(null)}
+              aria-label="Close details"
+            >
+              ×
+            </button>
+            {selectedPoi.photo && (
+              <figure className="ps-drawer__photo">
+                <img src={selectedPoi.photo} alt={selectedPoi.photoAlt ?? selectedPoi.name} />
+                {selectedPoi.photoCredit && (
+                  <figcaption className="ps-drawer__credit">{selectedPoi.photoCredit}</figcaption>
+                )}
+              </figure>
+            )}
+            {selectedPoi.category && (
+              <p className="ps-drawer__category">{selectedPoi.category}</p>
+            )}
+            <h2 className="ps-drawer__title">{selectedPoi.name}</h2>
+            <p className="ps-drawer__body">{selectedPoi.description}</p>
+          </>
+        )}
+      </aside>
     </div>
   );
 }

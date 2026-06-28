@@ -19,3 +19,5 @@ npm-debug.log*
 
 # Generated preview images from scripts/render-preview.ts (root only)
 /preview*.png
+# Generated close-ups from scripts/_inspect-building.ts (root only)
+/building-*.png

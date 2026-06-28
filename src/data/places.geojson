@@ -1,0 +1,22 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "montauk-club",
+        "name": "Montauk Club",
+        "category": "Landmark",
+        "building": "montauk-club",
+        "description": "A Venetian Gothic social club designed by Francis H. Kimball and completed in 1891, ornamented in terra cotta with scenes of the Montauk people. A New York City landmark at 25 Eighth Avenue and Lincoln Place.",
+        "photo": "/photos/montauk-club-1910.jpg",
+        "photoAlt": "The Montauk Club photographed from Eighth Avenue around 1910",
+        "photoCredit": "Eugene L. Armbruster, c. 1910 · Center for Brooklyn History (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9717, 40.6748]
+      }
+    }
+  ]
+}

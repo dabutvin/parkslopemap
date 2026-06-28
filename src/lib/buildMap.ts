@@ -3,11 +3,13 @@ import type {
   FeatureCollection,
   LineString,
   MultiLineString,
+  Point,
   Polygon,
   MultiPolygon,
 } from "geojson";
 import { createProjection, DEFAULT_ANGLE } from "./projection";
 import { roughen, type RoughOptions, type RoughSubPath } from "./roughen";
+import { BUILDINGS } from "./buildings";
 
 // Hand-drawn palette: warm paper, sage park, soft ink.
 export const COLORS = {
@@ -33,6 +35,35 @@ export interface KeyedSubPath extends RoughSubPath {
   key: string;
 }
 
+/**
+ * A point of interest drawn as a hand-drawn building. `parts` are roughened and
+ * expressed in the building's *local* coordinates; the renderer places them on
+ * the map with `translate(x, y) scale(scale) translate(-anchorX, -anchorY)`.
+ */
+export interface PoiModel {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  /** Optional historic photo shown atop the detail drawer. */
+  photo?: string;
+  photoAlt?: string;
+  photoCredit?: string;
+  /** Projected map point the building stands on. */
+  x: number;
+  y: number;
+  scale: number;
+  anchorX: number;
+  anchorY: number;
+  /** Local bounding box of the drawing (for the click hit area). */
+  width: number;
+  height: number;
+  parts: KeyedSubPath[];
+  /** Screen-space anchor for the name label (above the building). */
+  labelX: number;
+  labelY: number;
+}
+
 export interface MapModel {
   width: number;
   height: number;
@@ -45,6 +76,8 @@ export interface MapModel {
   /** Cross-street labels, revealed progressively via each label's minZoom. */
   streetLabels: AvenueLabel[];
   parkLabel: AvenueLabel;
+  /** Points of interest (hand-drawn landmark buildings). */
+  pois: PoiModel[];
   /** Screen-space heading (degrees) that points to true north. */
   northAngle: number;
 }
@@ -53,6 +86,7 @@ export interface BuildMapInput {
   boundary: Feature<Polygon>;
   park: Feature<Polygon | MultiPolygon>;
   streets: FeatureCollection<LineString | MultiLineString>;
+  places?: FeatureCollection<Point>;
 }
 
 export interface BuildMapOptions {
@@ -67,7 +101,7 @@ export interface BuildMapOptions {
  * serializable model of everything that needs to be drawn.
  */
 export function buildMapModel(
-  { boundary, park, streets }: BuildMapInput,
+  { boundary, park, streets, places }: BuildMapInput,
   { width, padding = 60, angle = DEFAULT_ANGLE }: BuildMapOptions
 ): MapModel {
   // Reserve room on the right so Prospect Park reads as a band on the east.
@@ -144,6 +178,8 @@ export function buildMapModel(
     angle: bandAngle,
   };
 
+  const pois = buildPois(places, project);
+
   // Heading that points to true north, so the compass rose is accurate.
   const n0 = project([-73.982, 40.665]);
   const n1 = project([-73.982, 40.67]);
@@ -160,8 +196,65 @@ export function buildMapModel(
     avenueLabels,
     streetLabels,
     parkLabel,
+    pois,
     northAngle,
   };
+}
+
+/**
+ * Turn each place feature into a roughened, projected building. A feature is
+ * skipped if it lacks a known `building` builder, so data can outrun art.
+ */
+function buildPois(
+  places: FeatureCollection<Point> | undefined,
+  project: (coord: [number, number]) => [number, number]
+): PoiModel[] {
+  if (!places) return [];
+  const pois: PoiModel[] = [];
+
+  for (const feature of places.features) {
+    const props = feature.properties ?? {};
+    const buildingKey = props.building as string | undefined;
+    const builder = buildingKey ? BUILDINGS[buildingKey] : undefined;
+    if (!builder) continue;
+
+    const drawing = builder();
+    const [x, y] = project(feature.geometry.coordinates as [number, number]);
+
+    const parts: KeyedSubPath[] = drawing.parts.flatMap((part, i) =>
+      roughen(part.d, {
+        fill: part.fill,
+        fillStyle: part.fillStyle ?? "hachure",
+        stroke: part.stroke ?? COLORS.ink,
+        strokeWidth: part.strokeWidth ?? 1.2,
+        roughness: part.roughness ?? 1,
+        bowing: part.bowing ?? 1,
+        seed: part.seed,
+      }).map((p, j) => ({ ...p, key: `${i}-${j}` }))
+    );
+
+    pois.push({
+      id: (props.id as string) ?? buildingKey ?? "poi",
+      name: (props.name as string) ?? "",
+      category: (props.category as string) ?? "",
+      description: (props.description as string) ?? "",
+      photo: (props.photo as string) ?? undefined,
+      photoAlt: (props.photoAlt as string) ?? undefined,
+      photoCredit: (props.photoCredit as string) ?? undefined,
+      x,
+      y,
+      scale: drawing.scale,
+      anchorX: drawing.anchorX,
+      anchorY: drawing.anchorY,
+      width: drawing.width,
+      height: drawing.height,
+      parts,
+      labelX: x,
+      labelY: y - drawing.anchorY * drawing.scale - 9,
+    });
+  }
+
+  return pois;
 }
 
 
