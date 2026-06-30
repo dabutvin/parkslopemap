@@ -1,0 +1,1715 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "way/5676379",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9688775,
+            40.6729954
+          ],
+          [
+            -73.9694286,
+            40.6730922
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/46137553",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9606118,
+            40.6601972
+          ],
+          [
+            -73.9606479,
+            40.6604789
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/97010425",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9708298,
+            40.6749269
+          ],
+          [
+            -73.9706413,
+            40.674569
+          ],
+          [
+            -73.970655,
+            40.67435
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/127739282",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.961201,
+            40.6645406
+          ],
+          [
+            -73.961294,
+            40.6650268
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/127739288",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9609568,
+            40.6632948
+          ],
+          [
+            -73.9611096,
+            40.6640629
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/221595432",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9626659,
+            40.6635083
+          ],
+          [
+            -73.9628848,
+            40.6638048
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/221595433",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9623837,
+            40.6630968
+          ],
+          [
+            -73.9622704,
+            40.6629272
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/221698687",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9599396,
+            40.6559622
+          ],
+          [
+            -73.9604031,
+            40.6579826
+          ],
+          [
+            -73.9606118,
+            40.6601972
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/221753946",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9609568,
+            40.6632948
+          ],
+          [
+            -73.9608625,
+            40.6625062
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/221759323",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9629037,
+            40.6733425
+          ],
+          [
+            -73.962689,
+            40.6722472
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/221795718",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.961294,
+            40.6650268
+          ],
+          [
+            -73.9621007,
+            40.6691935
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/222258277",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9730512,
+            40.6779969
+          ],
+          [
+            -73.9727171,
+            40.6775369
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/227064553",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.963137,
+            40.674573
+          ],
+          [
+            -73.9630202,
+            40.6739453
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/227064554",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9626099,
+            40.671855
+          ],
+          [
+            -73.9625942,
+            40.6717626
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/227064555",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9621272,
+            40.6693408
+          ],
+          [
+            -73.9625105,
+            40.6713479
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/227064556",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.964073,
+            40.679379
+          ],
+          [
+            -73.963331,
+            40.675561
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/261445003",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9606662,
+            40.6609533
+          ],
+          [
+            -73.9607734,
+            40.6617338
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/295384457",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9672129,
+            40.6728115
+          ],
+          [
+            -73.9657895,
+            40.6724935
+          ],
+          [
+            -73.9644025,
+            40.6720624
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/335394629",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9625942,
+            40.6717626
+          ],
+          [
+            -73.9625677,
+            40.6716357
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/335394630",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9625371,
+            40.6714988
+          ],
+          [
+            -73.9625105,
+            40.6713479
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318559",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9586321,
+            40.670808
+          ],
+          [
+            -73.9579683,
+            40.6706759
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318560",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9528955,
+            40.6700012
+          ],
+          [
+            -73.9520237,
+            40.6699551
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318561",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9556682,
+            40.6701931
+          ],
+          [
+            -73.9552611,
+            40.6701387
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318565",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9579683,
+            40.6706759
+          ],
+          [
+            -73.9573256,
+            40.6705456
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318567",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9532685,
+            40.6700228
+          ],
+          [
+            -73.9528955,
+            40.6700012
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318569",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9539342,
+            40.6700628
+          ],
+          [
+            -73.9532685,
+            40.6700228
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318574",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9545604,
+            40.6700958
+          ],
+          [
+            -73.9539342,
+            40.6700628
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318577",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9573256,
+            40.6705456
+          ],
+          [
+            -73.9556682,
+            40.6701931
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420318579",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9552611,
+            40.6701387
+          ],
+          [
+            -73.9545604,
+            40.6700958
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583298",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9684174,
+            40.6729473
+          ],
+          [
+            -73.9685355,
+            40.6729903
+          ],
+          [
+            -73.9688775,
+            40.6729954
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583300",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9620547,
+            40.6715289
+          ],
+          [
+            -73.961806,
+            40.6714766
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583302",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9613323,
+            40.6713767
+          ],
+          [
+            -73.960925,
+            40.671291
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583304",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.961806,
+            40.6714766
+          ],
+          [
+            -73.9613323,
+            40.6713767
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583307",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9630912,
+            40.6717417
+          ],
+          [
+            -73.9625677,
+            40.6716357
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583309",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9625677,
+            40.6716357
+          ],
+          [
+            -73.9620547,
+            40.6715289
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583311",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9677887,
+            40.6729027
+          ],
+          [
+            -73.9677011,
+            40.672845
+          ],
+          [
+            -73.9672907,
+            40.6727837
+          ],
+          [
+            -73.9672129,
+            40.6728115
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583314",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9639695,
+            40.6719399
+          ],
+          [
+            -73.9630912,
+            40.6717417
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583316",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9644025,
+            40.6720624
+          ],
+          [
+            -73.9639695,
+            40.6719399
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420583318",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9688338,
+            40.6722247
+          ],
+          [
+            -73.9692164,
+            40.6727949
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420584215",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9629528,
+            40.673584
+          ],
+          [
+            -73.9629037,
+            40.6733425
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420584216",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9630202,
+            40.6739453
+          ],
+          [
+            -73.9629528,
+            40.673584
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420584217",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.962689,
+            40.6722472
+          ],
+          [
+            -73.9626099,
+            40.671855
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420875712",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9643941,
+            40.6810498
+          ],
+          [
+            -73.9643121,
+            40.6805841
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/420875713",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.964236,
+            40.680236
+          ],
+          [
+            -73.964147,
+            40.6797601
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/421118176",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.960925,
+            40.671291
+          ],
+          [
+            -73.9586321,
+            40.670808
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/421118177",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.968984,
+            40.6728786
+          ],
+          [
+            -73.9684174,
+            40.6729473
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/451915590",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9743245,
+            40.6797501
+          ],
+          [
+            -73.973547,
+            40.6786798
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/451915592",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.973547,
+            40.6786798
+          ],
+          [
+            -73.9730512,
+            40.6779969
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/451915594",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9727171,
+            40.6775369
+          ],
+          [
+            -73.9724528,
+            40.677173
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/452286946",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9702626,
+            40.674664
+          ],
+          [
+            -73.9708298,
+            40.6749269
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/452286949",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.971046,
+            40.6752484
+          ],
+          [
+            -73.9708298,
+            40.6749269
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/497258436",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9625677,
+            40.6716357
+          ],
+          [
+            -73.9625371,
+            40.6714988
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/497382067",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9719095,
+            40.6764249
+          ],
+          [
+            -73.971046,
+            40.6752484
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/526209963",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9628848,
+            40.6638048
+          ],
+          [
+            -73.9655089,
+            40.667629
+          ],
+          [
+            -73.9688338,
+            40.6722247
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/587355757",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9611096,
+            40.6640629
+          ],
+          [
+            -73.961201,
+            40.6645406
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/587355764",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9621007,
+            40.6691935
+          ],
+          [
+            -73.9621272,
+            40.6693408
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/587355779",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.961437,
+            40.6616849
+          ],
+          [
+            -73.9608909,
+            40.6609097
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/728838683",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.963275,
+            40.675274
+          ],
+          [
+            -73.963137,
+            40.674573
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/728848116",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.963331,
+            40.675561
+          ],
+          [
+            -73.963275,
+            40.675274
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/735249954",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9643121,
+            40.6805841
+          ],
+          [
+            -73.9642506,
+            40.6803048
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/737412805",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9620332,
+            40.6625721
+          ],
+          [
+            -73.961437,
+            40.6616849
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/892105929",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9623837,
+            40.6630968
+          ],
+          [
+            -73.9626659,
+            40.6635083
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/893401542",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9606479,
+            40.6604789
+          ],
+          [
+            -73.9606143,
+            40.6605697
+          ],
+          [
+            -73.9606662,
+            40.6609533
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1022612904",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9627768,
+            40.6633528
+          ],
+          [
+            -73.9627645,
+            40.6634205
+          ],
+          [
+            -73.9632621,
+            40.6641916
+          ],
+          [
+            -73.9655688,
+            40.6675384
+          ],
+          [
+            -73.968896,
+            40.6721173
+          ],
+          [
+            -73.9691589,
+            40.6724624
+          ],
+          [
+            -73.9696766,
+            40.6725604
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1071973707",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9684174,
+            40.6729473
+          ],
+          [
+            -73.9679753,
+            40.672924
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1071973708",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9672129,
+            40.6728115
+          ],
+          [
+            -73.967266,
+            40.6728644
+          ],
+          [
+            -73.967673,
+            40.6729274
+          ],
+          [
+            -73.9677887,
+            40.6729027
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1136398222",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9520237,
+            40.6699551
+          ],
+          [
+            -73.9512513,
+            40.6699143
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1136718903",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.964147,
+            40.6797601
+          ],
+          [
+            -73.964073,
+            40.679379
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1136718904",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9642506,
+            40.6803048
+          ],
+          [
+            -73.964236,
+            40.680236
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1210901137",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9622704,
+            40.6629272
+          ],
+          [
+            -73.9620965,
+            40.6626663
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1212102883",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9620965,
+            40.6626663
+          ],
+          [
+            -73.9620332,
+            40.6625721
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1301521628",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9606479,
+            40.6604789
+          ],
+          [
+            -73.9608909,
+            40.6609097
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1304966316",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9724528,
+            40.677173
+          ],
+          [
+            -73.9719095,
+            40.6764249
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1320331747",
+      "properties": {
+        "name": "Eastern Parkway",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9679753,
+            40.672924
+          ],
+          [
+            -73.9677887,
+            40.6729027
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1330564546",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9593296,
+            40.6529312
+          ],
+          [
+            -73.9598596,
+            40.6556372
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1330564547",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9598596,
+            40.6556372
+          ],
+          [
+            -73.9599396,
+            40.6559622
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1502686286",
+      "properties": {
+        "name": "Washington Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9608625,
+            40.6625062
+          ],
+          [
+            -73.9607734,
+            40.6617338
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "way/1524432633",
+      "properties": {
+        "name": "Flatbush Avenue",
+        "kind": "avenue"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -73.9730512,
+            40.6779969
+          ],
+          [
+            -73.9730299,
+            40.6778212
+          ],
+          [
+            -73.9728472,
+            40.6775662
+          ],
+          [
+            -73.9724192,
+            40.676986
+          ],
+          [
+            -73.9721423,
+            40.6767455
+          ]
+        ]
+      }
+    }
+  ]
+}

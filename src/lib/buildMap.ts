@@ -106,6 +106,21 @@ export interface MapModel {
   greenPaths: RoughSubPath[];
   /** Optional label for an inner green space. */
   greenLabel?: AvenueLabel;
+  /**
+   * The green wedge NE of the park (Mount Prospect Park, Brooklyn Botanic
+   * Garden), drawn park-style on the paper above/right of the neighborhood.
+   */
+  northGreenPaths: KeyedSubPath[];
+  /** Labels for each northern green space. */
+  northGreenLabels: AvenueLabel[];
+  /** Roads framing the northern wedge, drawn over the greens (clipped to northClip). */
+  northStreetPaths: KeyedSubPath[];
+  /**
+   * Screen-space rectangle the northern section is drawn within, so the framing
+   * roads (which run for miles in OSM) are trimmed to the wedge instead of
+   * sprawling across the paper. Undefined when there is no northern section.
+   */
+  northClip?: { x: number; y: number; width: number; height: number };
   neighborhoodFill: RoughSubPath[];
   boundaryOutline: RoughSubPath[];
   streetPaths: KeyedSubPath[];
@@ -128,6 +143,10 @@ export interface BuildMapInput {
   greens?: Feature<Polygon | MultiPolygon>;
   /** Additional, unlabeled green spaces (e.g. smaller playgrounds). */
   greenSpaces?: FeatureCollection<Polygon | MultiPolygon>;
+  /** Green spaces NE of the park, above Flatbush Ave (Mount Prospect Park, BBG). */
+  northGreens?: FeatureCollection<Polygon | MultiPolygon>;
+  /** Roads that frame the northern wedge (Flatbush Ave, Eastern Pkwy, Washington Ave). */
+  northStreets?: FeatureCollection<LineString | MultiLineString>;
   streets: FeatureCollection<LineString | MultiLineString>;
   /** Prospect Park's internal paths + carriage loop (each feature has kind). */
   parkTrails?: FeatureCollection<LineString | MultiLineString>;
@@ -148,11 +167,13 @@ export interface BuildMapOptions {
  * serializable model of everything that needs to be drawn.
  */
 export function buildMapModel(
-  { boundary, park, greens, greenSpaces, streets, parkTrails, parkWater, places }: BuildMapInput,
+  { boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places }: BuildMapInput,
   { width, padding = 60, angle = DEFAULT_ANGLE }: BuildMapOptions
 ): MapModel {
-  // Reserve room on the right so Prospect Park reads as a band on the east.
-  const insetRight = Math.round(width * 0.2);
+  // Reserve room on the right so Prospect Park reads as a band on the east, and
+  // (when present) room above for the green wedge NE of the park.
+  const insetRight = Math.round(width * (northGreens?.features.length ? 0.32 : 0.2));
+  const insetTop = northGreens?.features.length ? Math.round(width * 0.1) : 0;
 
   // Pass 1: fit to a square to discover the neighborhood's true aspect ratio.
   const probe = createProjection(boundary, { width, height: width, padding: 0, angle });
@@ -160,12 +181,13 @@ export function buildMapModel(
   const aspect = (bx1 - bx0) / (by1 - by0) || 1;
 
   // Size the canvas so the neighborhood fits exactly in the content box
-  // (width minus padding and the reserved park band).
+  // (width minus padding and the reserved park band; height also reserves the
+  // top headroom for the northern greens).
   const contentW = width - 2 * padding - insetRight;
-  const height = Math.round(contentW / aspect + 2 * padding);
+  const height = Math.round(contentW / aspect + 2 * padding + insetTop);
 
   // Pass 2: real projection fitted to the content box.
-  const { path, project } = createProjection(boundary, { width, height, padding, insetRight, angle });
+  const { path, project } = createProjection(boundary, { width, height, padding, insetRight, insetTop, angle });
 
   const boundaryD = path(boundary) ?? "";
   const parkD = path(park) ?? "";
@@ -238,6 +260,66 @@ export function buildMapModel(
       angle: 0,
     };
   }
+
+  // The green wedge NE of the park (Mount Prospect Park, Brooklyn Botanic
+  // Garden). Painted park-style on the paper, like Prospect Park's band; each
+  // gets a label at its projected centroid.
+  const northGreenPaths: KeyedSubPath[] = [];
+  const northGreenLabels: AvenueLabel[] = [];
+  (northGreens?.features ?? []).forEach((f, i) => {
+    const d = path(f) ?? "";
+    if (!d) return;
+    const sub = roughen(d, {
+      fill: COLORS.park,
+      fillStyle: "solid",
+      stroke: COLORS.parkInk,
+      strokeWidth: 2,
+      roughness: 1.8,
+      bowing: 1.5,
+      seed: i + 700,
+    }).map((p, j) => ({ ...p, key: `north-${i}-${j}` }));
+    northGreenPaths.push(...sub);
+    const name = (f.properties?.name as string) ?? "";
+    if (name) {
+      const [[nx0, ny0], [nx1, ny1]] = path.bounds(f);
+      northGreenLabels.push({ name, x: (nx0 + nx1) / 2, y: (ny0 + ny1) / 2, angle: 0 });
+    }
+  });
+
+  // The section's screen extent: the greens' bounding box, grown upward to take
+  // in Eastern Parkway (which runs above them) and right to the canvas edge. The
+  // framing roads are clipped to this so they trace the wedge instead of running
+  // off across the whole map.
+  let northClip: MapModel["northClip"];
+  if (northGreens?.features.length) {
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const f of northGreens.features) {
+      const [[x0, y0], [x1, y1]] = path.bounds(f);
+      minX = Math.min(minX, x0); minY = Math.min(minY, y0);
+      maxX = Math.max(maxX, x1); maxY = Math.max(maxY, y1);
+    }
+    const x = Math.max(0, minX - 45);
+    const top = Math.max(0, minY - 230);
+    northClip = { x, y: top, width: width - x, height: maxY + 45 - top };
+  }
+
+  // The roads that frame the wedge, drawn avenue-weight (clipped to northClip in
+  // the renderer) so they separate the section from Prospect Park and trace
+  // Eastern Pkwy / Washington Ave.
+  const northStreetPaths: KeyedSubPath[] = [];
+  (northStreets?.features ?? []).forEach((f, i) => {
+    const d = path(f) ?? "";
+    if (!d) return;
+    const sub = roughen(d, {
+      stroke: COLORS.avenue,
+      strokeWidth: 2.4,
+      roughness: 1.5,
+      bowing: 1.2,
+      seed: i + 800,
+      fill: "none",
+    }).map((p, j) => ({ ...p, key: `north-st-${i}-${j}` }));
+    northStreetPaths.push(...sub);
+  });
 
   const neighborhoodFill = roughen(boundaryD, {
     fill: COLORS.neighborhood,
@@ -314,7 +396,9 @@ export function buildMapModel(
     id: "prospect-park",
     name: "Prospect Park",
     x: width - insetRight * 0.5,
-    y: height * 0.42,
+    // Drop the label into the park's body when the northern section is present,
+    // so it clears the Botanic Garden / Mount Prospect labels up by the NE corner.
+    y: height * (insetTop ? 0.6 : 0.42),
     angle: 0,
     category: "Park",
     description:
@@ -342,6 +426,10 @@ export function buildMapModel(
     parkDrivePaths,
     greenPaths,
     greenLabel,
+    northGreenPaths,
+    northGreenLabels,
+    northStreetPaths,
+    northClip,
     neighborhoodFill,
     boundaryOutline,
     streetPaths,

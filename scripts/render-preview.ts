@@ -27,6 +27,18 @@ const park = read("prospect-park.geojson") as Feature<Polygon | MultiPolygon>;
 const greens = read("washington-park.geojson") as Feature<Polygon | MultiPolygon>;
 const greenSpaces = read("green-spaces.geojson") as FeatureCollection<Polygon | MultiPolygon>;
 const streets = read("streets.geojson") as FeatureCollection<LineString | MultiLineString>;
+let northGreens: FeatureCollection<Polygon | MultiPolygon> | undefined;
+try {
+  northGreens = read("north-greens.geojson") as FeatureCollection<Polygon | MultiPolygon>;
+} catch {
+  northGreens = undefined;
+}
+let northStreets: FeatureCollection<LineString | MultiLineString> | undefined;
+try {
+  northStreets = read("north-streets.geojson") as FeatureCollection<LineString | MultiLineString>;
+} catch {
+  northStreets = undefined;
+}
 const places = read("places.geojson") as FeatureCollection<Point>;
 let parkTrails: FeatureCollection<LineString | MultiLineString> | undefined;
 try {
@@ -42,7 +54,7 @@ try {
 }
 
 const angle = process.argv[2] === undefined ? NaN : Number(process.argv[2]);
-const model = buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, parkWater, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
+const model = buildMapModel({ boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -50,9 +62,11 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
   <defs>
     <clipPath id="c"><path d="${model.boundaryD}"/></clipPath>
     <clipPath id="park"><path d="${model.parkD}"/></clipPath>
+    ${model.northClip ? `<clipPath id="north"><rect x="${model.northClip.x}" y="${model.northClip.y}" width="${model.northClip.width}" height="${model.northClip.height}"/></clipPath>` : ""}
   </defs>
   <rect x="0" y="0" width="${model.width}" height="${model.height}" fill="${COLORS.paper}"/>
   <g>${model.parkPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}"/>`).join("")}</g>
+  <g>${model.northGreenPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}"/>`).join("")}</g>
   <g clip-path="url(#park)">${model.parkWaterPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}" stroke-linejoin="round"/>`).join("")}</g>
   <g clip-path="url(#park)" fill="none" stroke-linecap="round">
     ${model.parkTrailPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" stroke-dasharray="0.5 4"/>`).join("")}
@@ -63,6 +77,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
   <g clip-path="url(#c)">${model.streetPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round"/>`).join("")}</g>
   <g>${model.boundaryOutline.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`).join("")}</g>
   <g>${model.plazaPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}" stroke-linecap="round"/>`).join("")}</g>
+  <g${model.northClip ? ` clip-path="url(#north)"` : ""}>${model.northStreetPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round"/>`).join("")}</g>
   ${model.pois
     .map(
       (poi) =>
@@ -79,6 +94,12 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
       )
       .join("")}
     <text x="${model.parkLabel.x}" y="${model.parkLabel.y}" font-size="30" font-weight="700" fill="#5a6f49" text-anchor="middle" transform="rotate(${model.parkLabel.angle} ${model.parkLabel.x} ${model.parkLabel.y})">${esc(model.parkLabel.name)}</text>
+    ${model.northGreenLabels
+      .map(
+        (l) =>
+          `<text x="${l.x}" y="${l.y}" font-size="14" font-weight="700" fill="#5a6f49" text-anchor="middle">${esc(l.name)}</text>`
+      )
+      .join("")}
     ${model.greenLabel ? `<text x="${model.greenLabel.x}" y="${model.greenLabel.y}" font-size="13" font-weight="700" fill="#5a6f49" text-anchor="middle">${esc(model.greenLabel.name)}</text>` : ""}
     ${model.avenueLabels
       .map(

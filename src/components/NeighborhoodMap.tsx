@@ -16,6 +16,8 @@ import parkPathsRaw from "../data/prospect-park-paths.geojson?raw";
 import parkWaterRaw from "../data/prospect-park-water.geojson?raw";
 import washingtonRaw from "../data/washington-park.geojson?raw";
 import greenSpacesRaw from "../data/green-spaces.geojson?raw";
+import northGreensRaw from "../data/north-greens.geojson?raw";
+import northStreetsRaw from "../data/north-streets.geojson?raw";
 import streetsRaw from "../data/streets.geojson?raw";
 import placesRaw from "../data/places.geojson?raw";
 
@@ -25,6 +27,8 @@ const parkTrails = JSON.parse(parkPathsRaw) as FeatureCollection<LineString | Mu
 const parkWater = JSON.parse(parkWaterRaw) as FeatureCollection<Polygon | MultiPolygon>;
 const greens = JSON.parse(washingtonRaw) as Feature<Polygon | MultiPolygon>;
 const greenSpaces = JSON.parse(greenSpacesRaw) as FeatureCollection<Polygon | MultiPolygon>;
+const northGreens = JSON.parse(northGreensRaw) as FeatureCollection<Polygon | MultiPolygon>;
+const northStreets = JSON.parse(northStreetsRaw) as FeatureCollection<LineString | MultiLineString>;
 const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLineString>;
 const places = JSON.parse(placesRaw) as FeatureCollection<Point>;
 
@@ -40,7 +44,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 export function NeighborhoodMap() {
   const model = useMemo(
-    () => buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, parkWater, places }, { width: DESIGN_WIDTH }),
+    () => buildMapModel({ boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places }, { width: DESIGN_WIDTH }),
     []
   );
 
@@ -213,6 +217,16 @@ export function NeighborhoodMap() {
         <clipPath id="ps-park-clip">
           <path d={model.parkD} />
         </clipPath>
+        {model.northClip && (
+          <clipPath id="ps-north-clip">
+            <rect
+              x={model.northClip.x}
+              y={model.northClip.y}
+              width={model.northClip.width}
+              height={model.northClip.height}
+            />
+          </clipPath>
+        )}
       </defs>
 
       <rect className="ps-map__paper" x="0" y="0" width={model.width} height={model.height} />
@@ -220,6 +234,12 @@ export function NeighborhoodMap() {
       <g className="ps-layer ps-layer--park">
         {model.parkPaths.map((p, i) => (
           <path key={`park-${i}`} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} />
+        ))}
+      </g>
+
+      <g className="ps-layer ps-layer--north-green">
+        {model.northGreenPaths.map((p) => (
+          <path key={p.key} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} />
         ))}
       </g>
 
@@ -274,6 +294,16 @@ export function NeighborhoodMap() {
       <g className="ps-layer ps-layer--plaza">
         {model.plazaPaths.map((p) => (
           <path key={p.key} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} strokeLinecap="round" />
+        ))}
+      </g>
+
+      {/* Flatbush Ave / Eastern Pkwy / Washington Ave, framing the northern wedge. */}
+      <g
+        className="ps-layer ps-layer--north-streets"
+        clipPath={model.northClip ? "url(#ps-north-clip)" : undefined}
+      >
+        {model.northStreetPaths.map((p) => (
+          <path key={p.key} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill="none" strokeLinecap="round" />
         ))}
       </g>
 
@@ -348,6 +378,16 @@ export function NeighborhoodMap() {
             {model.greenLabel.name}
           </text>
         )}
+        {model.northGreenLabels.map((label) => (
+          <text
+            key={label.name}
+            className="ps-label ps-label--north-green"
+            x={label.x}
+            y={label.y}
+          >
+            {label.name}
+          </text>
+        ))}
         {model.avenueLabels.map((label) => (
           <text
             key={label.name}

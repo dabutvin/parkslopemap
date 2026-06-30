@@ -3,13 +3,18 @@
  * static GeoJSON into src/data. Run on demand with `npm run fetch-data`; it is
  * NOT part of the app runtime (the app only reads the committed GeoJSON).
  *
- * It produces seven files:
+ * It produces eight files:
  *   - park-slope-boundary.geojson : the neighborhood outline
  *   - prospect-park.geojson       : the park polygon (the eastern landmark)
  *   - prospect-park-paths.geojson : the park's loop drive + main footpaths
  *   - prospect-park-water.geojson : the park's water (Lake, Lullwater, pools)
  *   - washington-park.geojson     : the labeled inner green (Old Stone House)
  *   - green-spaces.geojson        : smaller, unlabeled inner playgrounds
+ *   - north-greens.geojson        : the green wedge NE of the park, above
+ *                                   Flatbush Ave (Mount Prospect Park + the
+ *                                   Brooklyn Botanic Garden)
+ *   - north-streets.geojson       : the roads that frame that wedge (Flatbush
+ *                                   Ave, Eastern Parkway, Washington Ave)
  *   - streets.geojson             : the avenue + cross-street grid
  *
  * The boundary is stitched from real OpenStreetMap geometry so the borders are
@@ -418,6 +423,80 @@ async function main() {
     });
   console.log(`  kept ${parkWater.length} park water bodies`);
 
+  // The green wedge that sits NE of Prospect Park, above Flatbush Avenue and
+  // bordered by Eastern Parkway (north) and Washington Avenue (east): Mount
+  // Prospect Park and the Brooklyn Botanic Garden. Drawn as park-style green so
+  // the map reads as one continuous green corridor poking past the NE corner.
+  console.log("Querying Overpass for the northern green wedge...");
+  const NORTH_NAMES = ["Mount Prospect Park", "Brooklyn Botanic Garden"];
+  const northRaw = await overpass(`
+    [out:json][timeout:90];
+    (
+      relation["leisure"~"park|garden"]["name"~"Mount Prospect Park|Brooklyn Botanic Garden"](40.66,-73.974,40.679,-73.952);
+      way["leisure"~"park|garden"]["name"~"Mount Prospect Park|Brooklyn Botanic Garden"](40.66,-73.974,40.679,-73.952);
+    );
+    out body; >; out skel qt;
+  `);
+  const northFc = osmtogeojson(northRaw) as FeatureCollection;
+  const northGreens: Feature<Polygon | MultiPolygon>[] = [];
+  for (const name of NORTH_NAMES) {
+    // Prefer the largest matching polygon (the full grounds, not a sub-area).
+    const candidates = northFc.features.filter(
+      (f) =>
+        (f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon") &&
+        f.properties?.name === name
+    ) as Feature<Polygon | MultiPolygon>[];
+    if (!candidates.length) {
+      console.warn(`  could not find "${name}"`);
+      continue;
+    }
+    candidates.sort(
+      (a, b) => largestPolygonRing(b.geometry).length - largestPolygonRing(a.geometry).length
+    );
+    const feat = candidates[0];
+    // Drop interior holes so each reads as one clean green mass (matches the park).
+    if (feat.geometry.type === "Polygon") {
+      feat.geometry.coordinates = [feat.geometry.coordinates[0]];
+    } else {
+      feat.geometry.coordinates = feat.geometry.coordinates.map((poly) => [poly[0]]);
+    }
+    const simplified = simplify(feat, { tolerance: 0.00003, highQuality: true }) as Feature<
+      Polygon | MultiPolygon
+    >;
+    simplified.properties = { name };
+    northGreens.push(simplified);
+  }
+  console.log(`  kept ${northGreens.length} northern green spaces`);
+
+  // The roads that frame the northern green wedge: Flatbush Avenue (which splits
+  // it from Prospect Park), Eastern Parkway (its northern edge), and Washington
+  // Avenue (its eastern edge). Drawn unclipped over the greens so the section
+  // reads as its own bordered block rather than melting into the park.
+  console.log("Querying Overpass for the roads that frame the northern wedge...");
+  const NORTH_ROAD_NAMES = new Set(["Flatbush Avenue", "Eastern Parkway", "Washington Avenue"]);
+  const northRoadsRaw = await overpass(`
+    [out:json][timeout:90];
+    (
+      way["highway"]["name"~"Flatbush Avenue|Eastern Parkway|Washington Avenue"](40.655,-73.974,40.681,-73.952);
+    );
+    out body; >; out skel qt;
+  `);
+  const northRoadsFc = osmtogeojson(northRoadsRaw) as FeatureCollection;
+  const northRoads = (
+    northRoadsFc.features.filter(
+      (f) =>
+        (f.geometry.type === "LineString" || f.geometry.type === "MultiLineString") &&
+        NORTH_ROAD_NAMES.has((f.properties?.name as string) ?? "")
+    ) as Feature<LineString | MultiLineString>[]
+  ).map((f) => {
+    const simplified = simplify(f, { tolerance: 0.00003, highQuality: true }) as Feature<
+      LineString | MultiLineString
+    >;
+    simplified.properties = { name: f.properties?.name ?? null, kind: "avenue" };
+    return simplified;
+  });
+  console.log(`  kept ${northRoads.length} framing road segments`);
+
   // d3-geo treats polygons as spherical and expects CLOCKWISE outer rings;
   // rings the other way are read as "the whole globe minus this shape". Rewind
   // so the app fills the actual interiors.
@@ -426,6 +505,9 @@ async function main() {
   const washingtonCW = rewind(washington, { reverse: true }) as Feature<Polygon | MultiPolygon>;
   const greenSpacesCW = featureCollection(
     playgrounds.map((f) => rewind(f, { reverse: true }) as Feature<Polygon | MultiPolygon>)
+  );
+  const northGreensCW = featureCollection(
+    northGreens.map((f) => rewind(f, { reverse: true }) as Feature<Polygon | MultiPolygon>)
   );
 
   await mkdir(OUT_DIR, { recursive: true });
@@ -454,11 +536,19 @@ async function main() {
     JSON.stringify(greenSpacesCW, null, 2)
   );
   await writeFile(
+    join(OUT_DIR, "north-greens.geojson"),
+    JSON.stringify(northGreensCW, null, 2)
+  );
+  await writeFile(
+    join(OUT_DIR, "north-streets.geojson"),
+    JSON.stringify(featureCollection(northRoads), null, 2)
+  );
+  await writeFile(
     join(OUT_DIR, "streets.geojson"),
     JSON.stringify(featureCollection(streets.features as Feature<LineString | MultiLineString>[]), null, 2)
   );
 
-  console.log(`Done. Wrote 7 GeoJSON files to ${OUT_DIR}`);
+  console.log(`Done. Wrote 9 GeoJSON files to ${OUT_DIR}`);
 }
 
 main().catch((err) => {

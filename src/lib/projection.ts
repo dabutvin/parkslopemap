@@ -19,6 +19,12 @@ export interface ProjectionOptions {
    */
   insetRight?: number;
   /**
+   * Extra space (px) reserved at the top so the neighborhood sits below center,
+   * leaving headroom for the green wedge NE of the park (Mount Prospect Park /
+   * Brooklyn Botanic Garden) to show above Flatbush Avenue.
+   */
+  insetTop?: number;
+  /**
    * Post-projection rotation in degrees. Park Slope's street grid sits on a
    * diagonal versus true north; rotating makes the avenues read vertically so
    * the map looks like a deliberately drawn illustration rather than a tilted
@@ -35,12 +41,12 @@ export const DEFAULT_ANGLE = 30;
  */
 export function createProjection(
   boundary: Feature,
-  { width, height, padding = 48, insetRight = 0, angle = DEFAULT_ANGLE }: ProjectionOptions
+  { width, height, padding = 48, insetRight = 0, insetTop = 0, angle = DEFAULT_ANGLE }: ProjectionOptions
 ): MapProjection {
   const projection = geoMercator().angle(angle);
   projection.fitExtent(
     [
-      [padding, padding],
+      [padding, padding + insetTop],
       [width - padding - insetRight, height - padding],
     ],
     boundary
