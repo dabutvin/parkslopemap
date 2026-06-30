@@ -128,6 +128,9 @@ body {
   height: 100%;
   overflow: hidden;
   touch-action: none;
+  /* Panning drags across the SVG text labels; keep that from selecting them. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .ps-zoom {
