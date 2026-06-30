@@ -3,9 +3,10 @@
  * static GeoJSON into src/data. Run on demand with `npm run fetch-data`; it is
  * NOT part of the app runtime (the app only reads the committed GeoJSON).
  *
- * It produces five files:
+ * It produces six files:
  *   - park-slope-boundary.geojson : the neighborhood outline
  *   - prospect-park.geojson       : the park polygon (the eastern landmark)
+ *   - prospect-park-paths.geojson : the park's loop drive + main footpaths
  *   - washington-park.geojson     : the labeled inner green (Old Stone House)
  *   - green-spaces.geojson        : smaller, unlabeled inner playgrounds
  *   - streets.geojson             : the avenue + cross-street grid
@@ -29,6 +30,8 @@ import {
   booleanPointInPolygon,
   centroid,
   rewind,
+  simplify,
+  length as turfLength,
 } from "@turf/turf";
 import type {
   Feature,
@@ -81,6 +84,13 @@ const PLAZA_STREETS = new Set([
   "Plaza Street West",
   "Plaza Street East",
 ]);
+
+// Prospect Park's carriage loop is made of these named drives; everything else
+// matched inside the park is treated as a footpath.
+const PARK_DRIVE_NAMES = new Set(["West Drive", "East Drive", "Center Drive", "Park Drive"]);
+// Footpaths shorter than this (in meters) are dropped as clutter; the loop drive
+// is always kept regardless of length.
+const PARK_PATH_MIN_METERS = 120;
 
 // The avenues that read as the neighborhood's "spine".
 const AVENUES = new Set([
@@ -331,6 +341,46 @@ async function main() {
   for (const f of playgrounds) f.properties = {}; // unlabeled
   console.log(`  kept ${playgrounds.length} inner playgrounds`);
 
+  // Prospect Park's internal circulation: the carriage loop ("...Drive") plus the
+  // main footpaths. Kept as a separate file and drawn as illustrated trails.
+  console.log("Querying Overpass for Prospect Park paths and drives...");
+  const parkPathsRaw = await overpass(`
+    [out:json][timeout:90];
+    (
+      way["highway"~"footway|path|cycleway"](40.654,-73.974,40.674,-73.957);
+      way["highway"]["name"~"Drive"](40.654,-73.974,40.674,-73.957);
+    );
+    out body; >; out skel qt;
+  `);
+  const parkPathsFc = osmtogeojson(parkPathsRaw) as FeatureCollection;
+  const parkPathLines = (
+    parkPathsFc.features.filter(
+      (f) => f.geometry.type === "LineString" || f.geometry.type === "MultiLineString"
+    ) as Feature<LineString | MultiLineString>[]
+  ).filter((f) => {
+    try {
+      return booleanIntersects(f, park);
+    } catch {
+      return false;
+    }
+  });
+  const parkPaths: Feature<LineString | MultiLineString>[] = [];
+  for (const f of parkPathLines) {
+    const name = (f.properties?.name as string | undefined) ?? "";
+    const kind = PARK_DRIVE_NAMES.has(name) ? "drive" : "path";
+    const simplified = simplify(f, { tolerance: 0.00004, highQuality: true }) as Feature<
+      LineString | MultiLineString
+    >;
+    const meters = turfLength(simplified, { units: "kilometers" }) * 1000;
+    if (kind === "path" && meters < PARK_PATH_MIN_METERS) continue;
+    simplified.properties = { kind, name: name || undefined };
+    parkPaths.push(simplified);
+  }
+  const driveCount = parkPaths.filter((f) => f.properties?.kind === "drive").length;
+  console.log(
+    `  kept ${parkPaths.length} park features (${driveCount} drive, ${parkPaths.length - driveCount} path)`
+  );
+
   // d3-geo treats polygons as spherical and expects CLOCKWISE outer rings;
   // rings the other way are read as "the whole globe minus this shape". Rewind
   // so the app fills the actual interiors.
@@ -351,6 +401,10 @@ async function main() {
     JSON.stringify(parkCW, null, 2)
   );
   await writeFile(
+    join(OUT_DIR, "prospect-park-paths.geojson"),
+    JSON.stringify(featureCollection(parkPaths), null, 2)
+  );
+  await writeFile(
     join(OUT_DIR, "washington-park.geojson"),
     JSON.stringify(washingtonCW, null, 2)
   );
@@ -363,7 +417,7 @@ async function main() {
     JSON.stringify(featureCollection(streets.features as Feature<LineString | MultiLineString>[]), null, 2)
   );
 
-  console.log(`Done. Wrote 5 GeoJSON files to ${OUT_DIR}`);
+  console.log(`Done. Wrote 6 GeoJSON files to ${OUT_DIR}`);
 }
 
 main().catch((err) => {

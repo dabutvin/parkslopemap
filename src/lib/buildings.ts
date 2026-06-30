@@ -75,6 +75,24 @@ const C = {
   bronzeDark: "#565638", // deep bronze shade
   gold: "#c8a23c", // gilded entrance screen / inscriptions
   goldDark: "#9a7a22", // shaded gilding
+  // Church tones (the three Park Slope landmark churches).
+  lime: "#d9cba6", // light Indiana-limestone ashlar (Old First)
+  limeDark: "#bdab82", // shaded limestone returns / spire facet
+  bstone: "#9b6240", // warm rough-faced brownstone wall (St. Augustine / Memorial)
+  bstoneDark: "#724631", // deep brownstone shade
+  bstoneTrim: "#b9835a", // dressed-stone copings, hoodmolds, sills
+  slate: "#5f5e63", // blue-grey slate roof
+  slateDark: "#46454a", // shaded slate slope
+  // Carnegie-library tones (the 1906 Park Slope Branch: red brick + limestone).
+  brick: "#a85d44", // lit red-brick wall
+  brickDark: "#854a36", // shaded brick / right return
+  // Wildflower tones (the Long Meadow marker — a little golden meadow flower).
+  petal: "#e7b34c", // lit golden petal
+  petalDark: "#c4892b", // petal shade / outline
+  bloomCenter: "#7c4f2f", // brown seed disc
+  bloomCenterDark: "#5d3a22", // disc shade
+  stem: "#5f7a45", // green stem
+  leaf: "#86a85d", // lit leaf
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -89,6 +107,21 @@ function archWindow(left: number, topY: number, w: number, h: number): string {
     `M ${r(left)} ${r(bot)} L ${r(left)} ${r(spring)} ` +
     `A ${r(rad)} ${r(rad)} 0 0 1 ${r(left + w)} ${r(spring)} ` +
     `L ${r(left + w)} ${r(bot)} Z`
+  );
+}
+
+/** A pointed (lancet / two-centred Gothic) arched opening, flat at the bottom. */
+function lancet(left: number, topY: number, w: number, h: number): string {
+  const cx = left + w / 2;
+  const right = left + w;
+  const rad = w; // a wide radius gives a tall, sharp Gothic point
+  const spring = topY + w * 0.85;
+  const bot = topY + h;
+  return (
+    `M ${r(left)} ${r(bot)} L ${r(left)} ${r(spring)} ` +
+    `A ${r(rad)} ${r(rad)} 0 0 1 ${r(cx)} ${r(topY)} ` +
+    `A ${r(rad)} ${r(rad)} 0 0 1 ${r(right)} ${r(spring)} ` +
+    `L ${r(right)} ${r(bot)} Z`
   );
 }
 
@@ -1424,6 +1457,836 @@ function centralLibrary(): BuildingDrawing {
   };
 }
 
+/**
+ * Old First Reformed Church (1888–1893, George L. Morse), Seventh Avenue at
+ * Carroll Street: a Late Gothic Revival church in light Indiana limestone whose
+ * 212-foot stone steeple is the tallest in Brooklyn. Drawn as its signature
+ * silhouette — a lower gabled nave on the left and, on the right, a slender
+ * buttressed tower carrying an enormous needle spire that tapers to a point,
+ * flanked by corner pinnacles, all in pale ashlar with tall lancet windows.
+ */
+function oldFirstReformed(): BuildingDrawing {
+  const W = 122;
+  const parts: BuildingPart[] = [];
+
+  let seed = 440;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const yWater = 258; // sidewalk
+  const yBase = 251;
+
+  // Tower (right) carrying the great needle spire.
+  const tL = 66;
+  const tR = 116;
+  const tCx = (tL + tR) / 2; // 91
+  const tTop = 96; // top of the belfry stage / base of the spire
+  const spireApex = 2;
+
+  // Nave (left), a lower gabled limestone front.
+  const nL = 2;
+  const nR = 64;
+  const nCx = (nL + nR) / 2; // 33
+  const naveShoulder = 130; // the gable springs here
+  const naveApex = 86;
+
+  // A small crocketed pinnacle of total height `h` rising to (cx, baseY - h).
+  const pinnacle = (cx: number, baseY: number, h: number, w: number) => {
+    const capH = h * 0.46;
+    const shaftTop = baseY - (h - capH);
+    push({ d: rect(cx - w / 2, shaftTop, w, h - capH), fill: C.lime, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+    push({ d: `M ${r(cx - w / 2)} ${r(shaftTop)} L ${r(cx)} ${r(baseY - h)} L ${r(cx + w / 2)} ${r(shaftTop)} Z`, fill: C.limeDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  };
+
+  // Ground shadow first.
+  push({ d: ellipse(W / 2, yWater + 2, W * 0.58, 9), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // --- Nave gable front (drawn first; the tower overlaps its right edge) ---
+  push({
+    d: `M ${r(nL)} ${r(yBase)} L ${r(nL)} ${r(naveShoulder)} L ${r(nCx)} ${r(naveApex)} ` +
+      `L ${r(nR)} ${r(naveShoulder)} L ${r(nR)} ${r(yBase)} Z`,
+    fill: C.lime,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.5,
+    fillStyle: "solid",
+  });
+  // Gable rake coping.
+  push({ d: `M ${r(nL - 1)} ${r(naveShoulder)} L ${r(nCx)} ${r(naveApex - 2)} L ${r(nR + 1)} ${r(naveShoulder)}`, stroke: C.limeDark, strokeWidth: 2, roughness: 0.8 });
+  // Tall lancet window group in the gable.
+  push({ d: lancet(nL + 12, naveShoulder - 30, nR - nL - 24, 88), fill: C.glass, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  for (const mx of [nCx - 9, nCx, nCx + 9]) {
+    push({ d: `M ${r(mx)} ${r(naveShoulder - 14)} L ${r(mx)} ${r(yBase - 28)}`, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7 });
+  }
+  // Pointed entrance at the base.
+  push({ d: lancet(nCx - 11, yBase - 34, 22, 34), fill: C.door, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(nCx)} ${r(yBase - 22)} L ${r(nCx)} ${r(yBase)}`, stroke: C.lime, strokeWidth: 0.7, roughness: 0.7 });
+  // Nave corner buttress + pinnacle (left edge).
+  push({ d: rect(nL - 3, naveShoulder + 6, 5, yBase - naveShoulder - 6), fill: C.limeDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  pinnacle(nL, naveShoulder + 6, 26, 7);
+
+  // --- Tower ---
+  push({ d: rect(tL, tTop, tR - tL, yBase - tTop), fill: C.lime, stroke: C.ink, strokeWidth: 1.6, roughness: 1, bowing: 0.4, fillStyle: "solid" });
+  // Shaded right return for a touch of mass.
+  push({ d: rect(tR - 6, tTop, 6, yBase - tTop), fill: C.limeDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  // Stepped corner buttresses.
+  push({ d: rect(tL - 3, tTop + 12, 5, yBase - tTop - 12), fill: C.limeDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(tR - 2, tTop + 12, 5, yBase - tTop - 12), fill: C.limeDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  // String courses.
+  for (const yy of [tTop + 46, tTop + 96, tTop + 132]) {
+    push({ d: `M ${r(tL - 2)} ${r(yy)} L ${r(tR + 2)} ${r(yy)}`, stroke: C.limeDark, strokeWidth: 1.2, roughness: 0.7 });
+  }
+  // Belfry: tall paired lancets near the top.
+  push({ d: lancet(tCx - 15, tTop + 8, 13, 32), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+  push({ d: lancet(tCx + 2, tTop + 8, 13, 32), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+  // A single lancet mid-shaft.
+  push({ d: lancet(tCx - 7, tTop + 60, 14, 30), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  // Deep pointed entrance portal at the base.
+  push({ d: lancet(tCx - 15, yBase - 48, 30, 48), fill: C.door, stroke: C.ink, strokeWidth: 1.5, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(yBase - 30)} L ${r(tCx)} ${r(yBase)}`, stroke: C.lime, strokeWidth: 0.8, roughness: 0.7 });
+
+  // --- The great needle spire (slender, rising from a small arcaded drum) ---
+  const sBaseL = tCx - 13;
+  const sBaseR = tCx + 13;
+  // Blind arcade ringing the spire base (the lantern drum below the needle).
+  for (const ax of spread(sBaseL - 3, sBaseR + 3, 4, 5)) {
+    push({ d: lancet(ax, tTop - 8, 5, 9), fill: C.limeDark, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  }
+  push({ d: `M ${r(sBaseL)} ${r(tTop)} L ${r(tCx)} ${r(spireApex)} L ${r(sBaseR)} ${r(tTop)} Z`, fill: C.lime, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+  // Shaded right facet.
+  push({ d: `M ${r(tCx)} ${r(spireApex)} L ${r(sBaseR)} ${r(tTop)} L ${r(tCx)} ${r(tTop)} Z`, fill: C.limeDark, stroke: "none", strokeWidth: 0, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(spireApex)} L ${r(tCx)} ${r(tTop)}`, stroke: C.limeDark, strokeWidth: 0.8, roughness: 0.7 });
+  // Spire lucarnes (tiny gabled openings up the face).
+  for (const ly of [tTop - 40, tTop - 16]) {
+    const lw = ly < tTop - 28 ? 6 : 8;
+    push({ d: `M ${r(tCx - lw / 2)} ${r(ly + 6)} L ${r(tCx)} ${r(ly)} L ${r(tCx + lw / 2)} ${r(ly + 6)} Z`, fill: C.limeDark, stroke: C.ink, strokeWidth: 0.7, roughness: 0.7, fillStyle: "solid" });
+  }
+  // Pinnacles flanking the spire base.
+  pinnacle(tL + 2, tTop + 4, 30, 8);
+  pinnacle(tR - 2, tTop + 4, 30, 8);
+
+  return { width: W, height: yWater + 6, anchorX: W / 2, anchorY: yWater, scale: 0.32, parts };
+}
+
+/**
+ * St. Augustine's Roman Catholic Church (1888–1892, Parfitt Brothers), Sixth
+ * Avenue at Sterling Place — "the Cathedral of Park Slope." A High Victorian
+ * Gothic pile in rough-faced brownstone with steep slate roofs. Drawn from the
+ * Sterling Place view: a tall gabled front with a great traceried window over a
+ * deep pointed entrance porch, and, to the right, the massive square tower that
+ * rises to a pale pyramidal steeple capped with a cross and ringed by corner
+ * pinnacles.
+ */
+function stAugustine(): BuildingDrawing {
+  const W = 152;
+  const parts: BuildingPart[] = [];
+
+  let seed = 540;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const yWater = 226; // sidewalk
+  const yBase = 219;
+
+  // Tower (right) with its pale pyramidal steeple.
+  const tL = 94;
+  const tR = 144;
+  const tCx = (tL + tR) / 2; // 119
+  const tTop = 84; // top of the belfry stage / base of the steeple
+  const steepleApex = 12;
+
+  // Nave gable front (left/center).
+  const nL = 6;
+  const nR = 90;
+  const nCx = (nL + nR) / 2; // 48
+  const naveEave = 104; // steep slate roof springs here
+  const naveApex = 42;
+
+  const pinnacle = (cx: number, baseY: number, h: number, w: number) => {
+    const capH = h * 0.5;
+    const shaftTop = baseY - (h - capH);
+    push({ d: rect(cx - w / 2, shaftTop, w, h - capH), fill: C.bstone, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+    push({ d: `M ${r(cx - w / 2)} ${r(shaftTop)} L ${r(cx)} ${r(baseY - h)} L ${r(cx + w / 2)} ${r(shaftTop)} Z`, fill: C.slateDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  };
+
+  // Ground shadow first.
+  push({ d: ellipse(W / 2, yWater + 2, W * 0.56, 10), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // --- Tower (drawn first; the nave roof tucks in front of its left edge) ---
+  push({ d: rect(tL, tTop, tR - tL, yBase - tTop), fill: C.bstone, stroke: C.ink, strokeWidth: 1.6, roughness: 1.1, bowing: 0.4, fillStyle: "solid" });
+  push({ d: rect(tR - 7, tTop, 7, yBase - tTop), fill: C.bstoneDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  // Corner buttresses.
+  push({ d: rect(tL - 3, tTop + 14, 6, yBase - tTop - 14), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(tR - 3, tTop + 14, 6, yBase - tTop - 14), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  // String courses.
+  for (const yy of [tTop + 40, tTop + 86]) {
+    push({ d: `M ${r(tL - 2)} ${r(yy)} L ${r(tR + 2)} ${r(yy)}`, stroke: C.bstoneTrim, strokeWidth: 1.2, roughness: 0.7 });
+  }
+  // Belfry: a pair of tall louvered lancets high in the tower.
+  push({ d: lancet(tCx - 14, tTop + 8, 12, 28), fill: C.recess, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+  push({ d: lancet(tCx + 2, tTop + 8, 12, 28), fill: C.recess, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+  // A tall lancet mid-tower.
+  push({ d: lancet(tCx - 7, tTop + 52, 14, 36), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  // Side entrance at the tower base.
+  push({ d: lancet(tCx - 11, yBase - 32, 22, 32), fill: C.door, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+
+  // --- Tall, slender pyramidal steeple (pale stone), shaded facet + a cross ---
+  const stBaseL = tCx - 15;
+  const stBaseR = tCx + 15;
+  push({ d: `M ${r(stBaseL)} ${r(tTop)} L ${r(tCx)} ${r(steepleApex)} L ${r(stBaseR)} ${r(tTop)} Z`, fill: C.lime, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(steepleApex)} L ${r(stBaseR)} ${r(tTop)} L ${r(tCx)} ${r(tTop)} Z`, fill: C.limeDark, stroke: "none", strokeWidth: 0, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(steepleApex)} L ${r(tCx)} ${r(tTop)}`, stroke: C.limeDark, strokeWidth: 0.8, roughness: 0.7 });
+  // Cross finial.
+  push({ d: `M ${r(tCx)} ${r(steepleApex)} L ${r(tCx)} ${r(steepleApex - 12)}`, stroke: C.ink, strokeWidth: 1.6, roughness: 0.7 });
+  push({ d: `M ${r(tCx - 3.5)} ${r(steepleApex - 8)} L ${r(tCx + 3.5)} ${r(steepleApex - 8)}`, stroke: C.ink, strokeWidth: 1.6, roughness: 0.7 });
+  // Corner pinnacles ringing the steeple base.
+  pinnacle(tL + 2, tTop + 3, 26, 7);
+  pinnacle(tR - 2, tTop + 3, 26, 7);
+
+  // --- Nave gable front (brownstone wall + steep slate gable roof) ---
+  // Steep slate roof behind the gable wall (reads as the roof slope over the nave).
+  push({ d: `M ${r(nL - 4)} ${r(naveEave + 6)} L ${r(nCx - 4)} ${r(naveApex - 6)} L ${r(nR + 8)} ${r(naveEave + 6)} Z`, fill: C.slate, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  // Masonry gable wall (pentagon).
+  push({
+    d: `M ${r(nL)} ${r(yBase)} L ${r(nL)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex)} ` +
+      `L ${r(nR)} ${r(naveEave)} L ${r(nR)} ${r(yBase)} Z`,
+    fill: C.bstone,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1.1,
+    bowing: 0.5,
+    fillStyle: "solid",
+  });
+  // Gable rake coping + apex pinnacle.
+  push({ d: `M ${r(nL - 1)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex - 1)} L ${r(nR + 1)} ${r(naveEave)}`, stroke: C.bstoneTrim, strokeWidth: 1.8, roughness: 0.8 });
+  pinnacle(nCx, naveApex + 2, 18, 6);
+  // A great traceried (rose-topped) pointed window high in the gable.
+  push({ d: lancet(nL + 16, naveApex + 18, nR - nL - 32, 70), fill: C.glass, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+  for (const mx of [nCx - 14, nCx, nCx + 14]) {
+    push({ d: `M ${r(mx)} ${r(naveApex + 40)} L ${r(mx)} ${r(yBase - 44)}`, stroke: C.ink, strokeWidth: 0.9, roughness: 0.7 });
+  }
+  // Rose/wheel window over the window head.
+  push({ d: ellipse(nCx, naveApex + 30, 7, 7), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(nCx - 7)} ${r(naveApex + 30)} L ${r(nCx + 7)} ${r(naveApex + 30)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.6 });
+  push({ d: `M ${r(nCx)} ${r(naveApex + 23)} L ${r(nCx)} ${r(naveApex + 37)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.6 });
+
+  // --- Projecting gabled entrance porch with twin pointed doors ---
+  const pL = nCx - 24;
+  const pR = nCx + 24;
+  const pTop = yBase - 48; // porch gable apex zone
+  push({ d: `M ${r(pL)} ${r(yBase)} L ${r(pL)} ${r(pTop + 10)} L ${r(nCx)} ${r(pTop)} L ${r(pR)} ${r(pTop + 10)} L ${r(pR)} ${r(yBase)} Z`, fill: C.bstoneTrim, stroke: C.ink, strokeWidth: 1.4, roughness: 1, fillStyle: "solid" });
+  push({ d: `M ${r(pL - 1)} ${r(pTop + 10)} L ${r(nCx)} ${r(pTop - 1)} L ${r(pR + 1)} ${r(pTop + 10)}`, stroke: C.bstoneDark, strokeWidth: 1.6, roughness: 0.8 });
+  push({ d: lancet(nCx - 18, pTop + 12, 16, yBase - pTop - 12), fill: C.door, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+  push({ d: lancet(nCx + 2, pTop + 12, 16, yBase - pTop - 12), fill: C.door, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+
+  // Secondary cross-gable to the far left (hinting the church's double gables).
+  push({ d: `M ${r(nL - 4)} ${r(naveEave + 6)} L ${r(nL + 8)} ${r(naveEave - 18)} L ${r(nL + 20)} ${r(naveEave + 6)} Z`, fill: C.slateDark, stroke: C.ink, strokeWidth: 1, roughness: 1, fillStyle: "solid" });
+
+  return { width: W, height: yWater + 6, anchorX: W / 2, anchorY: yWater, scale: 0.3, parts };
+}
+
+/**
+ * Memorial Presbyterian Church (1881–1883, Pugin & Walter), Seventh Avenue at
+ * St. John's Place: a Late Victorian Gothic church of warm Belleville brownstone
+ * with a blue-slate roof. Drawn from the avenue: a lower gabled nave on the left
+ * with tall stained-glass lancets under an open quatrefoil parapet, and a
+ * buttressed corner tower on the right rising through an open twin-arched belfry
+ * to a broached octagonal stone spire ringed by four corner pinnacles.
+ */
+function memorialPresbyterian(): BuildingDrawing {
+  const W = 112;
+  const parts: BuildingPart[] = [];
+
+  let seed = 640;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const yWater = 248; // sidewalk
+  const yBase = 241;
+
+  // Corner tower (right) + broached spire.
+  const tL = 58;
+  const tR = 106;
+  const tCx = (tL + tR) / 2; // 82
+  const tTop = 96; // base of the spire / top of the belfry stage
+  const spireApex = 6;
+
+  // Nave (left), lower gabled brownstone front.
+  const nL = 0;
+  const nR = 58;
+  const nCx = (nL + nR) / 2; // 29
+  const naveEave = 150; // steep slate roof springs here
+  const naveApex = 110;
+
+  const pinnacle = (cx: number, baseY: number, h: number, w: number) => {
+    const capH = h * 0.5;
+    const shaftTop = baseY - (h - capH);
+    push({ d: rect(cx - w / 2, shaftTop, w, h - capH), fill: C.bstone, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+    push({ d: `M ${r(cx - w / 2)} ${r(shaftTop)} L ${r(cx)} ${r(baseY - h)} L ${r(cx + w / 2)} ${r(shaftTop)} Z`, fill: C.bstoneDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  };
+
+  // Ground shadow first.
+  push({ d: ellipse(W / 2, yWater + 2, W * 0.58, 9), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // --- Nave gable front (drawn first; the tower overlaps its right edge) ---
+  // Steep slate roof slope behind the gable parapet.
+  push({ d: `M ${r(nL - 3)} ${r(naveEave + 4)} L ${r(nCx)} ${r(naveApex - 6)} L ${r(nR + 6)} ${r(naveEave + 4)} Z`, fill: C.slate, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  // Masonry gable wall.
+  push({
+    d: `M ${r(nL)} ${r(yBase)} L ${r(nL)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex)} ` +
+      `L ${r(nR)} ${r(naveEave)} L ${r(nR)} ${r(yBase)} Z`,
+    fill: C.bstone,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1.1,
+    bowing: 0.5,
+    fillStyle: "solid",
+  });
+  // Open quatrefoil parapet band along the eaves.
+  push({ d: rect(nL, naveEave - 6, nR - nL, 6), fill: C.bstoneTrim, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+  for (const qx of spread(nL + 2, nR - 2, 6, 4)) {
+    push({ d: ellipse(qx + 2, naveEave - 3, 1.8, 1.8), fill: C.recess, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  }
+  // Gable rake coping.
+  push({ d: `M ${r(nL - 1)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex - 1)} L ${r(nR + 1)} ${r(naveEave)}`, stroke: C.bstoneTrim, strokeWidth: 1.6, roughness: 0.8 });
+  // Circular (wheel) window in the gable peak.
+  push({ d: ellipse(nCx, naveApex + 18, 8, 8), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(nCx - 8)} ${r(naveApex + 18)} L ${r(nCx + 8)} ${r(naveApex + 18)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.6 });
+  push({ d: `M ${r(nCx)} ${r(naveApex + 10)} L ${r(nCx)} ${r(naveApex + 26)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.6 });
+  // A row of tall stained-glass lancets along the nave.
+  for (const wx of spread(nL + 4, nR - 4, 3, 13)) {
+    push({ d: lancet(wx, naveEave + 12, 13, 56), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+    push({ d: `M ${r(wx + 6.5)} ${r(naveEave + 24)} L ${r(wx + 6.5)} ${r(yBase - 8)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.6 });
+  }
+  // Nave buttresses between the windows.
+  for (const bx of [nL + 1, nCx - 2, nR - 5]) {
+    push({ d: rect(bx, naveEave + 8, 4, yBase - naveEave - 8), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 0.8, roughness: 0.9, fillStyle: "solid" });
+  }
+
+  // --- Tower ---
+  push({ d: rect(tL, tTop, tR - tL, yBase - tTop), fill: C.bstone, stroke: C.ink, strokeWidth: 1.6, roughness: 1.1, bowing: 0.4, fillStyle: "solid" });
+  push({ d: rect(tR - 6, tTop, 6, yBase - tTop), fill: C.bstoneDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  // Corner buttresses.
+  push({ d: rect(tL - 3, tTop + 12, 5, yBase - tTop - 12), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(tR - 2, tTop + 12, 5, yBase - tTop - 12), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  // String courses.
+  for (const yy of [tTop + 44, tTop + 92]) {
+    push({ d: `M ${r(tL - 2)} ${r(yy)} L ${r(tR + 2)} ${r(yy)}`, stroke: C.bstoneTrim, strokeWidth: 1.2, roughness: 0.7 });
+  }
+  // Open twin-arched belfry near the top.
+  push({ d: lancet(tCx - 15, tTop + 8, 13, 30), fill: C.recess, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  push({ d: lancet(tCx + 2, tTop + 8, 13, 30), fill: C.recess, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  // Tall lancet mid-tower.
+  push({ d: lancet(tCx - 7, tTop + 52, 14, 32), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  // Entrance porch in the tower base (the church's main entrance).
+  push({ d: lancet(tCx - 13, yBase - 40, 26, 40), fill: C.door, stroke: C.ink, strokeWidth: 1.5, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(yBase - 24)} L ${r(tCx)} ${r(yBase)}`, stroke: C.bstoneTrim, strokeWidth: 0.8, roughness: 0.7 });
+
+  // --- Broached octagonal spire ---
+  // Broaches: small triangles at the front corners (square → octagon transition).
+  push({ d: `M ${r(tL + 1)} ${r(tTop)} L ${r(tL + 11)} ${r(tTop - 18)} L ${r(tL + 11)} ${r(tTop)} Z`, fill: C.bstoneDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tR - 1)} ${r(tTop)} L ${r(tR - 11)} ${r(tTop - 18)} L ${r(tR - 11)} ${r(tTop)} Z`, fill: C.bstoneDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  // Main spire faces.
+  push({ d: `M ${r(tL + 9)} ${r(tTop - 2)} L ${r(tCx)} ${r(spireApex)} L ${r(tR - 9)} ${r(tTop - 2)} Z`, fill: C.bstone, stroke: C.ink, strokeWidth: 1.4, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(spireApex)} L ${r(tR - 9)} ${r(tTop - 2)} L ${r(tCx)} ${r(tTop - 2)} Z`, fill: C.bstoneDark, stroke: "none", strokeWidth: 0, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(spireApex)} L ${r(tCx)} ${r(tTop - 2)}`, stroke: C.bstoneDark, strokeWidth: 0.8, roughness: 0.7 });
+  // Four corner pinnacles ringing the spire base.
+  pinnacle(tL + 2, tTop + 3, 28, 7);
+  pinnacle(tR - 2, tTop + 3, 28, 7);
+  pinnacle(tCx - 16, tTop + 1, 20, 6);
+  pinnacle(tCx + 16, tTop + 1, 20, 6);
+
+  // --- Slender stair turret with a conical cap at the nave/tower corner ---
+  const trCx = tL + 4;
+  const trW = 11;
+  const trSpring = tTop + 48; // cap springs here
+  const trApex = tTop + 24;
+  push({ d: rect(trCx - trW / 2, trSpring, trW, yBase - trSpring), fill: C.bstone, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  push({ d: rect(trCx + trW / 2 - 3, trSpring, 3, yBase - trSpring), fill: C.bstoneDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  push({ d: `M ${r(trCx - trW / 2 - 1)} ${r(trSpring)} L ${r(trCx)} ${r(trApex)} L ${r(trCx + trW / 2 + 1)} ${r(trSpring)} Z`, fill: C.slate, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(trCx)} ${r(trApex)} L ${r(trCx)} ${r(trApex - 5)}`, stroke: C.ink, strokeWidth: 1, roughness: 0.7 }); // finial
+  push({ d: ellipse(trCx, trSpring + 20, 3, 3), fill: C.glass, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+
+  return { width: W, height: yWater + 6, anchorX: W / 2, anchorY: yWater, scale: 0.32, parts };
+}
+
+/**
+ * The Park Slope Branch (originally the Prospect Branch) of the Brooklyn Public
+ * Library (1906, Raymond F. Almirall), 431 Sixth Avenue at 9th Street — one of
+ * the earliest of Brooklyn's Carnegie libraries. Drawn from its Sixth Avenue
+ * front: a long, low, two-story red-brick Classical Revival block with limestone
+ * trim, a continuous stone parapet, and three tall double-height windows on each
+ * side (each capped by a limestone keystone carved with a torch, "the light of
+ * learning"). At its center a projecting portico — paired non-fluted Doric
+ * columns carrying a triglyph entablature, a low pediment, and the engraved
+ * "BROOKLYN PUBLIC LIBRARY" band — shelters a recessed entrance reached by a
+ * short flight of steps up from the raised limestone basement.
+ */
+function parkSlopeLibrary(): BuildingDrawing {
+  const W = 176;
+  const parts: BuildingPart[] = [];
+
+  let seed = 720;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const yWater = 152; // sidewalk
+  const yBasement = 120; // top of the raised limestone basement
+  const yParTop = 30; // top of the long stone parapet
+  const yCorBot = 42; // bottom of cornice; brick wall begins
+  const L = 6;
+  const R = 170;
+  const DX = 12; // shaded right return for mass
+
+  // Projecting central portico.
+  const pcL = 60;
+  const pcR = 116;
+  const pcCx = (pcL + pcR) / 2; // 88
+  const yPedApex = 0;
+  const yPedBase = 16; // pediment base / portico cornice top
+  const yPCorBot = 22;
+  const yFriezeBot = 38;
+  const yArchBot = 41;
+  const yStyl = 122; // top of the stylobate / steps
+
+  // A tall double-height window with a limestone surround and a torch keystone.
+  const tallWin = (x: number, y: number, w: number, h: number) => {
+    push({ d: rect(x - 3, y - 3, w + 6, h + 6), fill: C.stone, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+    push({ d: rect(x, y, w, h), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.7, fillStyle: "solid" });
+    push({ d: `M ${r(x + w / 2)} ${r(y)} L ${r(x + w / 2)} ${r(y + h)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.5 });
+    for (const t of [0.3, 0.58, 0.82]) {
+      push({ d: `M ${r(x)} ${r(y + h * t)} L ${r(x + w)} ${r(y + h * t)}`, stroke: C.ink, strokeWidth: 0.5, roughness: 0.5 });
+    }
+    // Torch keystone over the window head.
+    const kx = x + w / 2;
+    push({ d: `M ${r(kx - 3)} ${r(y - 3)} L ${r(kx + 3)} ${r(y - 3)} L ${r(kx + 2.2)} ${r(y - 10)} L ${r(kx - 2.2)} ${r(y - 10)} Z`, fill: C.stoneDark, stroke: C.ink, strokeWidth: 0.8, roughness: 0.6, fillStyle: "solid" });
+    const ft = y - 10;
+    push({ d: `M ${r(kx)} ${r(ft)} C ${r(kx + 3)} ${r(ft - 2)} ${r(kx + 1.5)} ${r(ft - 7)} ${r(kx)} ${r(ft - 9)} C ${r(kx - 1.5)} ${r(ft - 7)} ${r(kx - 3)} ${r(ft - 2)} ${r(kx)} ${r(ft)} Z`, fill: C.gold, stroke: C.goldDark, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+  };
+
+  // A non-fluted Doric column with a simple capital + base and a shaded right side.
+  const column = (cx: number) => {
+    const w = 6;
+    push({ d: rect(cx - w / 2, yArchBot + 3, w, yStyl - yArchBot - 8), fill: C.stone, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+    push({ d: rect(cx + w / 2 - 1.8, yArchBot + 3, 1.8, yStyl - yArchBot - 8), fill: C.stoneDark, stroke: "none", strokeWidth: 0, roughness: 0.8, fillStyle: "solid" });
+    push({ d: rect(cx - w / 2 - 1.5, yArchBot, w + 3, 4), fill: C.stone, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" }); // capital
+    push({ d: rect(cx - w / 2 - 1.5, yStyl - 5, w + 3, 5), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" }); // base
+  };
+
+  // Ground shadow first.
+  push({
+    d: ellipse(W / 2 + 4, yWater + 2, W * 0.56, 9),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Shaded right return (the 9th Street side), for mass.
+  push({
+    d: `M ${r(R)} ${r(yParTop)} L ${r(R + DX)} ${r(yParTop + 7)} ` +
+      `L ${r(R + DX)} ${r(yWater - 3)} L ${r(R)} ${r(yWater)} Z`,
+    fill: C.brickDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1.1,
+    fillStyle: "solid",
+  });
+
+  // Main red-brick wall.
+  push({
+    d: rect(L, yCorBot, R - L, yWater - yCorBot),
+    fill: C.brick,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.5,
+    fillStyle: "solid",
+  });
+  // A few faint brick coursing lines.
+  for (const yy of [yCorBot + 26, yCorBot + 54]) {
+    push({ d: `M ${r(L + 3)} ${r(yy)} L ${r(R - 3)} ${r(yy)}`, stroke: C.brickDark, strokeWidth: 0.5, roughness: 1.1 });
+  }
+
+  // Raised limestone basement course across the foot.
+  push({
+    d: rect(L - 2, yBasement, (R - L) + 4 + DX, yWater - yBasement),
+    fill: C.stoneDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({ d: `M ${r(L - 1)} ${r(yBasement + 6)} L ${r(R + DX - 1)} ${r(yBasement + 6)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7 });
+
+  // Continuous stone parapet + cornice along the whole front (drawn over the
+  // brick wall top; the portico will rise above it at the center).
+  push({
+    d: rect(L - 3, yParTop, (R - L) + 6 + DX, yCorBot - yParTop),
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.5,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  push({ d: `M ${r(L - 4)} ${r(yParTop + 3)} L ${r(R + DX + 1)} ${r(yParTop + 3)}`, stroke: C.stoneDark, strokeWidth: 0.8, roughness: 0.7 });
+
+  // Three tall double-height windows on each side of the portico.
+  const winY = 56;
+  const winH = 58;
+  for (const x of spread(10, pcL - 4, 3, 11)) tallWin(x, winY, 11, winH);
+  for (const x of spread(pcR + 4, R - 6, 3, 11)) tallWin(x, winY, 11, winH);
+
+  // --- Projecting central portico ---
+  // Limestone back wall behind the columns.
+  push({
+    d: rect(pcL, yArchBot - 1, pcR - pcL, yStyl - yArchBot + 1),
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+
+  // Recessed entrance with a transom + torch keystone.
+  const dL = 78;
+  const dR = 98;
+  const dTop = 72;
+  push({ d: rect(dL, dTop, dR - dL, yStyl - dTop), fill: C.door, stroke: C.ink, strokeWidth: 1.4, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(dL, dTop, dR - dL, 6), fill: C.glass, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" }); // transom
+  push({ d: `M ${r(pcCx)} ${r(dTop + 6)} L ${r(pcCx)} ${r(yStyl)}`, stroke: C.stone, strokeWidth: 0.8, roughness: 0.7 }); // door split
+  // Torch keystone over the entrance.
+  push({ d: `M ${r(pcCx - 3.5)} ${r(dTop - 2)} L ${r(pcCx + 3.5)} ${r(dTop - 2)} L ${r(pcCx + 2.4)} ${r(dTop - 11)} L ${r(pcCx - 2.4)} ${r(dTop - 11)} Z`, fill: C.stoneDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.6, fillStyle: "solid" });
+  push({ d: `M ${r(pcCx)} ${r(dTop - 11)} C ${r(pcCx + 3.5)} ${r(dTop - 13)} ${r(pcCx + 1.8)} ${r(dTop - 19)} ${r(pcCx)} ${r(dTop - 21)} C ${r(pcCx - 1.8)} ${r(dTop - 19)} ${r(pcCx - 3.5)} ${r(dTop - 13)} ${r(pcCx)} ${r(dTop - 11)} Z`, fill: C.gold, stroke: C.goldDark, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+
+  // Two pairs of Doric columns flanking the entrance.
+  for (const cx of [67, 75, 101, 109]) column(cx);
+
+  // Stylobate the columns stand on.
+  push({ d: rect(pcL - 2, yStyl, pcR - pcL + 4, 5), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+
+  // Entablature: architrave + frieze with triglyphs + an inscription band.
+  push({ d: rect(pcL - 3, yFriezeBot, (pcR + 3) - (pcL - 3), yArchBot - yFriezeBot), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" }); // architrave
+  push({ d: rect(pcL - 3, yPCorBot, (pcR + 3) - (pcL - 3), yFriezeBot - yPCorBot), fill: C.stone, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" }); // frieze
+  // Engraved "BROOKLYN PUBLIC LIBRARY" band (suggested with tick lettering).
+  push({ d: rect(pcL + 2, yPCorBot + 2, (pcR - 2) - (pcL + 2), 5), fill: C.stoneDark, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  for (const x of spread(pcL + 4, pcR - 4, 16, 1.4)) {
+    push({ d: `M ${r(x)} ${r(yPCorBot + 3)} L ${r(x)} ${r(yPCorBot + 6)}`, stroke: C.stone, strokeWidth: 0.6, roughness: 0.5 });
+  }
+  // Triglyphs over the column axes.
+  for (const tx of [67, 75, 101, 109]) {
+    push({ d: rect(tx - 1.5, yFriezeBot - 6, 3, 6), fill: C.stoneDark, stroke: C.ink, strokeWidth: 0.5, roughness: 0.6, fillStyle: "solid" });
+  }
+
+  // Portico cornice (overhangs) + low pediment.
+  push({ d: rect(pcL - 6, yPedBase, (pcR + 6) - (pcL - 6), yPCorBot - yPedBase), fill: C.stone, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  push({
+    d: `M ${r(pcL - 6)} ${r(yPedBase)} L ${r(pcCx)} ${r(yPedApex)} L ${r(pcR + 6)} ${r(yPedBase)} Z`,
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 0.8,
+    fillStyle: "solid",
+  });
+  push({ d: `M ${r(pcCx)} ${r(yPedApex)} L ${r(pcR + 6)} ${r(yPedBase)} L ${r(pcCx)} ${r(yPedBase)} Z`, fill: C.stoneDark, stroke: "none", strokeWidth: 0, roughness: 0.8, fillStyle: "solid" }); // shaded right face of tympanum
+
+  // --- Entrance steps from the raised basement down to the sidewalk ---
+  push({
+    d: `M ${r(pcL - 4)} ${r(yWater)} L ${r(pcL + 4)} ${r(yStyl + 5)} ` +
+      `L ${r(pcR - 4)} ${r(yStyl + 5)} L ${r(pcR + 4)} ${r(yWater)} Z`,
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  const steps = 4;
+  for (let i = 1; i < steps; i++) {
+    const t = i / steps;
+    const y = yStyl + 5 + (yWater - (yStyl + 5)) * t;
+    const dx = (pcR - pcL) / 2 + 8 * t;
+    push({ d: `M ${r(pcCx - dx)} ${r(y)} L ${r(pcCx + dx)} ${r(y)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  }
+
+  return {
+    width: R + DX + 4,
+    height: yWater + 6,
+    anchorX: W / 2,
+    anchorY: yWater,
+    scale: 0.3,
+    parts,
+  };
+}
+
+/**
+ * The Sanders Theatre (1928), 188 Prospect Park West at 14th Street — the brick
+ * movie palace that later became the Pavilion and, since 2018, Nitehawk Prospect
+ * Park. Drawn from its facades old and new, capturing the building's three
+ * signature notes: a stepped brick parapet rising to a curved central crown; a
+ * projecting iron balcony carried on brackets; and, below darker brick, a band
+ * of tall slender round-arched windows set in pale limestone — all over a big
+ * projecting theater marquee with a lit, lettered fascia.
+ */
+function sandersTheatre(): BuildingDrawing {
+  const FW = 120; // front (Prospect Park West) face width
+  const DX = 14; // shaded right-return depth (the 14th Street flank)
+  const parts: BuildingPart[] = [];
+
+  let seed = 800;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical bands (top-down). The stepped parapet occupies the zone above the
+  // cornice line (yWallTop), so the brick facade is pushed down to leave room.
+  const yWallTop = 30; // cornice line; brick wall begins (parapet rises above)
+  const yBalcTop = 44; // top rail of the projecting balcony
+  const yBalcBot = 54; // balcony floor / top of the limestone window band
+  const yWinTop = 62; // tops of the tall arched windows
+  const yWinBot = 126;
+  const yStoneBot = 134; // bottom of the limestone window band
+  const yMarqTop = 146; // projecting marquee fascia
+  const yMarqBot = 172;
+  const yShop = 176; // storefront / entrance zone under the marquee
+  const yBase = 206; // base course
+  const yWater = 212; // sidewalk
+
+  const cx = FW / 2; // 60
+
+  // Ground shadow first, so the building sits on top of it.
+  push({ d: ellipse(cx + 4, yWater + 2, FW * 0.6, 9), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // Shaded right return (the 14th Street flank), for mass.
+  push({
+    d: `M ${r(FW)} ${r(yWallTop)} L ${r(FW + DX)} ${r(yWallTop + 8)} ` +
+      `L ${r(FW + DX)} ${r(yWater - 3)} L ${r(FW)} ${r(yWater)} Z`,
+    fill: C.brickDark, stroke: C.ink, strokeWidth: 1.2, roughness: 1.1, fillStyle: "solid",
+  });
+
+  // Main red-brick wall.
+  push({
+    d: rect(0, yWallTop, FW, yWater - yWallTop),
+    fill: C.brick, stroke: C.ink, strokeWidth: 1.6, roughness: 1, bowing: 0.5, fillStyle: "solid",
+  });
+  // Brick corner piers framing the facade.
+  for (const px of [0, FW - 6]) {
+    push({ d: rect(px, yWallTop, 6, yWater - yWallTop), fill: C.brickDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  }
+
+  // --- Stepped brick parapet rising to a curved central crown ---
+  push({
+    d:
+      `M 0 ${r(yWallTop)} L 0 22 L 20 22 L 20 16 L 40 16 L 40 8 ` +
+      `L 46 8 Q ${r(cx)} 1 74 8 L 80 8 L 80 16 L 100 16 L 100 22 ` +
+      `L ${r(FW)} 22 L ${r(FW)} ${r(yWallTop)} Z`,
+    fill: C.brick, stroke: C.ink, strokeWidth: 1.5, roughness: 1, fillStyle: "solid",
+  });
+  // Pale stone coping running along the stepped silhouette.
+  push({
+    d:
+      `M 0 22 L 20 22 L 20 16 L 40 16 L 40 8 L 46 8 ` +
+      `Q ${r(cx)} 1 74 8 L 80 8 L 80 16 L 100 16 L 100 22 L ${r(FW)} 22`,
+    stroke: C.stone, strokeWidth: 2.4, roughness: 0.8,
+  });
+  // A small stone medallion in the crown.
+  push({ d: ellipse(cx, 12, 3, 3), fill: C.stone, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+  // Stone cornice ledge across the whole front, at the parapet's base.
+  push({ d: rect(-3, yWallTop - 4, FW + 6 + DX, 5), fill: C.stone, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+
+  // Recessed darker brick band behind the balcony.
+  push({ d: rect(6, yWallTop + 2, FW - 12, yBalcBot - yWallTop - 2), fill: C.brickDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+
+  // --- Pale limestone window band (lighter than the brick above and below) ---
+  push({ d: rect(4, yBalcBot, FW - 8, yStoneBot - yBalcBot), fill: C.lime, stroke: C.ink, strokeWidth: 1.4, roughness: 0.9, fillStyle: "solid" });
+  // Sill course at the foot of the band.
+  push({ d: rect(4, yStoneBot - 4, FW - 8, 4), fill: C.limeDark, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+
+  // Five tall, slender round-arched windows in the limestone band.
+  const winH = yWinBot - yWinTop;
+  for (const x of spread(12, FW - 12, 5, 11)) {
+    push({ d: archWindow(x, yWinTop, 11, winH), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+    const wcx = x + 5.5;
+    push({ d: `M ${r(wcx)} ${r(yWinTop + 6)} L ${r(wcx)} ${r(yWinBot)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 }); // mullion
+    push({ d: `M ${r(x + 1)} ${r(yWinTop + winH * 0.55)} L ${r(x + 10)} ${r(yWinTop + winH * 0.55)}`, stroke: C.ink, strokeWidth: 0.5, roughness: 0.6 }); // transom
+  }
+
+  // --- Projecting iron balcony on brackets ---
+  // Support brackets first, so the floor ledge draws over their tops.
+  for (const bx of spread(8, FW - 8, 7, 2)) {
+    push({ d: `M ${r(bx)} ${r(yBalcBot + 6)} L ${r(bx + 4)} ${r(yBalcBot - 1)} L ${r(bx + 4)} ${r(yBalcBot + 6)} Z`, fill: C.rail, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  }
+  // Projecting floor ledge.
+  push({ d: rect(0, yBalcBot - 3, FW, 4), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  // Iron railing: top rail + vertical balusters.
+  push({ d: rect(0, yBalcTop, FW, 2), fill: C.rail, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+  for (const x of spread(3, FW - 3, 34, 0.9)) {
+    push({ d: `M ${r(x)} ${r(yBalcTop + 2)} L ${r(x)} ${r(yBalcBot - 3)}`, stroke: C.rail, strokeWidth: 0.8, roughness: 0.6 });
+  }
+
+  // --- Projecting marquee across the front ---
+  const mL = -6;
+  const mR = FW + 6;
+  // Tie rods up to the facade.
+  for (const sx of [cx - 40, cx - 14, cx + 14, cx + 40]) {
+    push({ d: `M ${r(sx)} ${r(yMarqTop)} L ${r(sx + 3)} ${r(yMarqTop - 8)}`, stroke: C.ink, strokeWidth: 1, roughness: 0.7 });
+  }
+  // Red name band along the top of the marquee.
+  push({ d: rect(mL, yMarqTop, mR - mL, 8), fill: C.frieze, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  for (const x of spread(mL + 22, mR - 22, 8, 3)) {
+    push({ d: rect(x, yMarqTop + 2, 3, 4), fill: C.stone, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+  // Cream letter board below the name band.
+  push({ d: rect(mL, yMarqTop + 8, mR - mL, yMarqBot - yMarqTop - 8), fill: C.stone, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+  // Two rows of title lettering (tick marks).
+  for (const [ly, n] of [[yMarqTop + 12, 18], [yMarqTop + 19, 16]] as const) {
+    for (const x of spread(mL + 8, mR - 8, n, 2)) {
+      push({ d: rect(x, ly, 2, 4), fill: C.ink, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+    }
+  }
+  // Lit-bulb edge along the bottom of the marquee.
+  for (const x of spread(mL + 2, mR - 2, 22, 1.6)) {
+    push({ d: ellipse(x + 0.8, yMarqBot - 2, 1.2, 1.2), fill: C.gold, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+  // Marquee soffit (shaded underside).
+  push({ d: rect(mL + 2, yMarqBot, mR - mL - 4, 3), fill: C.recess, stroke: C.ink, strokeWidth: 0.8, roughness: 0.8, fillStyle: "solid" });
+
+  // --- Ground floor: entrance doors flanked by poster cases ---
+  push({ d: rect(-2, yBase, FW + 4 + DX, yWater - yBase + 2), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" }); // base band
+  push({ d: rect(2, yShop, FW - 4, yBase - yShop), fill: C.door, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" }); // dim lobby front
+  // Central bank of entrance doors with a transom band.
+  const dL = cx - 22;
+  const dR = cx + 22;
+  push({ d: rect(dL, yShop + 2, dR - dL, 6), fill: C.glass, stroke: C.ink, strokeWidth: 0.9, roughness: 0.7, fillStyle: "solid" });
+  for (const x of spread(dL, dR, 4, 9)) {
+    push({ d: rect(x, yShop + 10, 9, yBase - yShop - 12), fill: C.glass, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" });
+    push({ d: `M ${r(x + 4.5)} ${r(yShop + 12)} L ${r(x + 4.5)} ${r(yBase - 3)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  }
+  // Illuminated poster cases flanking the doors.
+  for (const x of [10, FW - 24]) {
+    push({ d: rect(x, yShop + 8, 14, yBase - yShop - 12), fill: C.recess, stroke: C.stone, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  }
+
+  return { width: FW + DX, height: yWater + 6, anchorX: cx, anchorY: yWater, scale: 0.34, parts };
+}
+
+/**
+ * A little golden meadow wildflower, used to mark the Long Meadow in Prospect
+ * Park rather than a building: a single bloom of petals around a brown seed
+ * disc, on a gently curved green stem with two leaves. Authored top-down with a
+ * bottom-center ground anchor like the other markers.
+ */
+function longMeadowFlower(): BuildingDrawing {
+  const W = 64;
+  const H = 96;
+  const parts: BuildingPart[] = [];
+
+  let seed = 880;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const cx = W / 2; // 32
+  const groundY = H - 2; // sidewalk / ground line
+  const bloomCy = 30; // center of the bloom
+  const rCenter = 8.5;
+
+  // Ground shadow first, so the flower sits on top of it.
+  push({
+    d: ellipse(cx, groundY + 1, 15, 4),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Stem (a gentle S-curve up to the bloom).
+  push({
+    d: `M ${r(cx)} ${r(groundY)} Q ${r(cx - 7)} ${r(groundY - 28)} ${r(cx)} ${r(bloomCy + rCenter)}`,
+    stroke: C.stem,
+    strokeWidth: 3,
+    roughness: 1,
+    bowing: 1.4,
+  });
+
+  // Two leaves along the stem.
+  const leaf = (baseY: number, dir: 1 | -1) => {
+    const tipX = cx + dir * 17;
+    const tipY = baseY - 9;
+    const cX = cx + dir * 9;
+    const cY = baseY - 17;
+    push({
+      d:
+        `M ${r(cx)} ${r(baseY)} Q ${r(cX)} ${r(cY)} ${r(tipX)} ${r(tipY)} ` +
+        `Q ${r(cx + dir * 10)} ${r(baseY + 1)} ${r(cx)} ${r(baseY)} Z`,
+      fill: C.leaf,
+      stroke: C.stem,
+      strokeWidth: 1,
+      roughness: 1,
+      bowing: 1,
+      fillStyle: "solid",
+    });
+  };
+  leaf(groundY - 20, -1);
+  leaf(groundY - 38, 1);
+
+  // Petals radiating from the bloom center (drawn before the disc so the disc
+  // caps their bases).
+  const petal = (angle: number) => {
+    const ri = rCenter - 1;
+    const ro = rCenter + 16;
+    const halfW = 6;
+    const ca = Math.cos(angle);
+    const sa = Math.sin(angle);
+    const px = -sa; // perpendicular direction
+    const py = ca;
+    const baseX = cx + ri * ca;
+    const baseY = bloomCy + ri * sa;
+    const tipX = cx + ro * ca;
+    const tipY = bloomCy + ro * sa;
+    const midR = (ri + ro) / 2;
+    const mX = cx + midR * ca;
+    const mY = bloomCy + midR * sa;
+    push({
+      d:
+        `M ${r(baseX)} ${r(baseY)} ` +
+        `Q ${r(mX + halfW * px)} ${r(mY + halfW * py)} ${r(tipX)} ${r(tipY)} ` +
+        `Q ${r(mX - halfW * px)} ${r(mY - halfW * py)} ${r(baseX)} ${r(baseY)} Z`,
+      fill: C.petal,
+      stroke: C.petalDark,
+      strokeWidth: 1,
+      roughness: 1.1,
+      bowing: 1.2,
+      fillStyle: "solid",
+    });
+  };
+  const N = 9;
+  for (let i = 0; i < N; i++) petal((i / N) * Math.PI * 2 - Math.PI / 2);
+
+  // Brown seed disc.
+  push({
+    d: ellipse(cx, bloomCy, rCenter, rCenter),
+    fill: C.bloomCenter,
+    stroke: C.bloomCenterDark,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // A few seed stipples on the disc.
+  for (const [dx, dy] of [[-3, -2], [2, -3], [3, 2], [-2, 3], [0, 0]] as const) {
+    push({
+      d: ellipse(cx + dx, bloomCy + dy, 1, 1),
+      fill: C.bloomCenterDark,
+      stroke: "none",
+      strokeWidth: 0,
+      roughness: 0.7,
+      fillStyle: "solid",
+    });
+  }
+
+  return { width: W, height: H, anchorX: cx, anchorY: groundY, scale: 0.5, parts };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -1435,4 +2298,10 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "litchfield-villa": litchfieldVilla,
   "memorial-arch": memorialArch,
   "central-library": centralLibrary,
+  "old-first-reformed": oldFirstReformed,
+  "st-augustine": stAugustine,
+  "memorial-presbyterian": memorialPresbyterian,
+  "park-slope-library": parkSlopeLibrary,
+  "sanders-theatre": sandersTheatre,
+  "long-meadow": longMeadowFlower,
 };

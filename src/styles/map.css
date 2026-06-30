@@ -180,6 +180,19 @@ body {
   opacity: 0.85;
 }
 
+/* Prospect Park trails: fine dotted footpaths + a bolder dashed carriage loop.
+   non-scaling-stroke keeps the dots/dashes crisp at any zoom. */
+.ps-trail {
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 0.5 4;
+  opacity: 0.8;
+}
+
+.ps-trail--drive {
+  stroke-dasharray: 7 5;
+  opacity: 0.9;
+}
+
 .ps-label {
   fill: var(--ink);
   font-family: "Caveat", "Patrick Hand", cursive;
@@ -195,6 +208,24 @@ body {
   fill: #5a6f49;
   text-anchor: middle;
   letter-spacing: 0.04em;
+}
+
+/* A label that behaves like a POI: tappable, with hover/selected feedback. */
+.ps-label--clickable {
+  cursor: pointer;
+  pointer-events: all;
+  outline: none;
+  transition: fill 0.15s ease, filter 0.15s ease;
+}
+
+.ps-label--clickable:hover,
+.ps-label--clickable:focus-visible {
+  fill: #44552f;
+  filter: drop-shadow(0 1px 2px rgba(91, 74, 58, 0.3));
+}
+
+.ps-label--park.ps-label--selected {
+  fill: #a8412f;
 }
 
 .ps-label--green {

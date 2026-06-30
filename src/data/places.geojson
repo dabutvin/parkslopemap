@@ -49,7 +49,7 @@
       },
       "geometry": {
         "type": "Point",
-        "coordinates": [-73.9744, 40.6771]
+        "coordinates": [-73.9751, 40.6771]
       }
     },
     {
@@ -118,6 +118,108 @@
       "geometry": {
         "type": "Point",
         "coordinates": [-73.96807, 40.67255]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "old-first-reformed",
+        "name": "Old First Reformed Church",
+        "category": "Church",
+        "building": "old-first-reformed",
+        "description": "The Reformed Dutch Church of the Town of Breukelen, whose congregation was founded in 1654 by decree of Governor Pieter Stuyvesant. This Late Gothic Revival church at 126 Seventh Avenue and Carroll Street was designed by George L. Morse and dedicated in 1891. Built of Indiana limestone on a granite base with no interior wood or steel, its 212-foot stone spire is the tallest live-stone steeple in Brooklyn and can be seen for miles.",
+        "photo": "/photos/old-first-reformed-church.jpg",
+        "photoAlt": "Old First Reformed Church from the corner of Seventh Avenue and Carroll Street, its limestone spire rising over the gabled nave and rose window",
+        "photoCredit": "Andrey Romanenko, 2012 \u00b7 Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.97639, 40.67333]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "st-augustine",
+        "name": "St. Augustine's R.C. Church",
+        "category": "Church",
+        "building": "st-augustine",
+        "description": "Known as 'the Cathedral of Park Slope,' St. Augustine's Roman Catholic Church at 116 Sixth Avenue and Sterling Place was designed by the Parfitt Brothers and dedicated in 1892. A High Victorian Gothic pile of rough-faced brownstone with steep slate roofs, it is famous for its unusual German-derived double apse, its great 150-foot corner tower and steeple, and the bronze trumpeting angel perched atop the Sixth Avenue gable. The Brooklyn Daily Eagle called it 'one of the finest examples of Gothic architecture in the country.'",
+        "photo": "/photos/st-augustine-church.jpg",
+        "photoAlt": "The brownstone front gable and great steepled tower of St. Augustine's Roman Catholic Church seen from Sterling Place",
+        "photoCredit": "Beyond My Ken, 2013 \u00b7 Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9764895, 40.6784296]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "memorial-presbyterian",
+        "name": "Memorial Presbyterian Church",
+        "category": "Church",
+        "building": "memorial-presbyterian",
+        "description": "A Late Victorian Gothic Revival church at 186 St. John's Place and Seventh Avenue, designed by Pugin & Walter and opened in 1883. Built of warm Belleville brownstone with a blue-slate roof, it rises from a buttressed corner tower through an open belfry to a broached octagonal spire. Much of its glorious stained glass is by Tiffany Studios. It has been part of the Park Slope Historic District since 1973.",
+        "photo": "/photos/memorial-presbyterian-church.jpg",
+        "photoAlt": "The brownstone corner tower and broached spire of Memorial Presbyterian Church at Seventh Avenue and St. John's Place",
+        "photoCredit": "Jim Henderson \u00b7 Wikimedia Commons (CC0 / public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9745467, 40.6763727]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "park-slope-library",
+        "name": "Park Slope Library",
+        "category": "Landmark",
+        "building": "park-slope-library",
+        "description": "The Park Slope Branch of the Brooklyn Public Library at 431 Sixth Avenue, between 8th and 9th Streets. Designed by Raymond F. Almirall and opened in 1906, it was the ninth of Brooklyn's Andrew Carnegie\u2013funded branches \u2014 originally the 'Prospect Branch,' whose books had begun life in Litchfield Villa. A two-story Classical Revival block of red brick with limestone trim, it has a projecting portico of paired Doric columns under a pediment engraved 'BROOKLYN PUBLIC LIBRARY / ESTABLISHED 1897,' and torches carved into the keystones above its windows and door symbolizing the light of learning. Inside are stained-glass archways, a vaulted stained-glass ceiling, and tiled fireplaces. It was designated a New York City landmark in 1998.",
+        "photo": "/photos/park-slope-library.jpg",
+        "photoAlt": "The red-brick Classical Revival front of the Park Slope Branch library on Sixth Avenue, with its limestone Doric portico",
+        "photoCredit": "Beyond My Ken, 2013 \u00b7 Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.98352, 40.66822]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "nitehawk-prospect-park",
+        "name": "Nitehawk Prospect Park",
+        "category": "Cinema",
+        "building": "sanders-theatre",
+        "description": "Park Slope's movie house at 188 Prospect Park West, facing Bartel-Pritchard Square at the southwest corner of Prospect Park. It opened in August 1928 as the Sanders Theatre \u2014 a 1,500-seat brick movie palace decorated in a Moorish style, with a Wurlitzer organ \u2014 on the site of the earlier Marathon Theatre (1908). After the Sanders closed in 1978 the building sat empty for nearly two decades, reopened as the multiplex Pavilion Theatre in 1996, and in December 2018 was reborn as Nitehawk Prospect Park, a dine-in cinema that preserved the 1920s balcony, marble stairs, and original plasterwork. (The original Nitehawk is over in Williamsburg.) A movie theater has stood on this corner since 1908.",
+        "photo": "/photos/sanders-theatre.jpg",
+        "photoAlt": "The Sanders Theatre at Prospect Park West and 14th Street, its marquee advertising 'Hudson's Bay' and 'Play Girl,' photographed around 1941",
+        "photoCredit": "NYC Municipal Archives \u00b7 1940s tax photo (WPA), c. 1941 (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9797431, 40.661589]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "long-meadow",
+        "name": "The Long Meadow",
+        "category": "Park",
+        "building": "long-meadow",
+        "description": "The great open lawn that is the heart of Prospect Park \u2014 about 90 acres of rolling, tree-fringed greensward stretching nearly a mile down the park's western side, one of the largest meadows in any American park. Laid out by Frederick Law Olmsted and Calvert Vaux in the 1860s, it was designed as a pastoral counterpoint to the city: a long, unbroken sweep of grass with no buildings to interrupt the view. From the 1880s until 1935 a flock of sheep grazed the meadow to keep the grass trimmed (and to complete the bucolic picture), tended by a shepherd and his dogs; the flock was finally retired to upstate New York during the Depression.",
+        "photo": "/photos/long-meadow-sheep-1900.jpg",
+        "photoAlt": "A shepherd and two collies watching a flock of sheep graze on the Long Meadow in Prospect Park around 1900",
+        "photoCredit": "Detroit Publishing Co., c. 1900 \u00b7 Library of Congress (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9708, 40.6655]
       }
     }
   ]

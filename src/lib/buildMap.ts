@@ -20,6 +20,8 @@ export const COLORS = {
   ink: "#5b4a3a",
   avenue: "#8a7256",
   street: "#b7a78f",
+  parkTrail: "#7d976a",
+  parkDrive: "#6a8456",
 };
 
 // Roads (by OSM name) that belong to Grand Army Plaza. They're pulled out of the
@@ -36,6 +38,20 @@ export interface AvenueLabel {
   angle: number;
   /** Zoom factor (model.width / viewBox.width) at which this label appears. */
   minZoom?: number;
+}
+
+/**
+ * The "Prospect Park" label. Unlike the avenue labels it is *clickable* (it has
+ * no building drawing of its own), so it carries the same detail-drawer fields a
+ * POI does, keyed by `id`.
+ */
+export interface ParkLabel extends AvenueLabel {
+  id: string;
+  category: string;
+  description: string;
+  photo?: string;
+  photoAlt?: string;
+  photoCredit?: string;
 }
 
 export interface KeyedSubPath extends RoughSubPath {
@@ -75,7 +91,13 @@ export interface MapModel {
   width: number;
   height: number;
   boundaryD: string;
+  /** The projected Prospect Park polygon path (used to clip the park trails). */
+  parkD: string;
   parkPaths: RoughSubPath[];
+  /** Prospect Park footpaths, drawn as fine dotted trails (clipped to the park). */
+  parkTrailPaths: KeyedSubPath[];
+  /** The Prospect Park carriage loop, drawn bolder than the footpaths. */
+  parkDrivePaths: KeyedSubPath[];
   /** Inner green spaces (e.g. Washington Park) drawn atop the neighborhood. */
   greenPaths: RoughSubPath[];
   /** Optional label for an inner green space. */
@@ -88,7 +110,7 @@ export interface MapModel {
   avenueLabels: AvenueLabel[];
   /** Cross-street labels, revealed progressively via each label's minZoom. */
   streetLabels: AvenueLabel[];
-  parkLabel: AvenueLabel;
+  parkLabel: ParkLabel;
   /** Points of interest (hand-drawn landmark buildings). */
   pois: PoiModel[];
   /** Screen-space heading (degrees) that points to true north. */
@@ -103,6 +125,8 @@ export interface BuildMapInput {
   /** Additional, unlabeled green spaces (e.g. smaller playgrounds). */
   greenSpaces?: FeatureCollection<Polygon | MultiPolygon>;
   streets: FeatureCollection<LineString | MultiLineString>;
+  /** Prospect Park's internal paths + carriage loop (each feature has kind). */
+  parkTrails?: FeatureCollection<LineString | MultiLineString>;
   places?: FeatureCollection<Point>;
 }
 
@@ -118,7 +142,7 @@ export interface BuildMapOptions {
  * serializable model of everything that needs to be drawn.
  */
 export function buildMapModel(
-  { boundary, park, greens, greenSpaces, streets, places }: BuildMapInput,
+  { boundary, park, greens, greenSpaces, streets, parkTrails, places }: BuildMapInput,
   { width, padding = 60, angle = DEFAULT_ANGLE }: BuildMapOptions
 ): MapModel {
   // Reserve room on the right so Prospect Park reads as a band on the east.
@@ -231,6 +255,26 @@ export function buildMapModel(
   });
   const plazaPaths = buildPlazaOval(plazaPts);
 
+  // Prospect Park's internal circulation: fine footpaths + the bolder loop drive.
+  // Both are roughened polylines; the renderer clips them to the park polygon and
+  // dots/dashes them so they read as illustrated trails, not real roads.
+  const parkTrailPaths: KeyedSubPath[] = [];
+  const parkDrivePaths: KeyedSubPath[] = [];
+  (parkTrails?.features ?? []).forEach((f, i) => {
+    const isDrive = f.properties?.kind === "drive";
+    const lines = f.geometry.type === "LineString" ? [f.geometry.coordinates] : f.geometry.coordinates;
+    lines.forEach((line, k) => {
+      const pts = line.map((c) => project(c as [number, number]));
+      if (pts.length < 2) return;
+      const d = "M " + pts.map(([x, y]) => `${x} ${y}`).join(" L ");
+      const opts: RoughOptions = isDrive
+        ? { stroke: COLORS.parkDrive, strokeWidth: 1.8, roughness: 1.2, bowing: 1, seed: i + 300, fill: "none" }
+        : { stroke: COLORS.parkTrail, strokeWidth: 1, roughness: 1, bowing: 0.8, seed: i + 300, fill: "none" };
+      const sub = roughen(d, opts).map((p, j) => ({ ...p, key: `trail-${i}-${k}-${j}` }));
+      (isDrive ? parkDrivePaths : parkTrailPaths).push(...sub);
+    });
+  });
+
   const pois = buildPois(places, project);
   // Keep street/avenue labels clear of the POI buildings by feeding their
   // on-map footprints in as points to avoid.
@@ -238,18 +282,23 @@ export function buildMapModel(
   const avenueLabels = buildStreetLabels(streets, project, "avenue", poiAvoid);
   const streetLabels = buildStreetLabels(streets, project, "street", poiAvoid);
 
-  // "Prospect Park" runs along the park band, parallel to the avenues. Anchor it
-  // to the reserved band in screen space so it always lands cleanly in the green.
-  const bandA = project([-73.969, 40.66]);
-  const bandB = project([-73.969, 40.671]);
-  let bandAngle = (Math.atan2(bandB[1] - bandA[1], bandB[0] - bandA[0]) * 180) / Math.PI;
-  if (bandAngle > 90) bandAngle -= 180;
-  if (bandAngle < -90) bandAngle += 180;
-  const parkLabel: AvenueLabel = {
+  // "Prospect Park" sits in the reserved band on the east. Drawn horizontally so
+  // it reads as a flat map label rather than following the angled park edge, and
+  // it doubles as a clickable POI (the label opens the park's detail drawer).
+  const parkLabel: ParkLabel = {
+    id: "prospect-park",
     name: "Prospect Park",
     x: width - insetRight * 0.5,
     y: height * 0.42,
-    angle: bandAngle,
+    angle: 0,
+    category: "Park",
+    description:
+      "Brooklyn's 526-acre masterpiece, designed by Frederick Law Olmsted and Calvert Vaux \u2014 the same partnership behind Manhattan's Central Park \u2014 and built between 1865 and 1873. The pair considered Prospect Park their finest work, having learned from Central Park's constraints: here they had a freer hand to compose three grand landscapes that still define the park, the sweeping Long Meadow, the wooded Ravine with Brooklyn's only forest, and the 60-acre Lake. Its grand entrance at Grand Army Plaza, the Long Meadow, the Boathouse, the Ravine, and the Lake draw some ten million visitors a year.",
+    photo: "/photos/prospect-park-map-1870.jpg",
+    photoAlt:
+      "Olmsted and Vaux's 1870 'Design for Prospect Park in the City of Brooklyn,' showing the Long Meadow, the Lake, and the system of drives",
+    photoCredit:
+      "Calvert Vaux & Frederick Law Olmsted, 'Design for Prospect Park,' 1870 \u00b7 Geographicus / Wikimedia Commons (public domain)",
   };
 
   // Heading that points to true north, so the compass rose is accurate.
@@ -261,7 +310,10 @@ export function buildMapModel(
     width,
     height,
     boundaryD,
+    parkD,
     parkPaths,
+    parkTrailPaths,
+    parkDrivePaths,
     greenPaths,
     greenLabel,
     neighborhoodFill,
@@ -341,6 +393,14 @@ const STREET_LABEL_MAX_ZOOM = 4.5;
 // A label is nudged off its street's midpoint if a POI sits within this many
 // screen pixels, so building markers and labels don't overlap.
 const LABEL_POI_CLEARANCE = 46;
+
+// Per-street manual label tweaks (screen-space). `dx` shifts the label right
+// (+) or left (−) to dodge overlaps; `angle` forces a fixed rotation in degrees
+// (0 = horizontal) instead of following the street's local heading.
+const LABEL_OVERRIDES: Record<string, { dx?: number; angle?: number }> = {
+  "Prospect Park Southwest": { dx: 130 },
+  "Bartel Pritchard Square": { angle: 0 },
+};
 
 /** Pick the polyline vertex for a label: the midpoint, unless a POI is too
  * close, in which case the nearest-to-center vertex that clears all POIs (or,
@@ -493,7 +553,14 @@ function buildStreetLabels(
       minZoom =
         STREET_LABEL_MAX_ZOOM - t * (STREET_LABEL_MAX_ZOOM - STREET_LABEL_MIN_ZOOM);
     }
-    labels.push({ name, x: coords[mid][0], y: coords[mid][1], angle, minZoom });
+
+    let x = coords[mid][0];
+    const y = coords[mid][1];
+    const override = LABEL_OVERRIDES[name];
+    if (override?.dx) x += override.dx;
+    if (override?.angle !== undefined) angle = override.angle;
+
+    labels.push({ name, x, y, angle, minZoom });
   }
   return labels;
 }

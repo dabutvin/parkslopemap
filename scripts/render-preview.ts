@@ -28,16 +28,29 @@ const greens = read("washington-park.geojson") as Feature<Polygon | MultiPolygon
 const greenSpaces = read("green-spaces.geojson") as FeatureCollection<Polygon | MultiPolygon>;
 const streets = read("streets.geojson") as FeatureCollection<LineString | MultiLineString>;
 const places = read("places.geojson") as FeatureCollection<Point>;
+let parkTrails: FeatureCollection<LineString | MultiLineString> | undefined;
+try {
+  parkTrails = read("prospect-park-paths.geojson") as FeatureCollection<LineString | MultiLineString>;
+} catch {
+  parkTrails = undefined;
+}
 
 const angle = process.argv[2] === undefined ? NaN : Number(process.argv[2]);
-const model = buildMapModel({ boundary, park, greens, greenSpaces, streets, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
+const model = buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width} ${model.height}" width="${model.width}" height="${model.height}">
-  <defs><clipPath id="c"><path d="${model.boundaryD}"/></clipPath></defs>
+  <defs>
+    <clipPath id="c"><path d="${model.boundaryD}"/></clipPath>
+    <clipPath id="park"><path d="${model.parkD}"/></clipPath>
+  </defs>
   <rect x="0" y="0" width="${model.width}" height="${model.height}" fill="${COLORS.paper}"/>
   <g>${model.parkPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}"/>`).join("")}</g>
+  <g clip-path="url(#park)" fill="none" stroke-linecap="round">
+    ${model.parkTrailPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" stroke-dasharray="0.5 4"/>`).join("")}
+    ${model.parkDrivePaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" stroke-dasharray="7 5"/>`).join("")}
+  </g>
   <g>${model.neighborhoodFill.map((p) => `<path d="${p.d}" stroke="none" fill="${p.fill ?? COLORS.neighborhood}"/>`).join("")}</g>
   <g>${model.greenPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}"/>`).join("")}</g>
   <g clip-path="url(#c)">${model.streetPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round"/>`).join("")}</g>

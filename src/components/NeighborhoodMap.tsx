@@ -12,6 +12,7 @@ import { buildMapModel } from "../lib/buildMap";
 
 import boundaryRaw from "../data/park-slope-boundary.geojson?raw";
 import parkRaw from "../data/prospect-park.geojson?raw";
+import parkPathsRaw from "../data/prospect-park-paths.geojson?raw";
 import washingtonRaw from "../data/washington-park.geojson?raw";
 import greenSpacesRaw from "../data/green-spaces.geojson?raw";
 import streetsRaw from "../data/streets.geojson?raw";
@@ -19,6 +20,7 @@ import placesRaw from "../data/places.geojson?raw";
 
 const boundary = JSON.parse(boundaryRaw) as Feature<Polygon>;
 const park = JSON.parse(parkRaw) as Feature<Polygon | MultiPolygon>;
+const parkTrails = JSON.parse(parkPathsRaw) as FeatureCollection<LineString | MultiLineString>;
 const greens = JSON.parse(washingtonRaw) as Feature<Polygon | MultiPolygon>;
 const greenSpaces = JSON.parse(greenSpacesRaw) as FeatureCollection<Polygon | MultiPolygon>;
 const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLineString>;
@@ -36,7 +38,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 export function NeighborhoodMap() {
   const model = useMemo(
-    () => buildMapModel({ boundary, park, greens, greenSpaces, streets, places }, { width: DESIGN_WIDTH }),
+    () => buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, places }, { width: DESIGN_WIDTH }),
     []
   );
 
@@ -48,7 +50,10 @@ export function NeighborhoodMap() {
     h: model.height,
   });
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
-  const selectedPoi = model.pois.find((p) => p.id === selectedPoiId) ?? null;
+  // The detail drawer is fed by either a POI building or the clickable park label.
+  const selectedPoi =
+    model.pois.find((p) => p.id === selectedPoiId) ??
+    (model.parkLabel.id === selectedPoiId ? model.parkLabel : null);
   const panRef = useRef<{
     pointerId: number;
     startX: number;
@@ -203,6 +208,9 @@ export function NeighborhoodMap() {
         <clipPath id="ps-clip">
           <path d={model.boundaryD} />
         </clipPath>
+        <clipPath id="ps-park-clip">
+          <path d={model.parkD} />
+        </clipPath>
       </defs>
 
       <rect className="ps-map__paper" x="0" y="0" width={model.width} height={model.height} />
@@ -210,6 +218,15 @@ export function NeighborhoodMap() {
       <g className="ps-layer ps-layer--park">
         {model.parkPaths.map((p, i) => (
           <path key={`park-${i}`} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} />
+        ))}
+      </g>
+
+      <g className="ps-layer ps-layer--trails" clipPath="url(#ps-park-clip)">
+        {model.parkTrailPaths.map((p) => (
+          <path key={p.key} className="ps-trail" d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill="none" strokeLinecap="round" />
+        ))}
+        {model.parkDrivePaths.map((p) => (
+          <path key={p.key} className="ps-trail ps-trail--drive" d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill="none" strokeLinecap="round" />
         ))}
       </g>
 
@@ -296,10 +313,21 @@ export function NeighborhoodMap() {
 
       <g className="ps-layer ps-layer--labels">
         <text
-          className="ps-label ps-label--park"
+          className={`ps-label ps-label--park ps-label--clickable${model.parkLabel.id === selectedPoiId ? " ps-label--selected" : ""}`}
           x={model.parkLabel.x}
           y={model.parkLabel.y}
           transform={`rotate(${model.parkLabel.angle} ${model.parkLabel.x} ${model.parkLabel.y})`}
+          data-poi-id={model.parkLabel.id}
+          role="button"
+          tabIndex={0}
+          aria-label={`${model.parkLabel.name}, ${model.parkLabel.category}`}
+          aria-pressed={model.parkLabel.id === selectedPoiId}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setSelectedPoiId(model.parkLabel.id);
+            }
+          }}
         >
           {model.parkLabel.name}
         </text>
