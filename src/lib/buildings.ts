@@ -101,6 +101,12 @@ const C = {
   bhouseTrim: "#f4efe0", // bright balusters / highlights
   water: "#9fb7ac", // Lullwater green-blue
   waterDark: "#83a094", // shaded ripples
+  // Endale Arch tones (the 1860s banded-stone tunnel into the Long Meadow).
+  berea: "#dcc079", // lit yellow Berea sandstone course
+  bereaDark: "#bb9d4f", // shaded sandstone / voussoir return
+  endaleHill: "#8fa95f", // planted hillside over the tunnel
+  endaleHillDark: "#6c8746", // shaded hill / shrub
+  warmGlow: "#cf9a61", // restored wood-lined glow deep in the vault
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -2575,6 +2581,185 @@ function lafayetteMemorial(): BuildingDrawing {
   };
 }
 
+/**
+ * Endale Arch (1867–68, Olmsted & Vaux with assistant architect Edward C.
+ * Miller): one of the first structures built in Prospect Park, a pedestrian
+ * underpass beneath the East Drive that the designers conceived as a portal
+ * from Grand Army Plaza into the pastoral Long Meadow. Drawn frontally as its
+ * Long-Meadow face (after the c.1870s stereoview): a broad, gently *pointed*
+ * two-centred arch whose archivolt is ringed with radiating voussoirs in
+ * alternating yellow Berea sandstone and reddish New Jersey brownstone, the
+ * tunnel mouth dark with receding orders and a far glimmer of daylight beyond;
+ * above it a low, shouldered/stepped raked coping rises to a carved-flower
+ * finial at the apex, and the whole portal is set into a planted bank, with
+ * dense foliage crowding in on both sides and a broad path fanning out in front.
+ */
+function endaleArch(): BuildingDrawing {
+  const W = 150;
+  const parts: BuildingPart[] = [];
+
+  let seed = 1080;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const cx = 75;
+  const ys = 96; // springline
+  const yGround = 152; // path level at the pier base
+  const pierL = 26;
+  const pierR = 124;
+
+  // Two-centred (pointed) arch geometry, sampled so we can ring it with real
+  // radiating voussoirs and trace the receding orders inside.
+  const a = 24; // inner opening half-width
+  const ri = 40; // inner archivolt radius
+  const ringW = 11;
+  const ro = ri + ringW; // outer archivolt radius
+  const dIn = ri - a; // centre offset from cx
+  const hpIn = Math.sqrt(ri * ri - dIn * dIn); // inner apex rise
+  const CRx = cx - dIn; // right-half arc centre (x); centre y is the springline
+  const phiTop = Math.atan2(-hpIn, dIn); // apex angle on the right arc
+
+  type Pt = [number, number];
+  // Right half of an arc of radius R, from the apex down to the right springer.
+  const rightArc = (R: number, n: number): Pt[] => {
+    const out: Pt[] = [];
+    for (let i = 0; i <= n; i++) {
+      const phi = phiTop + ((0 - phiTop) * i) / n;
+      out.push([CRx + R * Math.cos(phi), ys + R * Math.sin(phi)]);
+    }
+    return out;
+  };
+  const mirror = (pts: Pt[]): Pt[] => pts.map(([x, y]) => [2 * cx - x, y] as Pt);
+  const pathFrom = (pts: Pt[], close = true): string =>
+    "M " + pts.map(([x, y]) => `${r(x)} ${r(y)}`).join(" L ") + (close ? " Z" : "");
+  // Full inner edge: left springer -> apex -> right springer, at radius R.
+  const archEdge = (R: number, n = 12): Pt[] => {
+    const right = rightArc(R, n);
+    return [...mirror(right).reverse(), ...right.slice(1)];
+  };
+
+  // --- Ground shadow ---
+  push({ d: ellipse(cx, yGround + 3, W * 0.5, 9), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // --- Planted bank behind/over the tunnel ---
+  push({
+    d:
+      `M ${r(-6)} ${r(yGround)} L ${r(-6)} ${r(66)} ` +
+      `Q ${r(28)} ${r(26)} ${r(cx)} ${r(22)} ` +
+      `Q ${r(122)} ${r(26)} ${r(W + 6)} ${r(66)} ` +
+      `L ${r(W + 6)} ${r(yGround)} Z`,
+    fill: C.endaleHill,
+    stroke: C.endaleHillDark,
+    strokeWidth: 1.2,
+    roughness: 1.5,
+    bowing: 1.4,
+    fillStyle: "solid",
+  });
+  // Irregular tree clumps along the crest (drawn behind the masonry peak).
+  const clump = (bx: number, by: number, s: number) => {
+    push({ d: ellipse(bx, by, s, s * 0.9), fill: C.endaleHillDark, stroke: C.stem, strokeWidth: 0.8, roughness: 1.6, fillStyle: "solid" });
+    push({ d: ellipse(bx - s * 0.4, by - s * 0.35, s * 0.6, s * 0.55), fill: C.leaf, stroke: "none", strokeWidth: 0, roughness: 1.3, fillStyle: "solid" });
+    push({ d: ellipse(bx + s * 0.45, by - s * 0.1, s * 0.5, s * 0.5), fill: C.endaleHill, stroke: "none", strokeWidth: 0, roughness: 1.3, fillStyle: "solid" });
+  };
+  for (const [bx, by, s] of [
+    [20, 44, 13],
+    [44, 32, 12],
+    [62, 27, 9],
+    [cx, 25, 8],
+    [92, 28, 10],
+    [112, 34, 12],
+    [132, 46, 13],
+  ] as const) {
+    clump(bx, by, s);
+  }
+
+  // --- Low battered retaining walls sloping out from the piers ---
+  push({ d: `M ${r(4)} ${r(yGround)} L ${r(pierL)} ${r(yGround)} L ${r(pierL)} ${r(ys + 4)} L ${r(4)} ${r(yGround - 12)} Z`, fill: C.bereaDark, stroke: C.ink, strokeWidth: 1.2, roughness: 1.3, bowing: 0.5, fillStyle: "solid" });
+  push({ d: `M ${r(W - 4)} ${r(yGround)} L ${r(pierR)} ${r(yGround)} L ${r(pierR)} ${r(ys + 4)} L ${r(W - 4)} ${r(yGround - 12)} Z`, fill: C.bereaDark, stroke: C.ink, strokeWidth: 1.2, roughness: 1.3, bowing: 0.5, fillStyle: "solid" });
+
+  // --- Main facade wall + subtle two-colour banding ---
+  const yWallTop = 44; // coping/haunch line
+  push({ d: rect(pierL, yWallTop, pierR - pierL, yGround - yWallTop), fill: C.berea, stroke: C.ink, strokeWidth: 1.6, roughness: 1, bowing: 0.3, fillStyle: "solid" });
+  for (let y = yWallTop + 9; y < yGround - 4; y += 15) {
+    push({ d: rect(pierL, y, pierR - pierL, 6), fill: C.bstone, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  }
+  push({ d: rect(pierL, yWallTop, pierR - pierL, yGround - yWallTop), fill: "none", stroke: C.ink, strokeWidth: 1.4, roughness: 0.9, bowing: 0.3 });
+
+  // --- Dark tunnel mouth (inner edge of the archivolt down to the path) ---
+  const inEdge = archEdge(ri, 12);
+  push({ d: pathFrom([[cx - a, yGround] as Pt, ...inEdge, [cx + a, yGround] as Pt]), fill: C.recess, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  // A small far glimmer of daylight at the end of the tunnel (the meadow beyond).
+  push({ d: ellipse(cx, yGround - 20, 6, 10), fill: C.warmGlow, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  push({ d: ellipse(cx, yGround - 22, 3.4, 6), fill: "#d7cb9a", stroke: "none", strokeWidth: 0, roughness: 0.9, fillStyle: "solid" });
+  // Receding soffit orders (concentric rings stepping into the dark).
+  for (const R of [ri - 4, ri - 9]) {
+    push({ d: pathFrom(archEdge(R, 12), false), fill: "none", stroke: "#7a6650", strokeWidth: 1.4, roughness: 0.9 });
+  }
+
+  // --- Archivolt ring of alternating radiating voussoirs ---
+  const nV = 6;
+  const rIn = rightArc(ri, nV);
+  const rOut = rightArc(ro, nV);
+  for (let i = 0; i < nV; i++) {
+    const col = i % 2 === 0 ? C.berea : C.bstone;
+    push({ d: pathFrom([rIn[i], rIn[i + 1], rOut[i + 1], rOut[i]]), fill: col, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+    const lIn = mirror([rIn[i], rIn[i + 1]]);
+    const lOut = mirror([rOut[i], rOut[i + 1]]);
+    push({ d: pathFrom([lIn[0], lIn[1], lOut[1], lOut[0]]), fill: col, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+  }
+  // Impost blocks where the arch springs from the piers.
+  push({ d: rect(cx - a - ringW, ys - 1, ringW + 2, 5), fill: C.bereaDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(cx + a - 2, ys - 1, ringW + 2, 5), fill: C.bereaDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.8, fillStyle: "solid" });
+
+  // --- Low shouldered / stepped raked coping with a flower finial ---
+  push({ d: rect(pierL - 3, yWallTop - 4, pierR - pierL + 6, 5), fill: C.bereaDark, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" }); // coping ledge
+  const gable: Pt[] = [
+    [cx - 33, yWallTop - 4],
+    [cx - 33, yWallTop - 10],
+    [cx - 20, yWallTop - 10],
+    [cx - 20, yWallTop - 17],
+    [cx, yWallTop - 26],
+    [cx + 20, yWallTop - 17],
+    [cx + 20, yWallTop - 10],
+    [cx + 33, yWallTop - 10],
+    [cx + 33, yWallTop - 4],
+  ];
+  push({ d: pathFrom(gable), fill: C.berea, stroke: C.ink, strokeWidth: 1.3, roughness: 0.9, fillStyle: "solid" });
+  push({ d: pathFrom([[cx - 20, yWallTop - 13] as Pt, [cx + 20, yWallTop - 13] as Pt, [cx + 20, yWallTop - 10] as Pt, [cx - 20, yWallTop - 10] as Pt]), fill: C.bstone, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" }); // accent band
+  // Carved flower (rosette) at the apex.
+  const fy = yWallTop - 30;
+  for (let k = 0; k < 6; k++) {
+    const ang = (k / 6) * Math.PI * 2;
+    push({ d: ellipse(cx + Math.cos(ang) * 3.2, fy + Math.sin(ang) * 3.2, 1.7, 1.7), fill: C.berea, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+  }
+  push({ d: ellipse(cx, fy, 2.4, 2.4), fill: C.bstone, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+
+  // --- Dense foliage banks crowding the outer corners (over the wall edges) ---
+  for (const [bx, by, s] of [
+    [17, 92, 14],
+    [15, 116, 12],
+    [30, 132, 11],
+    [133, 92, 14],
+    [135, 116, 12],
+    [120, 132, 11],
+  ] as const) {
+    clump(bx, by, s);
+  }
+
+  // --- Broad path fanning out in front of the portal ---
+  push({ d: pathFrom([[cx - a, yGround - 1] as Pt, [cx + a, yGround - 1] as Pt, [pierR + 12, yGround + 9] as Pt, [pierL - 12, yGround + 9] as Pt]), fill: "#e1d3b1", stroke: "none", strokeWidth: 0, roughness: 1.2, fillStyle: "solid" });
+  push({ d: `M ${r(pierL - 10)} ${r(yGround + 2)} L ${r(pierR + 10)} ${r(yGround + 2)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.8 });
+
+  return {
+    width: W,
+    height: yGround + 10,
+    anchorX: cx,
+    anchorY: yGround,
+    scale: 0.32,
+    parts,
+  };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -2594,4 +2779,5 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "long-meadow": longMeadowFlower,
   "boathouse": boathouse,
   "lafayette-memorial": lafayetteMemorial,
+  "endale-arch": endaleArch,
 };

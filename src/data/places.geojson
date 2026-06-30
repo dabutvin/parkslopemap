@@ -255,6 +255,23 @@
         "type": "Point",
         "coordinates": [-73.976588, 40.664477]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "endale-arch",
+        "name": "Endale Arch",
+        "category": "Landmark",
+        "building": "endale-arch",
+        "description": "One of the first structures built in Prospect Park, a pedestrian underpass beneath the East Drive begun in 1867 and finished in 1868. Designed by Frederick Law Olmsted and Calvert Vaux with assistant architect Edward C. Miller, it was conceived as a portal carrying visitors from the urban bustle of Grand Army Plaza into the pastoral calm of the Long Meadow, with carriages rumbling unseen overhead. Sometimes called 'Enterdale' in early reports, it has a pointed arch, a stepped superstructure rising to a raked coping with a carved flower at its apex, and banded masonry of yellow Berea sandstone from Ohio and reddish New Jersey brownstone \u2014 details that echo a Syrio-Egyptian influence. Inside, the brick cross-vaults were lined with white pine and black walnut paneling. After decades of decay it was restored by the Prospect Park Alliance and reopened in 2020, its hidden colors and woodwork \u2014 now LED-lit \u2014 brought back to life.",
+        "photo": "/photos/endale-arch.jpg",
+        "photoAlt": "A stereoview of Endale Arch from the Long Meadow side around the 1870s\u20131880s, showing its pointed banded-stone archway, a park bench, and visitors at the tunnel mouth",
+        "photoCredit": "'American Views: Brooklyn, N.Y.' stereograph, c. 1870\u20131890 \u00b7 Library of Congress, Prints & Photographs Division (no known restrictions on publication)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.969083, 40.670944]
+      }
     }
   ]
 }
