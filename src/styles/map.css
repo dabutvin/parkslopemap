@@ -27,8 +27,10 @@ body {
 .app {
   display: flex;
   flex-direction: column;
-  /* Default to an immersive, full-viewport map. */
+  /* Default to an immersive, full-viewport map. `dvh` keeps the map from
+     hiding behind iOS Safari's address bar / toolbar (100vh overshoots there). */
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   /* Subtle vignette so the "page" feels like aged paper. */
   background:
@@ -143,8 +145,9 @@ body {
 }
 
 .ps-zoom__btn {
-  width: 2.4rem;
-  height: 2.4rem;
+  /* >= 44px so it's a comfortable touch target on phones. */
+  width: 2.75rem;
+  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -4,6 +4,10 @@ import { NeighborhoodMap } from "./components/NeighborhoodMap";
 export default function App() {
   const mapRef = useRef<HTMLElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // iPhone Safari doesn't support the Fullscreen API for non-video elements, so
+  // the button would be a no-op there. Only show it where it actually works.
+  const fullscreenSupported =
+    typeof document !== "undefined" && Boolean(document.fullscreenEnabled);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(document.fullscreenElement != null);
@@ -26,15 +30,17 @@ export default function App() {
         <p className="app__subtitle">Brooklyn, New York</p>
       </header>
       <main className="app__map" ref={mapRef}>
-        <button
-          type="button"
-          className="app__fullscreen"
-          onClick={toggleFullscreen}
-          aria-pressed={isFullscreen}
-          title={isFullscreen ? "Exit fullscreen" : "View fullscreen"}
-        >
-          {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-        </button>
+        {fullscreenSupported && (
+          <button
+            type="button"
+            className="app__fullscreen"
+            onClick={toggleFullscreen}
+            aria-pressed={isFullscreen}
+            title={isFullscreen ? "Exit fullscreen" : "View fullscreen"}
+          >
+            {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+          </button>
+        )}
         <NeighborhoodMap />
       </main>
     </div>

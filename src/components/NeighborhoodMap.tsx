@@ -48,26 +48,59 @@ export function NeighborhoodMap() {
     []
   );
 
+  // Warm the browser cache with every POI photo on mount so the detail drawer's
+  // image is already decoded when a building is tapped (no "pop in").
+  useEffect(() => {
+    const urls = new Set<string>();
+    for (const poi of model.pois) if (poi.photo) urls.add(poi.photo);
+    if (model.parkLabel.photo) urls.add(model.parkLabel.photo);
+    for (const url of urls) {
+      const img = new Image();
+      img.src = url;
+    }
+  }, [model]);
+
   const svgRef = useRef<SVGSVGElement>(null);
-  const [view, setView] = useState<ViewBox>({
-    x: 0,
-    y: 0,
-    w: model.width,
-    h: model.height,
+  const ratio = model.height / model.width;
+  const [view, setView] = useState<ViewBox>(() => {
+    // On phones, fitting the whole neighborhood makes every label microscopic.
+    // Start zoomed into the core so it's legible; pinch/buttons take it from there.
+    const isNarrow = typeof window !== "undefined" && window.innerWidth < 640;
+    if (isNarrow) {
+      const w = model.width / 1.8;
+      return { w, h: w * ratio, x: (model.width - w) / 2, y: (model.height - w * ratio) / 2 };
+    }
+    return { x: 0, y: 0, w: model.width, h: model.height };
   });
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
   // The detail drawer is fed by either a POI building or the clickable park label.
   const selectedPoi =
     model.pois.find((p) => p.id === selectedPoiId) ??
     (model.parkLabel.id === selectedPoiId ? model.parkLabel : null);
+  // Live mirror of `view` so gesture handlers can read the latest value without
+  // being torn down/recreated on every frame.
+  const viewRef = useRef(view);
+  viewRef.current = view;
+
+  // All active pointers on the SVG, keyed by pointerId, in client coords. One
+  // pointer => pan; two => pinch-zoom.
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
   const panRef = useRef<{
-    pointerId: number;
     startX: number;
     startY: number;
     view: ViewBox;
     poiId: string | null;
     moved: boolean;
   } | null>(null);
+  const pinchRef = useRef<{
+    startDist: number;
+    startView: ViewBox;
+    // World-space point under the initial finger midpoint, kept pinned to the
+    // current midpoint as the gesture moves.
+    px: number;
+    py: number;
+  } | null>(null);
+  const lastTapRef = useRef<{ t: number; x: number; y: number } | null>(null);
 
   // Keep the view within the map bounds and within the allowed zoom range.
   const clampView = useCallback(
@@ -115,46 +148,131 @@ export function NeighborhoodMap() {
     return () => svg.removeEventListener("wheel", onWheel);
   }, [zoomAt]);
 
+  // Begin a two-finger pinch from whatever pointers are currently down.
+  const beginPinch = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    const pts = [...pointersRef.current.values()];
+    if (pts.length < 2) return;
+    const rect = svg.getBoundingClientRect();
+    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+    const midX = (pts[0].x + pts[1].x) / 2;
+    const midY = (pts[0].y + pts[1].y) / 2;
+    const fx = (midX - rect.left) / rect.width;
+    const fy = (midY - rect.top) / rect.height;
+    const v = viewRef.current;
+    panRef.current = null;
+    pinchRef.current = {
+      startDist: dist || 1,
+      startView: v,
+      px: v.x + fx * v.w,
+      py: v.y + fy * v.h,
+    };
+  }, []);
+
   const onPointerDown = useCallback(
     (e: React.PointerEvent<SVGSVGElement>) => {
       e.currentTarget.setPointerCapture(e.pointerId);
+      pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const count = pointersRef.current.size;
+      if (count >= 2) {
+        beginPinch();
+        return;
+      }
       // Capture which POI (if any) the press started on, before pointer capture
       // retargets later events to the <svg>.
       const hit = (e.target as Element).closest?.("[data-poi-id]");
       panRef.current = {
-        pointerId: e.pointerId,
         startX: e.clientX,
         startY: e.clientY,
-        view,
+        view: viewRef.current,
         poiId: hit?.getAttribute("data-poi-id") ?? null,
         moved: false,
       };
     },
-    [view]
+    [beginPinch]
   );
 
-  const onPointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
-    const pan = panRef.current;
-    const svg = svgRef.current;
-    if (!pan || !svg || pan.pointerId !== e.pointerId) return;
-    if (Math.hypot(e.clientX - pan.startX, e.clientY - pan.startY) > 4) pan.moved = true;
-    const rect = svg.getBoundingClientRect();
-    const dx = ((e.clientX - pan.startX) / rect.width) * pan.view.w;
-    const dy = ((e.clientY - pan.startY) / rect.height) * pan.view.h;
-    setView(clampView({ ...pan.view, x: pan.view.x - dx, y: pan.view.y - dy }));
-  }, [clampView]);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<SVGSVGElement>) => {
+      const svg = svgRef.current;
+      const tracked = pointersRef.current.get(e.pointerId);
+      if (!svg || !tracked) return;
+      tracked.x = e.clientX;
+      tracked.y = e.clientY;
+      const rect = svg.getBoundingClientRect();
 
-  const endPan = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
-    const pan = panRef.current;
-    if (pan?.pointerId !== e.pointerId) return;
-    e.currentTarget.releasePointerCapture(e.pointerId);
-    panRef.current = null;
-    // A press that didn't drag is a tap: open the building, or close the drawer
-    // when tapping empty map.
-    if (e.type === "pointerup" && !pan.moved) {
+      const pinch = pinchRef.current;
+      if (pinch && pointersRef.current.size >= 2) {
+        const pts = [...pointersRef.current.values()];
+        const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+        const midX = (pts[0].x + pts[1].x) / 2;
+        const midY = (pts[0].y + pts[1].y) / 2;
+        const fx = (midX - rect.left) / rect.width;
+        const fy = (midY - rect.top) / rect.height;
+        const w = pinch.startView.w * (pinch.startDist / dist);
+        setView(
+          clampView({ w, h: w * ratio, x: pinch.px - fx * w, y: pinch.py - fy * w * ratio })
+        );
+        return;
+      }
+
+      const pan = panRef.current;
+      if (!pan) return;
+      if (Math.hypot(e.clientX - pan.startX, e.clientY - pan.startY) > 4) pan.moved = true;
+      const dx = ((e.clientX - pan.startX) / rect.width) * pan.view.w;
+      const dy = ((e.clientY - pan.startY) / rect.height) * pan.view.h;
+      setView(clampView({ ...pan.view, x: pan.view.x - dx, y: pan.view.y - dy }));
+    },
+    [clampView, ratio]
+  );
+
+  const endPan = useCallback(
+    (e: React.PointerEvent<SVGSVGElement>) => {
+      pointersRef.current.delete(e.pointerId);
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Pointer may already be released; ignore.
+      }
+
+      // Winding down a pinch. If one finger remains, hand control back to pan
+      // (seeded from the survivor) so the map doesn't jump.
+      if (pinchRef.current) {
+        if (pointersRef.current.size < 2) {
+          pinchRef.current = null;
+          const survivor = [...pointersRef.current.values()][0];
+          panRef.current = survivor
+            ? { startX: survivor.x, startY: survivor.y, view: viewRef.current, poiId: null, moved: true }
+            : null;
+        }
+        return;
+      }
+
+      const pan = panRef.current;
+      if (!pan) return;
+      panRef.current = null;
+      if (e.type !== "pointerup" || pan.moved) return;
+
+      // A press that didn't drag is a tap. Double-tapping empty map zooms in;
+      // a single tap opens a building or closes the drawer.
+      const now = e.timeStamp;
+      const last = lastTapRef.current;
+      const isDoubleTap =
+        !pan.poiId &&
+        last != null &&
+        now - last.t < 300 &&
+        Math.hypot(e.clientX - last.x, e.clientY - last.y) < 30;
+      if (isDoubleTap) {
+        lastTapRef.current = null;
+        zoomAt(e.clientX, e.clientY, 1 / 1.8);
+        return;
+      }
+      lastTapRef.current = { t: now, x: e.clientX, y: e.clientY };
       setSelectedPoiId(pan.poiId);
-    }
-  }, []);
+    },
+    [zoomAt]
+  );
 
   const zoomByButton = useCallback(
     (factor: number) => {
