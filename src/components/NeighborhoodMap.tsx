@@ -118,21 +118,42 @@ export function NeighborhoodMap() {
     [model.width, model.height]
   );
 
+  // Write the camera straight to the SVG attribute (no React render). Gestures
+  // call this every frame so panning/zooming is a single DOM write instead of a
+  // full reconciliation of the hundreds of <path> elements.
+  const applyView = useCallback((v: ViewBox) => {
+    viewRef.current = v;
+    svgRef.current?.setAttribute("viewBox", `${v.x} ${v.y} ${v.w} ${v.h}`);
+  }, []);
+
+  // Sync the live camera back into React state so derived UI (street-label
+  // visibility, the reset button) catches up. Debounced so a burst of moves
+  // triggers at most one render once motion settles.
+  const commitTimer = useRef<number | undefined>(undefined);
+  const scheduleCommit = useCallback(() => {
+    if (commitTimer.current) clearTimeout(commitTimer.current);
+    commitTimer.current = window.setTimeout(() => setView(viewRef.current), 120);
+  }, []);
+  const commitNow = useCallback(() => {
+    if (commitTimer.current) clearTimeout(commitTimer.current);
+    setView(viewRef.current);
+  }, []);
+
   const zoomAt = useCallback(
     (clientX: number, clientY: number, factor: number) => {
       const svg = svgRef.current;
       if (!svg) return;
       const rect = svg.getBoundingClientRect();
-      setView((v) => {
-        const fx = (clientX - rect.left) / rect.width;
-        const fy = (clientY - rect.top) / rect.height;
-        const px = v.x + fx * v.w;
-        const py = v.y + fy * v.h;
-        const w = v.w * factor;
-        return clampView({ w, h: w * (model.height / model.width), x: px - fx * w, y: py - fy * w * (model.height / model.width) });
-      });
+      const v = viewRef.current;
+      const fx = (clientX - rect.left) / rect.width;
+      const fy = (clientY - rect.top) / rect.height;
+      const px = v.x + fx * v.w;
+      const py = v.y + fy * v.h;
+      const w = v.w * factor;
+      applyView(clampView({ w, h: w * ratio, x: px - fx * w, y: py - fy * w * ratio }));
+      scheduleCommit();
     },
-    [clampView, model.width, model.height]
+    [applyView, clampView, ratio, scheduleCommit]
   );
 
   // Native, non-passive wheel listener so we can preventDefault the page scroll.
@@ -211,7 +232,7 @@ export function NeighborhoodMap() {
         const fx = (midX - rect.left) / rect.width;
         const fy = (midY - rect.top) / rect.height;
         const w = pinch.startView.w * (pinch.startDist / dist);
-        setView(
+        applyView(
           clampView({ w, h: w * ratio, x: pinch.px - fx * w, y: pinch.py - fy * w * ratio })
         );
         return;
@@ -222,9 +243,9 @@ export function NeighborhoodMap() {
       if (Math.hypot(e.clientX - pan.startX, e.clientY - pan.startY) > 4) pan.moved = true;
       const dx = ((e.clientX - pan.startX) / rect.width) * pan.view.w;
       const dy = ((e.clientY - pan.startY) / rect.height) * pan.view.h;
-      setView(clampView({ ...pan.view, x: pan.view.x - dx, y: pan.view.y - dy }));
+      applyView(clampView({ ...pan.view, x: pan.view.x - dx, y: pan.view.y - dy }));
     },
-    [clampView, ratio]
+    [applyView, clampView, ratio]
   );
 
   const endPan = useCallback(
@@ -237,14 +258,18 @@ export function NeighborhoodMap() {
       }
 
       // Winding down a pinch. If one finger remains, hand control back to pan
-      // (seeded from the survivor) so the map doesn't jump.
+      // (seeded from the survivor) so the map doesn't jump; otherwise the
+      // gesture is over, so commit the live camera to state.
       if (pinchRef.current) {
         if (pointersRef.current.size < 2) {
           pinchRef.current = null;
           const survivor = [...pointersRef.current.values()][0];
-          panRef.current = survivor
-            ? { startX: survivor.x, startY: survivor.y, view: viewRef.current, poiId: null, moved: true }
-            : null;
+          if (survivor) {
+            panRef.current = { startX: survivor.x, startY: survivor.y, view: viewRef.current, poiId: null, moved: true };
+          } else {
+            panRef.current = null;
+            commitNow();
+          }
         }
         return;
       }
@@ -252,7 +277,11 @@ export function NeighborhoodMap() {
       const pan = panRef.current;
       if (!pan) return;
       panRef.current = null;
-      if (e.type !== "pointerup" || pan.moved) return;
+      if (e.type !== "pointerup" || pan.moved) {
+        // A drag (or cancel) ended — sync state to the live camera.
+        commitNow();
+        return;
+      }
 
       // A press that didn't drag is a tap. Double-tapping empty map zooms in;
       // a single tap opens a building or closes the drawer.
@@ -271,7 +300,7 @@ export function NeighborhoodMap() {
       lastTapRef.current = { t: now, x: e.clientX, y: e.clientY };
       setSelectedPoiId(pan.poiId);
     },
-    [zoomAt]
+    [zoomAt, commitNow]
   );
 
   const zoomByButton = useCallback(
@@ -321,14 +350,6 @@ export function NeighborhoodMap() {
       onPointerCancel={endPan}
     >
       <defs>
-        <filter id="ps-paper" x="-5%" y="-5%" width="110%" height="110%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise" />
-          <feColorMatrix in="noise" type="saturate" values="0" result="grey" />
-          <feComponentTransfer in="grey" result="soft">
-            <feFuncA type="linear" slope="0.05" />
-          </feComponentTransfer>
-          <feComposite in="soft" in2="SourceGraphic" operator="over" />
-        </filter>
         <clipPath id="ps-clip">
           <path d={model.boundaryD} />
         </clipPath>
@@ -542,6 +563,19 @@ export function NeighborhoodMap() {
 
       <Compass x={88} y={96} radius={40} northAngle={model.northAngle} />
     </svg>
+
+      {/* Paper grain lives outside the zooming SVG so the costly feTurbulence
+          rasterizes once and is never recomputed while panning/zooming. */}
+      <svg className="ps-grain" aria-hidden="true" preserveAspectRatio="none">
+        <filter id="ps-grain-filter">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise" />
+          <feColorMatrix in="noise" type="saturate" values="0" result="grey" />
+          <feComponentTransfer in="grey">
+            <feFuncA type="linear" slope="0.05" />
+          </feComponentTransfer>
+        </filter>
+        <rect width="100%" height="100%" filter="url(#ps-grain-filter)" />
+      </svg>
 
       <div className="ps-zoom" role="group" aria-label="Zoom controls">
         <button type="button" className="ps-zoom__btn" onClick={() => zoomByButton(1 / 1.4)} aria-label="Zoom in">

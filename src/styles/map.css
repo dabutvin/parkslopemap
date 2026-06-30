@@ -178,7 +178,17 @@ body {
 
 .ps-map__paper {
   fill: var(--paper);
-  filter: url(#ps-paper);
+}
+
+/* Static paper grain overlay. Fixed to the viewport box (not the map's
+   coordinate space), so the expensive turbulence is rasterized once and stays
+   put during pan/zoom instead of re-rendering every frame. */
+.ps-grain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .ps-layer--streets path {
