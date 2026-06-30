@@ -95,6 +95,20 @@ const C = {
   bloomCenterDark: "#5d3a22", // disc shade
   stem: "#5f7a45", // green stem
   leaf: "#86a85d", // lit leaf
+  // Brooklyn Botanic Garden tones (an abstract flowering bed + cherry branches).
+  gPink: "#ecaac0", // cherry-blossom pink bloom
+  gPinkDark: "#cd7f9c",
+  gLilac: "#b9a6da", // mixed border blooms
+  gLilacDark: "#9a85bf",
+  gCoral: "#e89368",
+  gCoralDark: "#c96f43",
+  gGold: "#ecc257",
+  gGoldDark: "#cf982f",
+  gCenter: "#f5e08a", // warm flower center
+  gLeaf: "#8fb061", // planted mound green
+  gLeafDark: "#6c8a45",
+  gLeafDeep: "#4f6a37", // shaded base of the bed
+  gTwig: "#7c5a3a", // bare cherry branch
   // Boathouse tones (the 1905 white glazed-terra-cotta pavilion on the Lullwater).
   bhouse: "#e9e1cb", // lit cream terra-cotta
   bhouseDark: "#cdc1a0", // shaded returns / cornice underside
@@ -2760,6 +2774,254 @@ function endaleArch(): BuildingDrawing {
   };
 }
 
+/**
+ * The Brooklyn Museum (McKim, Mead & White, 1895–1915) at 200 Eastern Parkway:
+ * a monumental Beaux-Arts temple front in pale limestone. Drawn frontally as its
+ * signature elevation — a great central portico of tall Ionic columns standing
+ * on the iconic monumental front staircase (the one removed in 1934), carrying a
+ * full entablature and a sculptured triangular pediment, flanked by lower two-
+ * story pavilion wings with rows of windows.
+ */
+function brooklynMuseum(): BuildingDrawing {
+  const W = 184;
+  const parts: BuildingPart[] = [];
+
+  let seed = 920;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical bands (top-down).
+  const yPedApex = 16; // peak of the pediment
+  const yEntTop = 44; // pediment base / top of the entablature
+  const yEntBot = 56; // column capitals / bottom of the entablature
+  const yColTop = 56;
+  const yColBot = 108; // stylobate: columns stand on the top step
+  const yWingTop = 50; // flanking wing parapet (just below the portico cornice)
+  const yBase = 142; // top of the terrace
+  const yWater = 150; // ground
+
+  const L = 6;
+  const R = 178; // outer wall edges
+  const cpL = 56; // central portico sides
+  const cpR = 128;
+  const cx = (cpL + cpR) / 2; // 92
+
+  // A tapered Ionic column standing between `topY` and `botY`, centered on `cx`.
+  const column = (colCx: number, w: number, lit: boolean) => {
+    const half = w / 2;
+    const topHalf = half * 0.84; // slight entasis: narrower at the top
+    const wall = lit ? C.stone : C.stoneDark;
+    push({
+      d:
+        `M ${r(colCx - half)} ${r(yColBot)} ` +
+        `L ${r(colCx - topHalf)} ${r(yColTop)} ` +
+        `L ${r(colCx + topHalf)} ${r(yColTop)} ` +
+        `L ${r(colCx + half)} ${r(yColBot)} Z`,
+      fill: wall,
+      stroke: C.ink,
+      strokeWidth: 1,
+      roughness: 0.8,
+      fillStyle: "solid",
+    });
+    // A couple of fine flutes.
+    for (const fx of [colCx - half * 0.4, colCx + half * 0.4]) {
+      push({ d: `M ${r(fx)} ${r(yColTop + 3)} L ${r(fx)} ${r(yColBot - 2)}`, stroke: C.stoneDark, strokeWidth: 0.5, roughness: 0.6 });
+    }
+    // Base block.
+    push({ d: rect(colCx - half - 1, yColBot - 3, w + 2, 3), fill: C.stoneDark, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+    // Capital with two little volute scrolls.
+    push({ d: rect(colCx - half - 1.5, yColTop - 3, w + 3, 3), fill: wall, stroke: C.ink, strokeWidth: 0.9, roughness: 0.7, fillStyle: "solid" });
+    push({ d: ellipse(colCx - topHalf, yColTop - 1.2, 1.9, 1.5), fill: wall, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+    push({ d: ellipse(colCx + topHalf, yColTop - 1.2, 1.9, 1.5), fill: wall, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+  };
+
+  // Ground shadow first.
+  push({
+    d: ellipse(W / 2, yWater + 2, W * 0.52, 9),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // --- Flanking pavilion wings (left lit, right shaded) ---
+  push({ d: rect(cpR, yWingTop, R - cpR, yBase - yWingTop), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.6, roughness: 1, bowing: 0.3, fillStyle: "solid" }); // right
+  push({ d: rect(L, yWingTop, cpL - L, yBase - yWingTop), fill: C.stone, stroke: C.ink, strokeWidth: 1.6, roughness: 1, bowing: 0.3, fillStyle: "solid" }); // left
+  // Wing cornices (overhang) + a thin attic course suggesting the inscribed names.
+  push({ d: rect(L - 2, yWingTop - 4, cpL - L + 4, 4), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(cpR - 2, yWingTop - 4, R - cpR + 4, 4), fill: C.roofDark, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  for (const [wl, wr] of [[L + 4, cpL - 4], [cpR + 4, R - 4]] as const) {
+    push({ d: `M ${r(wl)} ${r(yWingTop - 2)} L ${r(wr)} ${r(yWingTop - 2)}`, stroke: C.stoneDark, strokeWidth: 0.5, roughness: 0.6 });
+  }
+  // Two stories of windows in each wing.
+  for (const [wl, wr, lit] of [[L + 5, cpL - 5, true], [cpR + 5, R - 5, false]] as const) {
+    for (const wy of [yWingTop + 12, yWingTop + 50]) {
+      for (const wx of spread(wl, wr, 3, 9)) {
+        push({ d: rect(wx, wy, 9, 22), fill: C.recess, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+        push({ d: rect(wx - 1.5, wy - 3, 12, 3), fill: lit ? C.stone : C.stoneDark, stroke: C.ink, strokeWidth: 0.7, roughness: 0.7, fillStyle: "solid" }); // lintel
+      }
+    }
+  }
+
+  // --- Central portico: deep shadowed cella wall behind the columns ---
+  push({ d: rect(cpL + 2, yEntBot, cpR - cpL - 4, yColBot - yEntBot), fill: C.recess, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  // Three tall bronze entrance doors at the back of the portico.
+  for (const dx of spread(cpL + 8, cpR - 8, 3, 9)) {
+    push({ d: rect(dx, yColBot - 26, 9, 26), fill: C.bronzeDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.8, fillStyle: "solid" });
+  }
+
+  // --- The monumental front staircase (wider at the bottom) ---
+  push({
+    d:
+      `M ${r(cpL - 12)} ${r(yBase)} L ${r(cpL)} ${r(yColBot)} ` +
+      `L ${r(cpR)} ${r(yColBot)} L ${r(cpR + 12)} ${r(yBase)} Z`,
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.4,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  const steps = 8;
+  for (let i = 1; i < steps; i++) {
+    const t = i / steps;
+    const yy = yColBot + (yBase - yColBot) * t;
+    const lx = cpL - 12 * t;
+    const rx = cpR + 12 * t;
+    push({ d: `M ${r(lx)} ${r(yy)} L ${r(rx)} ${r(yy)}`, stroke: C.stoneDark, strokeWidth: 0.7, roughness: 0.6 });
+  }
+
+  // --- Columns (six across the portico) ---
+  for (const [i, sx] of spread(cpL + 4, cpR - 4, 6, 6).entries()) {
+    column(sx + 3, 6, i < 3); // the right half reads slightly shaded
+  }
+
+  // --- Entablature over the columns ---
+  push({ d: rect(cpL - 3, yEntTop, cpR - cpL + 6, yEntBot - yEntTop), fill: C.stone, stroke: C.ink, strokeWidth: 1.5, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(cpL, yEntTop + 5, cpR - cpL, 4), fill: C.stoneDark, stroke: C.ink, strokeWidth: 0.7, roughness: 0.7, fillStyle: "solid" }); // frieze panel (inscription)
+  push({ d: rect(cpL - 6, yEntBot - 2, cpR - cpL + 12, 3), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" }); // overhanging cornice shelf
+
+  // --- Pediment with allegorical sculpture in the tympanum ---
+  push({
+    d: `M ${r(cpL - 6)} ${r(yEntTop)} L ${r(cx)} ${r(yPedApex)} L ${r(cpR + 6)} ${r(yEntTop)} Z`,
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  // Raking cornice (a thin inner line under each slope).
+  push({ d: `M ${r(cpL - 2)} ${r(yEntTop - 1.5)} L ${r(cx)} ${r(yPedApex + 4)} L ${r(cpR + 2)} ${r(yEntTop - 1.5)}`, stroke: C.stoneDark, strokeWidth: 0.7, roughness: 0.6 });
+  // Tympanum figures: a standing central figure flanked by two reclining ones.
+  push({ d: `M ${r(cx - 2.2)} ${r(yEntTop - 3)} L ${r(cx + 2.2)} ${r(yEntTop - 3)} L ${r(cx + 1.4)} ${r(yPedApex + 8)} L ${r(cx - 1.4)} ${r(yPedApex + 8)} Z`, fill: C.bronze, stroke: C.ink, strokeWidth: 0.8, roughness: 0.9, fillStyle: "solid" });
+  push({ d: ellipse(cx, yPedApex + 6, 2, 2.3), fill: C.bronze, stroke: C.ink, strokeWidth: 0.6, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(cx - 16, yEntTop - 5, 7, 3.2), fill: C.bronze, stroke: C.ink, strokeWidth: 0.7, roughness: 0.9, fillStyle: "solid" });
+  push({ d: ellipse(cx + 16, yEntTop - 5, 7, 3.2), fill: C.bronze, stroke: C.ink, strokeWidth: 0.7, roughness: 0.9, fillStyle: "solid" });
+  // Acroteria at the pediment corners and apex.
+  for (const ax of [cpL - 6, cx, cpR + 6]) {
+    push({ d: ellipse(ax, ax === cx ? yPedApex - 2 : yEntTop - 2, 1.8, 2.4), fill: C.stoneDark, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  }
+
+  // --- Terrace / plinth across the front (drawn last, in front) ---
+  push({ d: rect(L - 5, yBase, R - L + 10, yWater - yBase), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  push({ d: `M ${r(L - 3)} ${r(yBase + 4)} L ${r(R + 3)} ${r(yBase + 4)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7 });
+
+  return {
+    width: W,
+    height: yWater + 6,
+    anchorX: W / 2,
+    anchorY: yWater,
+    scale: 0.42,
+    parts,
+  };
+}
+
+/**
+ * The Brooklyn Botanic Garden (founded 1910). Not a building, so it's drawn
+ * abstractly: a low planted mound massed with stylized blossom clusters in
+ * cherry-blossom pink and mixed border colors, with two slender cherry branches
+ * arching above and a few petals drifting down — a little illustrated flower
+ * bed rather than a literal place.
+ */
+function botanicGarden(): BuildingDrawing {
+  const W = 92;
+  const H = 92;
+  const parts: BuildingPart[] = [];
+
+  let seed = 1200;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const cx = W / 2; // 46
+  const groundY = H - 3; // 89
+
+  // A single stylized blossom cluster: five outer lobes (petals) around a disc,
+  // capped by a warm center — reads as an abstract flower head.
+  const bloom = (px: number, py: number, R: number, fill: string, dark: string) => {
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 - Math.PI / 2;
+      push({
+        d: ellipse(px + Math.cos(a) * R * 0.6, py + Math.sin(a) * R * 0.6, R * 0.5, R * 0.5),
+        fill,
+        stroke: dark,
+        strokeWidth: 1,
+        roughness: 1.15,
+        bowing: 1.1,
+        fillStyle: "solid",
+      });
+    }
+    push({ d: ellipse(px, py, R * 0.6, R * 0.6), fill, stroke: dark, strokeWidth: 1, roughness: 1.1, fillStyle: "solid" });
+    push({ d: ellipse(px, py, R * 0.2, R * 0.2), fill: C.gCenter, stroke: "none", strokeWidth: 0, roughness: 0.8, fillStyle: "solid" });
+  };
+
+  // Ground shadow first, so the bed sits on top of it.
+  push({ d: ellipse(cx, groundY + 1, 40, 6), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // Two slender cherry branches arching up from behind the mound (drawn first so
+  // the mound covers their roots). Bare twigs with pink blossom puffs at the tips.
+  push({ d: `M 40 66 C 35 48 30 34 27 20`, stroke: C.gTwig, strokeWidth: 2.4, roughness: 1.3, bowing: 1.4 });
+  push({ d: `M 33 38 C 28 34 24 33 20 33`, stroke: C.gTwig, strokeWidth: 1.4, roughness: 1.2, bowing: 1.2 });
+  push({ d: `M 54 64 C 59 48 64 36 67 25`, stroke: C.gTwig, strokeWidth: 2.2, roughness: 1.3, bowing: 1.4 });
+  push({ d: `M 62 40 C 67 37 71 37 74 38`, stroke: C.gTwig, strokeWidth: 1.3, roughness: 1.2, bowing: 1.2 });
+  bloom(26, 18, 9, C.gPink, C.gPinkDark);
+  bloom(20, 32, 6, C.gPink, C.gPinkDark);
+  bloom(68, 22, 8, C.gPink, C.gPinkDark);
+  bloom(75, 37, 5.5, C.gPink, C.gPinkDark);
+
+  // The planted mound (the garden bed) over the branch roots.
+  push({
+    d: `M 5 ${groundY} C 9 62 28 50 ${cx} 50 C 64 50 83 62 87 ${groundY} Z`,
+    fill: C.gLeaf,
+    stroke: C.gLeafDark,
+    strokeWidth: 1.6,
+    roughness: 1.6,
+    bowing: 1.3,
+    fillStyle: "solid",
+  });
+  // Shaded base of the mound for depth.
+  push({ d: `M 9 ${groundY} C 18 ${groundY - 8} 70 ${groundY - 8} 83 ${groundY} Z`, fill: C.gLeafDeep, stroke: "none", strokeWidth: 0, roughness: 1.4, fillStyle: "solid" });
+  // A few foliage ticks across the mound.
+  for (const [tx, ty] of [[16, 70], [30, 62], [60, 62], [76, 70], [46, 60]] as const) {
+    push({ d: `M ${tx} ${ty} l -2 -6 M ${tx} ${ty} l 2 -6`, stroke: C.gLeafDark, strokeWidth: 1, roughness: 1.1 });
+  }
+
+  // The flower beds: a scatter of mixed blossom clusters massed on the mound.
+  bloom(30, 58, 8, C.gLilac, C.gLilacDark);
+  bloom(46, 54, 9, C.gPink, C.gPinkDark);
+  bloom(61, 58, 8, C.gGold, C.gGoldDark);
+  bloom(20, 68, 7, C.gCoral, C.gCoralDark);
+  bloom(38, 70, 8, C.gGold, C.gGoldDark);
+  bloom(54, 70, 8, C.gLilac, C.gLilacDark);
+  bloom(70, 67, 7, C.gPink, C.gPinkDark);
+
+  // A few petals drifting down.
+  for (const [pxp, pyp] of [[40, 30], [50, 42], [33, 48]] as const) {
+    push({ d: ellipse(pxp, pyp, 1.8, 1.2), fill: C.gPink, stroke: "none", strokeWidth: 0, roughness: 0.8, fillStyle: "solid" });
+  }
+
+  return { width: W, height: H, anchorX: cx, anchorY: groundY, scale: 0.5, parts };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -2777,7 +3039,9 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "park-slope-library": parkSlopeLibrary,
   "sanders-theatre": sandersTheatre,
   "long-meadow": longMeadowFlower,
+  "botanic-garden": botanicGarden,
   "boathouse": boathouse,
   "lafayette-memorial": lafayetteMemorial,
   "endale-arch": endaleArch,
+  "brooklyn-museum": brooklynMuseum,
 };

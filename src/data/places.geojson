@@ -272,6 +272,40 @@
         "type": "Point",
         "coordinates": [-73.969083, 40.670644]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "brooklyn-museum",
+        "name": "Brooklyn Museum",
+        "category": "Museum",
+        "building": "brooklyn-museum",
+        "description": "New York City's second-largest art museum, at 200 Eastern Parkway on the northeast edge of Prospect Park. The monumental Beaux-Arts building was designed by McKim, Mead & White, who won an 1893 competition for a vast scheme \u2014 had it been finished it would have been the largest art museum in the world; only about a sixth was built, in stages from 1895 to 1915. Its limestone front rose to a grand central portico of Ionic columns reached by a monumental staircase, with allegorical pediment sculpture and a row of figures by Daniel Chester French along the cornice. In 1934, under a Robert Moses modernization, the great front steps were removed and the ground-floor entrance reworked; a curved glass entry pavilion was added in 2004. Its collection spans some 1.5 million works, from one of the finest Egyptian holdings in the Americas to Judy Chicago's 'The Dinner Party.'",
+        "photo": "/photos/brooklyn-museum-1910s.jpg",
+        "photoAlt": "The Beaux-Arts Brooklyn Institute of Arts and Sciences (Brooklyn Museum) seen from Eastern Parkway, its columned portico reached by the grand monumental staircase that was removed in the 1930s, the attic ringed with statues and the central dome behind",
+        "photoCredit": "Detroit Publishing Co., c. 1905\u20131915 \u00b7 Library of Congress, Prints & Photographs Division, Detroit Publishing Company Collection (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.96386, 40.6706]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "botanic-garden",
+        "name": "Brooklyn Botanic Garden",
+        "category": "Garden",
+        "building": "botanic-garden",
+        "description": "Brooklyn's 52-acre botanic garden, founded in 1910 on a reclaimed ash dump beside Prospect Park and laid out by the Olmsted Brothers. Its best-loved corners are the Japanese Hill-and-Pond Garden \u2014 designed by Takeo Shiota and opened in 1915 as one of the first public Japanese gardens in America, with a red torii rising from the pond and a Shinto shrine on the hill \u2014 and the Cherry Esplanade, whose double rows of Kanzan cherries draw crowds each spring for Hanami. The garden also holds the Cranford Rose Garden, a Shakespeare Garden, and the domed Palm House conservatory.",
+        "photo": "/photos/botanic-garden-1917.jpg",
+        "photoAlt": "The torii gate and Moon View House reflected in the pond of the Japanese Hill-and-Pond Garden at the Brooklyn Botanic Garden, c. 1917",
+        "photoCredit": "From C. Stuart Gager, 'The Brooklyn Botanic Garden,' 1917 \u00b7 Internet Archive Book Images / Wikimedia Commons (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.96412, 40.6682]
+      }
     }
   ]
 }

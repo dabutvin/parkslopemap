@@ -281,8 +281,10 @@ export function buildMapModel(
     northGreenPaths.push(...sub);
     const name = (f.properties?.name as string) ?? "";
     // Mount Prospect Park is small and sits right by Grand Army Plaza's labels,
-    // so it's left unlabeled to keep that corner uncluttered.
-    if (name && name !== "Mount Prospect Park") {
+    // so it's left unlabeled to keep that corner uncluttered. The Botanic Garden
+    // is now a clickable POI (drawn as a flower bed with its own name label), so
+    // its plain green-wedge label is suppressed here too.
+    if (name && name !== "Mount Prospect Park" && name !== "Brooklyn Botanic Garden") {
       const [[nx0, ny0], [nx1, ny1]] = path.bounds(f);
       northGreenLabels.push({ name, x: (nx0 + nx1) / 2, y: (ny0 + ny1) / 2, angle: 0 });
     }
