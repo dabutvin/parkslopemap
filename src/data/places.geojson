@@ -221,6 +221,40 @@
         "type": "Point",
         "coordinates": [-73.9708, 40.6655]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "boathouse",
+        "name": "Prospect Park Boathouse",
+        "category": "Landmark",
+        "building": "boathouse",
+        "description": "The Beaux-Arts boathouse on the Lullwater, built in 1905 to the design of Frank Helmle and Ulrich Huberty, who modeled its white glazed terra-cotta arcade on Jacopo Sansovino's 16th-century Library of St Mark in Venice. Threatened with demolition in 1964, it was saved by public outcry and in 1968 became one of the first buildings in New York City to be designated an individual landmark. Restored in the 1970s and again in the 1990s, it reflects beautifully in the water and today houses the Prospect Park Audubon Center, the first urban Audubon center in the country.",
+        "photo": "/photos/boathouse-postcard.jpg",
+        "photoAlt": "A vintage postcard captioned 'Boat House, Prospect Park, Brooklyn, N.Y.,' showing the arcaded terra-cotta boathouse and a swan boat reflected in the Lake, with people on the terrace, c. 1910",
+        "photoCredit": "Vintage postcard, 'Boat House, Prospect Park, Brooklyn, N.Y.,' c. 1910 (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9701, 40.6642]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "lafayette-memorial",
+        "name": "Lafayette Memorial",
+        "category": "Monument",
+        "building": "lafayette-memorial",
+        "description": "A bronze bas-relief set in a broad stele of polished Milford-pink granite at the 9th Street entrance to Prospect Park, the gift of Brooklyn citizen Henry Harteau. Sculpted by Daniel Chester French and framed by Henry Bacon \u2014 the same pair who made the seated Lincoln in Washington \u2014 it shows the young Marquis de Lafayette in his major-general's uniform, sword-tip to the ground, beside his horse and the African-American groom who braces its bridle (some historians believe the groom is James Armistead Lafayette, the Revolutionary War spy whom Lafayette helped free from slavery). It was unveiled on May 10, 1917 by Marshal Joffre and former premier Ren\u00e9 Viviani of the French War Commission, then in New York to rally American support after the United States entered the First World War.",
+        "photo": "/photos/lafayette-memorial-1917.jpg",
+        "photoAlt": "Crowds, flags, and a line of policemen at the dedication of the Lafayette Memorial in Prospect Park on May 10, 1917, with French's bronze relief of Lafayette and his horse on the granite stele behind",
+        "photoCredit": "Bain News Service, May 10, 1917 \u00b7 George Grantham Bain Collection, Library of Congress (no known restrictions / public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.976588, 40.664477]
+      }
     }
   ]
 }

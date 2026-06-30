@@ -71,6 +71,8 @@ const C = {
   // Civic-monument tones (Grand Army Plaza: the Memorial Arch + the Library).
   granite: "#cdbd9c", // warm grey granite ashlar
   graniteDark: "#aa9974", // shaded granite returns / mouldings
+  pgranite: "#cda58a", // polished Milford-pink granite (the Lafayette stele)
+  pgraniteDark: "#a87f66", // shaded pink-granite return / lower mouldings
   bronze: "#7c7b54", // weathered-bronze statuary (the quadriga, pier groups)
   bronzeDark: "#565638", // deep bronze shade
   gold: "#c8a23c", // gilded entrance screen / inscriptions
@@ -93,6 +95,12 @@ const C = {
   bloomCenterDark: "#5d3a22", // disc shade
   stem: "#5f7a45", // green stem
   leaf: "#86a85d", // lit leaf
+  // Boathouse tones (the 1905 white glazed-terra-cotta pavilion on the Lullwater).
+  bhouse: "#e9e1cb", // lit cream terra-cotta
+  bhouseDark: "#cdc1a0", // shaded returns / cornice underside
+  bhouseTrim: "#f4efe0", // bright balusters / highlights
+  water: "#9fb7ac", // Lullwater green-blue
+  waterDark: "#83a094", // shaded ripples
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -2287,6 +2295,286 @@ function longMeadowFlower(): BuildingDrawing {
   return { width: W, height: H, anchorX: cx, anchorY: groundY, scale: 0.5, parts };
 }
 
+/**
+ * The Prospect Park Boathouse (1905, Helmle & Huberty), a white glazed
+ * terra-cotta Beaux-Arts pavilion on the Lullwater, modeled on Sansovino's
+ * Library of St Mark in Venice. Drawn frontally as its signature: a grand
+ * ground-floor arcade of tall round arches with keystones, a rich entablature
+ * (frieze with roundels over a bracketed, modillioned cornice), and a
+ * balustraded roof parapet — all standing at the water's edge with a faint
+ * reflection rippling below.
+ */
+function boathouse(): BuildingDrawing {
+  const W = 150;
+  const parts: BuildingPart[] = [];
+
+  let seed = 940;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const L = 6;
+  const R = W - 6; // 144
+  const L2 = 18; // set-back upper story
+  const R2 = W - 18; // 132
+
+  // Vertical bands (top-down): a low-roofed upper window story over a grand
+  // ground arcade, separated by a terrace balustrade.
+  const yRoofTop = 2; // thin roof rail across the upper block
+  const yRoofBot = 5;
+  const yUpCorTop = 5; // upper-story cornice
+  const yUpCorBot = 11;
+  const yUpWinTop = 16; // rectangular upper-story windows
+  const yUpWinBot = 30;
+  const yBalTop = 30; // terrace balustrade (in front of the upper story base)
+  const yBalBot = 40;
+  const yArcCorTop = 40; // arcade entablature + cornice
+  const yArcCorBot = 48;
+  const yArchTop = 54; // crown of the arcade arches
+  const yTerrace = 126; // terrace floor / springing of the arcade
+  const yTerBot = 134; // base course at the water
+  const yWater = 146; // waterline
+  const H = 154;
+
+  const archXs = spread(8, W - 8, 5, 18);
+  const aw = 18;
+
+  // Faint reflection of the arcade in the Lullwater (drawn first, behind water).
+  for (const x of archXs) {
+    push({ d: rect(x, yWater + 1, aw, 9), fill: C.bhouseDark, stroke: "none", strokeWidth: 0, roughness: 1.4, fillStyle: "solid" });
+  }
+  // Water band over the reflection (semi-transparent so the reflection shows).
+  push({ d: rect(-4, yWater, W + 8, H - yWater + 2), fill: "rgba(159,183,172,0.78)", stroke: "none", strokeWidth: 0, roughness: 1.4, fillStyle: "solid" });
+  for (const yy of [yWater + 4, yWater + 8]) {
+    push({ d: `M ${r(2)} ${r(yy)} L ${r(W - 2)} ${r(yy)}`, stroke: C.waterDark, strokeWidth: 0.8, roughness: 1.6, bowing: 1.2 });
+  }
+
+  // Terrace / stylobate the arcade stands on.
+  push({ d: rect(L - 3, yTerrace, R - L + 6, yTerBot - yTerrace + 4), fill: C.bhouseDark, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+
+  // --- Ground arcade ---
+  // Facade wall (the arcade is carved out of it as recessed arches).
+  push({ d: rect(L, yArcCorBot, R - L, yTerrace - yArcCorBot + 2), fill: C.bhouse, stroke: C.ink, strokeWidth: 1.6, roughness: 1, bowing: 0.4, fillStyle: "solid" });
+  const archH = yTerrace - yArchTop;
+  for (const x of archXs) {
+    push({ d: archWindow(x, yArchTop, aw, archH), fill: C.recess, stroke: C.ink, strokeWidth: 1.3, roughness: 0.9, fillStyle: "solid" });
+    const kx = x + aw / 2;
+    push({ d: `M ${r(kx - 3)} ${r(yArchTop - 2)} L ${r(kx + 3)} ${r(yArchTop - 2)} L ${r(kx + 2.2)} ${r(yArchTop + 8)} L ${r(kx - 2.2)} ${r(yArchTop + 8)} Z`, fill: C.bhouseTrim, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" }); // keystone
+    push({ d: rect(x + 2, yTerrace - 14, aw - 4, 12), fill: C.water, stroke: "none", strokeWidth: 0, roughness: 0.8, fillStyle: "solid" }); // water glint
+  }
+  // Roundels in the spandrels between the arches.
+  for (let i = 0; i < archXs.length - 1; i++) {
+    const px = (archXs[i] + aw + archXs[i + 1]) / 2;
+    push({ d: ellipse(px, yArchTop + 2, 3, 3), fill: C.bhouseDark, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  }
+  // Arcade entablature + modillioned cornice (overhangs both ends).
+  push({ d: rect(L - 5, yArcCorTop, R - L + 10, yArcCorBot - yArcCorTop), fill: C.bhouse, stroke: C.ink, strokeWidth: 1.5, roughness: 0.8, fillStyle: "solid" });
+  for (const x of spread(L, R, 18, 3)) {
+    push({ d: rect(x, yArcCorBot - 1, 3, 4), fill: C.bhouseDark, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+
+  // --- Upper window story (set back, behind the terrace balustrade) ---
+  push({ d: rect(L2, yUpCorBot, R2 - L2, yBalBot - yUpCorBot + 2), fill: C.bhouse, stroke: C.ink, strokeWidth: 1.4, roughness: 0.9, fillStyle: "solid" });
+  const upXs = spread(L2 + 3, R2 - 3, 7, 11);
+  for (const x of upXs) {
+    push({ d: rect(x - 1, yUpWinTop - 2, 13, yUpWinBot - yUpWinTop + 4), fill: C.bhouseTrim, stroke: C.ink, strokeWidth: 0.9, roughness: 0.7, fillStyle: "solid" }); // surround
+    push({ d: rect(x, yUpWinTop, 11, yUpWinBot - yUpWinTop), fill: C.glass, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" });
+    push({ d: `M ${r(x + 5.5)} ${r(yUpWinTop)} L ${r(x + 5.5)} ${r(yUpWinBot)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  }
+  // Upper cornice + thin roof rail.
+  push({ d: rect(L2 - 4, yUpCorTop, R2 - L2 + 8, yUpCorBot - yUpCorTop), fill: C.bhouse, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  for (const x of spread(L2, R2, 12, 3)) {
+    push({ d: rect(x, yUpCorBot - 1, 3, 3), fill: C.bhouseDark, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+  push({ d: rect(L2 - 2, yRoofTop, R2 - L2 + 4, yRoofBot - yRoofTop), fill: C.bhouseTrim, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" });
+
+  // --- Terrace balustrade across the front (over the arcade cornice) ---
+  push({ d: rect(L - 4, yBalBot - 3, R - L + 8, 3), fill: C.bhouseTrim, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" }); // bottom rail
+  push({ d: rect(L - 4, yBalTop, R - L + 8, 3), fill: C.bhouseTrim, stroke: C.ink, strokeWidth: 1, roughness: 0.7, fillStyle: "solid" }); // top rail
+  for (const x of spread(L - 2, R + 2, 32, 1.6)) {
+    push({ d: `M ${r(x)} ${r(yBalTop + 2)} L ${r(x)} ${r(yBalBot - 2)}`, stroke: C.bhouseDark, strokeWidth: 1, roughness: 0.6 });
+  }
+  for (const px of [L - 4, R - 1]) {
+    push({ d: rect(px, yBalTop - 1, 5, yBalBot - yBalTop + 1), fill: C.bhouse, stroke: C.ink, strokeWidth: 0.9, roughness: 0.7, fillStyle: "solid" });
+  }
+
+  return { width: W, height: H, anchorX: W / 2, anchorY: yWater, scale: 0.34, parts };
+}
+
+/**
+ * The Lafayette Memorial (1917, Daniel Chester French sculptor + Henry Bacon
+ * architect), Prospect Park West at the 9th Street entrance. A broad polished
+ * pink-granite stele, framed by Corinthian end pilasters under a low segmental
+ * coping, carrying French's bronze bas-relief: the Marquis de Lafayette
+ * standing in his major-general's uniform, sword-tip to the ground, beside his
+ * horse and the African-American groom who braces its bridle. Drawn frontally
+ * as the stele on its low terrace, the way it reads from Prospect Park West.
+ */
+function lafayetteMemorial(): BuildingDrawing {
+  const W = 150; // overall (terrace) width
+  const DX = 9; // shaded right return for a little mass
+  const parts: BuildingPart[] = [];
+
+  let seed = 1000;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  // Vertical bands (top-down).
+  const yCornCtr = 16; // coping crown (the top edge bows up at center)
+  const yCorTop = 26; // coping at the ends
+  const yCorBot = 40; // bottom of the coping band
+  const yInscr = 44; // engraved name band ("THE MARQUIS DE LAFAYETTE")
+  const yPanelTop = 56; // top of the bronze relief panel
+  const yPanelBot = 116;
+  const yBase = 138; // foot of the stele / top of the terrace
+  const yStep = 146; // terrace step
+  const yWater = 152; // ground
+
+  const L = 14; // stele left edge
+  const R = 136; // stele right edge
+  const cx = W / 2; // 75
+  const pierW = 12; // Corinthian end pilasters
+  const pL = L + pierW; // inner edge of the left pilaster
+  const pR = R - pierW; // inner edge of the right pilaster
+
+  // A weathered-bronze standing horse in profile (facing left), barrel centered
+  // at (hx, hy), drawn a touch lighter than the panel so it reads as relief.
+  const reliefHorse = (hx: number, hy: number) => {
+    push({ d: ellipse(hx, hy, 15, 8), fill: C.bronze, stroke: C.bronzeDark, strokeWidth: 0.8, roughness: 1, fillStyle: "solid" }); // barrel
+    // Neck + head reaching down and forward (left).
+    push({
+      d:
+        `M ${r(hx - 12)} ${r(hy - 4)} Q ${r(hx - 22)} ${r(hy - 7)} ${r(hx - 25)} ${r(hy + 4)} ` +
+        `L ${r(hx - 20)} ${r(hy + 6)} Q ${r(hx - 13)} ${r(hy + 2)} ${r(hx - 9)} ${r(hy - 1)} Z`,
+      fill: C.bronze,
+      stroke: C.bronzeDark,
+      strokeWidth: 0.8,
+      roughness: 1,
+      fillStyle: "solid",
+    });
+    // Legs (the two near legs slightly forward) and a streaming tail.
+    for (const [lx, lift] of [[hx - 9, 0], [hx - 3, 1], [hx + 6, 0], [hx + 11, 1]] as const) {
+      push({ d: `M ${r(lx)} ${r(hy + 5)} L ${r(lx)} ${r(hy + 17 - lift)}`, stroke: C.bronzeDark, strokeWidth: 1.8, roughness: 0.9 });
+    }
+    push({ d: `M ${r(hx + 14)} ${r(hy - 4)} Q ${r(hx + 21)} ${r(hy + 2)} ${r(hx + 18)} ${r(hy + 12)}`, stroke: C.bronzeDark, strokeWidth: 1.4, roughness: 1 });
+  };
+
+  // A standing relief figure: head, long coat, legs. `lighter` lifts it off the
+  // panel (Lafayette, in higher relief) vs. the dimmer groom behind the horse.
+  const figure = (fx: number, headY: number, footY: number, lighter: boolean) => {
+    const tone = lighter ? C.bronze : C.bronzeDark;
+    push({ d: ellipse(fx, headY, 3, 3.4), fill: tone, stroke: C.bronzeDark, strokeWidth: 0.7, roughness: 0.9, fillStyle: "solid" }); // head
+    push({
+      d: `M ${r(fx - 3)} ${r(headY + 3)} L ${r(fx + 3)} ${r(headY + 3)} L ${r(fx + 5)} ${r(footY)} L ${r(fx - 5)} ${r(footY)} Z`,
+      fill: tone,
+      stroke: C.bronzeDark,
+      strokeWidth: 0.8,
+      roughness: 0.9,
+      fillStyle: "solid",
+    }); // coat / body
+    push({ d: `M ${r(fx - 1.5)} ${r(footY - 1)} L ${r(fx - 1.5)} ${r(footY + 6)}`, stroke: C.bronzeDark, strokeWidth: 1.4, roughness: 0.8 });
+    push({ d: `M ${r(fx + 1.5)} ${r(footY - 1)} L ${r(fx + 1.5)} ${r(footY + 6)}`, stroke: C.bronzeDark, strokeWidth: 1.4, roughness: 0.8 });
+  };
+
+  // Ground shadow first, so the monument sits on top of it.
+  push({
+    d: ellipse(cx + 3, yWater + 2, W * 0.56, 9),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Shaded right return, for a touch of depth.
+  push({
+    d: `M ${r(R)} ${r(yCorTop)} L ${r(R + DX)} ${r(yCorTop + 6)} ` +
+      `L ${r(R + DX)} ${r(yBase - 1)} L ${r(R)} ${r(yBase)} Z`,
+    fill: C.pgraniteDark,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1.1,
+    fillStyle: "solid",
+  });
+
+  // Main pink-granite stele.
+  push({
+    d: rect(L, yCorTop, R - L, yBase - yCorTop),
+    fill: C.pgranite,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.4,
+    fillStyle: "solid",
+  });
+
+  // Corinthian end pilasters (lit face + a shaded inner edge + simple cap/base).
+  for (const px of [L, pR]) {
+    push({ d: rect(px, yCorBot, pierW, yBase - yCorBot), fill: C.stone, stroke: C.ink, strokeWidth: 1.1, roughness: 0.9, fillStyle: "solid" });
+    push({ d: rect(px + pierW - 2.5, yCorBot, 2.5, yBase - yCorBot), fill: C.pgraniteDark, stroke: "none", strokeWidth: 0, roughness: 0.9, fillStyle: "solid" });
+    for (const fx of spread(px + 1, px + pierW - 1, 2, 1.2)) {
+      push({ d: `M ${r(fx)} ${r(yCorBot + 8)} L ${r(fx)} ${r(yBase - 6)}`, stroke: C.graniteDark, strokeWidth: 0.6, roughness: 0.6 });
+    }
+    push({ d: rect(px - 1.5, yCorBot - 5, pierW + 3, 5), fill: C.stone, stroke: C.ink, strokeWidth: 0.9, roughness: 0.7, fillStyle: "solid" }); // capital
+    push({ d: rect(px - 1, yBase - 5, pierW + 2, 5), fill: C.pgraniteDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.7, fillStyle: "solid" }); // base
+  }
+
+  // Low segmental coping: the top edge bows gently up at the center.
+  push({
+    d:
+      `M ${r(L - 5)} ${r(yCorBot)} L ${r(L - 5)} ${r(yCorTop)} ` +
+      `Q ${r(cx)} ${r(yCornCtr)} ${r(R + 5)} ${r(yCorTop)} ` +
+      `L ${r(R + 5)} ${r(yCorBot)} Z`,
+    fill: C.stone,
+    stroke: C.ink,
+    strokeWidth: 1.5,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  push({ d: `M ${r(L - 4)} ${r(yCorTop + 4)} Q ${r(cx)} ${r(yCornCtr + 4)} ${r(R + 4)} ${r(yCorTop + 4)}`, stroke: C.pgraniteDark, strokeWidth: 0.8, roughness: 0.7 });
+
+  // Engraved name band ("THE MARQUIS DE LAFAYETTE"), suggested with tick letters.
+  push({ d: rect(pL + 2, yInscr, pR - pL - 4, 7), fill: C.graniteDark, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+  for (const x of spread(pL + 6, pR - 6, 13, 1.6)) {
+    push({ d: `M ${r(x)} ${r(yInscr + 1.5)} L ${r(x)} ${r(yInscr + 5.5)}`, stroke: C.stone, strokeWidth: 0.7, roughness: 0.5 });
+  }
+
+  // --- Bronze bas-relief panel (recessed, with a light granite surround) ---
+  push({ d: rect(pL - 1, yPanelTop - 1, pR - pL + 2, yPanelBot - yPanelTop + 2), fill: C.stone, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" }); // surround
+  push({ d: rect(pL + 2, yPanelTop + 2, pR - pL - 4, yPanelBot - yPanelTop - 4), fill: C.recess, stroke: C.ink, strokeWidth: 1.1, roughness: 0.9, fillStyle: "solid" }); // recessed (shadowed) field
+
+  // Magnolia tree tucked into the top-right corner (a soft bronze backdrop).
+  push({ d: ellipse(pR - 9, yPanelTop + 13, 7, 9), fill: C.bronze, stroke: "none", strokeWidth: 0, roughness: 1.2, fillStyle: "solid" });
+
+  // The horse, then Lafayette in front of it, then the groom bracing the bridle.
+  const groundY = yPanelBot - 14; // the figures' feet line within the panel
+  reliefHorse(cx + 14, groundY - 16);
+  figure(cx - 10, yPanelTop + 16, groundY, true); // Lafayette (higher relief)
+  // Lafayette's sword: tip to the ground at his right.
+  push({ d: `M ${r(cx - 5)} ${r(groundY - 12)} L ${r(cx + 2)} ${r(groundY)}`, stroke: C.bronze, strokeWidth: 1, roughness: 0.7 });
+  figure(cx + 33, yPanelTop + 22, groundY, true); // groom bracing the bridle
+  // Panel ground line.
+  push({ d: `M ${r(pL + 4)} ${r(groundY)} L ${r(pR - 4)} ${r(groundY)}`, stroke: C.bronze, strokeWidth: 0.8, roughness: 0.7 });
+
+  // Long dedication inscription on the lower stele (a few faint engraved lines).
+  for (const yy of [yPanelBot + 6, yPanelBot + 11, yPanelBot + 16]) {
+    push({ d: `M ${r(pL + 6)} ${r(yy)} L ${r(pR - 6)} ${r(yy)}`, stroke: C.pgraniteDark, strokeWidth: 0.6, roughness: 0.6 });
+  }
+
+  // --- Low terrace the stele stands on ---
+  push({ d: rect(2, yBase, W - 4 + DX, yStep - yBase), fill: C.stone, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(-4, yStep, W + 8 + DX, yWater - yStep), fill: C.pgraniteDark, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(0)} ${r(yStep + 3)} L ${r(W + DX)} ${r(yStep + 3)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+
+  return {
+    width: W + DX,
+    height: yWater + 6,
+    anchorX: cx,
+    anchorY: yWater,
+    scale: 0.34,
+    parts,
+  };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -2304,4 +2592,6 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "park-slope-library": parkSlopeLibrary,
   "sanders-theatre": sandersTheatre,
   "long-meadow": longMeadowFlower,
+  "boathouse": boathouse,
+  "lafayette-memorial": lafayetteMemorial,
 };
