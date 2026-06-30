@@ -2755,7 +2755,7 @@ function endaleArch(): BuildingDrawing {
     height: yGround + 10,
     anchorX: cx,
     anchorY: yGround,
-    scale: 0.32,
+    scale: 0.24,
     parts,
   };
 }

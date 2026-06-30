@@ -280,7 +280,9 @@ export function buildMapModel(
     }).map((p, j) => ({ ...p, key: `north-${i}-${j}` }));
     northGreenPaths.push(...sub);
     const name = (f.properties?.name as string) ?? "";
-    if (name) {
+    // Mount Prospect Park is small and sits right by Grand Army Plaza's labels,
+    // so it's left unlabeled to keep that corner uncluttered.
+    if (name && name !== "Mount Prospect Park") {
       const [[nx0, ny0], [nx1, ny1]] = path.bounds(f);
       northGreenLabels.push({ name, x: (nx0 + nx1) / 2, y: (ny0 + ny1) / 2, angle: 0 });
     }
