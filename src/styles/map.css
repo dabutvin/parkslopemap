@@ -196,6 +196,12 @@ body {
   opacity: 0.9;
 }
 
+/* Prospect Park water (the Lake, Lullwater, pools), painted blue over the green.
+   non-scaling-stroke keeps the inked shoreline thin as you zoom in. */
+.ps-water {
+  vector-effect: non-scaling-stroke;
+}
+
 .ps-label {
   fill: var(--ink);
   font-family: "Caveat", "Patrick Hand", cursive;

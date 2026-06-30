@@ -3,10 +3,11 @@
  * static GeoJSON into src/data. Run on demand with `npm run fetch-data`; it is
  * NOT part of the app runtime (the app only reads the committed GeoJSON).
  *
- * It produces six files:
+ * It produces seven files:
  *   - park-slope-boundary.geojson : the neighborhood outline
  *   - prospect-park.geojson       : the park polygon (the eastern landmark)
  *   - prospect-park-paths.geojson : the park's loop drive + main footpaths
+ *   - prospect-park-water.geojson : the park's water (Lake, Lullwater, pools)
  *   - washington-park.geojson     : the labeled inner green (Old Stone House)
  *   - green-spaces.geojson        : smaller, unlabeled inner playgrounds
  *   - streets.geojson             : the avenue + cross-street grid
@@ -381,6 +382,42 @@ async function main() {
     `  kept ${parkPaths.length} park features (${driveCount} drive, ${parkPaths.length - driveCount} path)`
   );
 
+  // Prospect Park's water bodies (the Lake, the Lullwater, the Pools). Kept as a
+  // separate file and painted blue over the green.
+  console.log("Querying Overpass for Prospect Park water...");
+  const waterRaw = await overpass(`
+    [out:json][timeout:90];
+    (
+      way["natural"="water"](40.649,-73.976,40.675,-73.955);
+      relation["natural"="water"](40.649,-73.976,40.675,-73.955);
+    );
+    out body; >; out skel qt;
+  `);
+  const waterFc = osmtogeojson(waterRaw) as FeatureCollection;
+  const parkWater = (
+    waterFc.features.filter(
+      (f) => f.geometry.type === "Polygon" || f.geometry.type === "MultiPolygon"
+    ) as Feature<Polygon | MultiPolygon>[]
+  )
+    .filter((f) => {
+      try {
+        return booleanIntersects(f, park);
+      } catch {
+        return false;
+      }
+    })
+    .map((f) => {
+      const name = (f.properties?.name as string | undefined) ?? undefined;
+      const simplified = simplify(f, { tolerance: 0.00002, highQuality: true }) as Feature<
+        Polygon | MultiPolygon
+      >;
+      // d3-geo wants CLOCKWISE outer rings; otherwise the fill inverts.
+      const cw = rewind(simplified, { reverse: true }) as Feature<Polygon | MultiPolygon>;
+      cw.properties = { name };
+      return cw;
+    });
+  console.log(`  kept ${parkWater.length} park water bodies`);
+
   // d3-geo treats polygons as spherical and expects CLOCKWISE outer rings;
   // rings the other way are read as "the whole globe minus this shape". Rewind
   // so the app fills the actual interiors.
@@ -405,6 +442,10 @@ async function main() {
     JSON.stringify(featureCollection(parkPaths), null, 2)
   );
   await writeFile(
+    join(OUT_DIR, "prospect-park-water.geojson"),
+    JSON.stringify(featureCollection(parkWater), null, 2)
+  );
+  await writeFile(
     join(OUT_DIR, "washington-park.geojson"),
     JSON.stringify(washingtonCW, null, 2)
   );
@@ -417,7 +458,7 @@ async function main() {
     JSON.stringify(featureCollection(streets.features as Feature<LineString | MultiLineString>[]), null, 2)
   );
 
-  console.log(`Done. Wrote 6 GeoJSON files to ${OUT_DIR}`);
+  console.log(`Done. Wrote 7 GeoJSON files to ${OUT_DIR}`);
 }
 
 main().catch((err) => {

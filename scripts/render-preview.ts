@@ -34,9 +34,15 @@ try {
 } catch {
   parkTrails = undefined;
 }
+let parkWater: FeatureCollection<Polygon | MultiPolygon> | undefined;
+try {
+  parkWater = read("prospect-park-water.geojson") as FeatureCollection<Polygon | MultiPolygon>;
+} catch {
+  parkWater = undefined;
+}
 
 const angle = process.argv[2] === undefined ? NaN : Number(process.argv[2]);
-const model = buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
+const model = buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, parkWater, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -47,6 +53,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
   </defs>
   <rect x="0" y="0" width="${model.width}" height="${model.height}" fill="${COLORS.paper}"/>
   <g>${model.parkPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}"/>`).join("")}</g>
+  <g clip-path="url(#park)">${model.parkWaterPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}" stroke-linejoin="round"/>`).join("")}</g>
   <g clip-path="url(#park)" fill="none" stroke-linecap="round">
     ${model.parkTrailPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" stroke-dasharray="0.5 4"/>`).join("")}
     ${model.parkDrivePaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" stroke-dasharray="7 5"/>`).join("")}

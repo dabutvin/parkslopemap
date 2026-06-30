@@ -13,6 +13,7 @@ import { buildMapModel } from "../lib/buildMap";
 import boundaryRaw from "../data/park-slope-boundary.geojson?raw";
 import parkRaw from "../data/prospect-park.geojson?raw";
 import parkPathsRaw from "../data/prospect-park-paths.geojson?raw";
+import parkWaterRaw from "../data/prospect-park-water.geojson?raw";
 import washingtonRaw from "../data/washington-park.geojson?raw";
 import greenSpacesRaw from "../data/green-spaces.geojson?raw";
 import streetsRaw from "../data/streets.geojson?raw";
@@ -21,6 +22,7 @@ import placesRaw from "../data/places.geojson?raw";
 const boundary = JSON.parse(boundaryRaw) as Feature<Polygon>;
 const park = JSON.parse(parkRaw) as Feature<Polygon | MultiPolygon>;
 const parkTrails = JSON.parse(parkPathsRaw) as FeatureCollection<LineString | MultiLineString>;
+const parkWater = JSON.parse(parkWaterRaw) as FeatureCollection<Polygon | MultiPolygon>;
 const greens = JSON.parse(washingtonRaw) as Feature<Polygon | MultiPolygon>;
 const greenSpaces = JSON.parse(greenSpacesRaw) as FeatureCollection<Polygon | MultiPolygon>;
 const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLineString>;
@@ -38,7 +40,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 export function NeighborhoodMap() {
   const model = useMemo(
-    () => buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, places }, { width: DESIGN_WIDTH }),
+    () => buildMapModel({ boundary, park, greens, greenSpaces, streets, parkTrails, parkWater, places }, { width: DESIGN_WIDTH }),
     []
   );
 
@@ -218,6 +220,12 @@ export function NeighborhoodMap() {
       <g className="ps-layer ps-layer--park">
         {model.parkPaths.map((p, i) => (
           <path key={`park-${i}`} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} />
+        ))}
+      </g>
+
+      <g className="ps-layer ps-layer--water" clipPath="url(#ps-park-clip)">
+        {model.parkWaterPaths.map((p) => (
+          <path key={p.key} className="ps-water" d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill={p.fill ?? "none"} strokeLinejoin="round" />
         ))}
       </g>
 

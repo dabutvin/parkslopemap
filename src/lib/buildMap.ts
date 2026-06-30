@@ -22,6 +22,8 @@ export const COLORS = {
   street: "#b7a78f",
   parkTrail: "#7d976a",
   parkDrive: "#6a8456",
+  water: "#9ec7da",
+  waterInk: "#5c869e",
 };
 
 // Roads (by OSM name) that belong to Grand Army Plaza. They're pulled out of the
@@ -94,6 +96,8 @@ export interface MapModel {
   /** The projected Prospect Park polygon path (used to clip the park trails). */
   parkD: string;
   parkPaths: RoughSubPath[];
+  /** Prospect Park's water bodies (Lake, Lullwater, pools), filled blue and clipped to the park. */
+  parkWaterPaths: KeyedSubPath[];
   /** Prospect Park footpaths, drawn as fine dotted trails (clipped to the park). */
   parkTrailPaths: KeyedSubPath[];
   /** The Prospect Park carriage loop, drawn bolder than the footpaths. */
@@ -127,6 +131,8 @@ export interface BuildMapInput {
   streets: FeatureCollection<LineString | MultiLineString>;
   /** Prospect Park's internal paths + carriage loop (each feature has kind). */
   parkTrails?: FeatureCollection<LineString | MultiLineString>;
+  /** Prospect Park's water bodies (Lake, Lullwater, pools). */
+  parkWater?: FeatureCollection<Polygon | MultiPolygon>;
   places?: FeatureCollection<Point>;
 }
 
@@ -142,7 +148,7 @@ export interface BuildMapOptions {
  * serializable model of everything that needs to be drawn.
  */
 export function buildMapModel(
-  { boundary, park, greens, greenSpaces, streets, parkTrails, places }: BuildMapInput,
+  { boundary, park, greens, greenSpaces, streets, parkTrails, parkWater, places }: BuildMapInput,
   { width, padding = 60, angle = DEFAULT_ANGLE }: BuildMapOptions
 ): MapModel {
   // Reserve room on the right so Prospect Park reads as a band on the east.
@@ -172,6 +178,25 @@ export function buildMapModel(
     roughness: 1.8,
     bowing: 1.5,
     seed: 7,
+  });
+
+  // Prospect Park's water bodies (Lake, Lullwater, pools), painted blue over the
+  // green. Roughened as filled polygons; the renderer clips them to the park so
+  // any stray edges stay inside the green mass.
+  const parkWaterPaths: KeyedSubPath[] = [];
+  (parkWater?.features ?? []).forEach((f, i) => {
+    const d = path(f) ?? "";
+    if (!d) return;
+    const sub = roughen(d, {
+      fill: COLORS.water,
+      fillStyle: "solid",
+      stroke: "none",
+      strokeWidth: 0,
+      roughness: 1.6,
+      bowing: 1.2,
+      seed: i + 500,
+    }).map((p, j) => ({ ...p, key: `water-${i}-${j}` }));
+    parkWaterPaths.push(...sub);
   });
 
   // Inner green spaces sit *over* the neighborhood fill, so they need their own
@@ -312,6 +337,7 @@ export function buildMapModel(
     boundaryD,
     parkD,
     parkPaths,
+    parkWaterPaths,
     parkTrailPaths,
     parkDrivePaths,
     greenPaths,
