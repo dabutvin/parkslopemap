@@ -366,6 +366,23 @@ export function NeighborhoodMap() {
             />
           </clipPath>
         )}
+        <filter
+          id="ps-poi-outline"
+          x="-40%"
+          y="-40%"
+          width="180%"
+          height="180%"
+          colorInterpolationFilters="sRGB"
+        >
+          <feMorphology in="SourceAlpha" operator="dilate" radius="5.6" result="dilated" />
+          <feComposite in="dilated" in2="SourceAlpha" operator="out" result="ring" />
+          <feFlood floodColor="#ffffff" floodOpacity="1" result="color" />
+          <feComposite in="color" in2="ring" operator="in" result="outline" />
+          <feMerge>
+            <feMergeNode in="outline" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
       <rect className="ps-map__paper" x="0" y="0" width={model.width} height={model.height} />
@@ -464,26 +481,31 @@ export function NeighborhoodMap() {
             }}
             transform={`translate(${poi.x} ${poi.y}) scale(${poi.scale}) translate(${-poi.anchorX} ${-poi.anchorY})`}
           >
-            {/* Invisible hit area so the whole footprint is easy to click. */}
-            <rect
-              className="ps-poi__hit"
-              x={-6}
-              y={-6}
-              width={poi.width + 12}
-              height={poi.height + 12}
-              fill="transparent"
-            />
-            {poi.parts.map((p) => (
-              <path
-                key={p.key}
-                d={p.d}
-                stroke={p.stroke}
-                strokeWidth={p.strokeWidth}
-                fill={p.fill ?? "none"}
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <g
+              className="ps-poi__figure"
+              filter={poi.id === selectedPoiId ? "url(#ps-poi-outline)" : undefined}
+            >
+              {/* Invisible hit area so the whole footprint is easy to click. */}
+              <rect
+                className="ps-poi__hit"
+                x={-6}
+                y={-6}
+                width={poi.width + 12}
+                height={poi.height + 12}
+                fill="transparent"
               />
-            ))}
+              {poi.parts.map((p) => (
+                <path
+                  key={p.key}
+                  d={p.d}
+                  stroke={p.stroke}
+                  strokeWidth={p.strokeWidth}
+                  fill={p.fill ?? "none"}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              ))}
+            </g>
           </g>
         ))}
       </g>

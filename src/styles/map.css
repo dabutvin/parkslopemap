@@ -299,19 +299,28 @@ body {
 
 .ps-poi {
   cursor: pointer;
-  /* Soft "lift" so a landmark reads as tappable. */
-  transition: filter 0.15s ease;
   outline: none;
 }
 
-.ps-poi:hover,
-.ps-poi:focus-visible {
+/* Hover/selected shadows on the outer group; outline filter is an SVG
+   attribute on the inner figure so CSS filter never clobbers it. */
+.ps-poi__figure {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+  transition: transform 0.18s ease;
+}
+
+.ps-poi:not(.ps-poi--selected):hover,
+.ps-poi:not(.ps-poi--selected):focus-visible {
   filter: drop-shadow(0 2px 3px rgba(91, 74, 58, 0.35));
 }
 
-.ps-poi--selected,
-.ps-poi--selected:hover {
-  filter: drop-shadow(0 3px 5px rgba(168, 65, 47, 0.45));
+.ps-poi--selected {
+  filter: drop-shadow(0 2px 5px rgba(91, 74, 58, 0.32));
+}
+
+.ps-poi--selected .ps-poi__figure {
+  transform: scale(1.07);
 }
 
 /* Detail drawer (slides from the right; becomes a bottom sheet on narrow screens). */
