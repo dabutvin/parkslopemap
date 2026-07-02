@@ -549,10 +549,12 @@ export function NeighborhoodMap() {
             {label.name}
           </text>
         ))}
-        {model.pois.map((poi) => (
+        {model.pois
+          .filter((poi) => poi.id === selectedPoiId)
+          .map((poi) => (
           <text
             key={poi.id}
-            className="ps-label ps-label--poi"
+            className="ps-label ps-label--poi ps-label--selected"
             x={poi.labelX}
             y={poi.labelY}
           >

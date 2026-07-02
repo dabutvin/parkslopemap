@@ -1836,7 +1836,255 @@ function memorialPresbyterian(): BuildingDrawing {
   push({ d: `M ${r(trCx)} ${r(trApex)} L ${r(trCx)} ${r(trApex - 5)}`, stroke: C.ink, strokeWidth: 1, roughness: 0.7 }); // finial
   push({ d: ellipse(trCx, trSpring + 20, 3, 3), fill: C.glass, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
 
-  return { width: W, height: yWater + 6, anchorX: W / 2, anchorY: yWater, scale: 0.32, parts };
+  return { width: W, height: yWater + 6, anchorX: W / 2, anchorY: yWater, scale: 0.25, parts };
+}
+
+/**
+ * Grace United Methodist Church (1882–1883, Parfitt Brothers), Seventh Avenue at
+ * St. John's Place — diagonally across from Memorial Presbyterian. A Victorian
+ * Gothic church of sandstone and brownstone with terra-cotta trim and Romanesque
+ * / Moorish touches. Its square corner tower was originally crowned by a tall
+ * octagonal cone spire; the spire was blown off in the hurricane of September 15,
+ * 1944 and never replaced, so the tower is drawn here truncated — capped by a
+ * low hipped lid and a battlemented parapet where the steeple once rose. Beside
+ * it, the gabled Seventh Avenue front carries the great traceried stained-glass
+ * window over a deep pointed entrance.
+ */
+function graceMethodist(): BuildingDrawing {
+  const W = 116;
+  const parts: BuildingPart[] = [];
+
+  let seed = 980;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const yWater = 250; // sidewalk
+  const yBase = 243;
+
+  // Square corner tower (right) — truncated where the lost spire used to be.
+  const tL = 62;
+  const tR = 110;
+  const tCx = (tL + tR) / 2; // 86
+  const tTop = 70; // top of the masonry shaft / base of the parapet
+  const parTop = 58; // top of the battlemented parapet
+  const lidApex = 50; // apex of the low hipped cap that now lids the tower
+
+  // Gabled Seventh Avenue front (left), lower than the tower.
+  const nL = 0;
+  const nR = 62;
+  const nCx = (nL + nR) / 2; // 31
+  const naveEave = 152; // steep slate roof springs here
+  const naveApex = 104;
+
+  const pinnacle = (cx: number, baseY: number, h: number, w: number) => {
+    const capH = h * 0.5;
+    const shaftTop = baseY - (h - capH);
+    push({ d: rect(cx - w / 2, shaftTop, w, h - capH), fill: C.bstone, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+    push({ d: `M ${r(cx - w / 2)} ${r(shaftTop)} L ${r(cx)} ${r(baseY - h)} L ${r(cx + w / 2)} ${r(shaftTop)} Z`, fill: C.bstoneDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  };
+
+  // Ground shadow first.
+  push({ d: ellipse(W / 2, yWater + 2, W * 0.58, 9), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // --- Nave gable front (drawn first; the tower overlaps its right edge) ---
+  // Steep slate roof slope behind the gable parapet.
+  push({ d: `M ${r(nL - 3)} ${r(naveEave + 4)} L ${r(nCx)} ${r(naveApex - 6)} L ${r(nR + 6)} ${r(naveEave + 4)} Z`, fill: C.slate, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  // Masonry gable wall.
+  push({
+    d: `M ${r(nL)} ${r(yBase)} L ${r(nL)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex)} ` +
+      `L ${r(nR)} ${r(naveEave)} L ${r(nR)} ${r(yBase)} Z`,
+    fill: C.bstone,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1.1,
+    bowing: 0.5,
+    fillStyle: "solid",
+  });
+  // Gable rake coping + apex pinnacle.
+  push({ d: `M ${r(nL - 1)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex - 1)} L ${r(nR + 1)} ${r(naveEave)}`, stroke: C.bstoneTrim, strokeWidth: 1.6, roughness: 0.8 });
+  pinnacle(nCx, naveApex + 2, 16, 5);
+  // A Romanesque corbel arcade band under the eaves (Moorish/Romanesque touch).
+  push({ d: rect(nL, naveEave - 7, nR - nL, 4), fill: C.bstoneTrim, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+  for (const ax of spread(nL + 2, nR - 2, 7, 4)) {
+    push({ d: archWindow(ax, naveEave - 6, 4, 4), fill: C.recess, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  }
+  // The great traceried pointed stained-glass window high in the gable.
+  push({ d: lancet(nL + 12, naveApex + 16, nR - nL - 24, 64), fill: C.glass, stroke: C.ink, strokeWidth: 1.4, roughness: 0.8, fillStyle: "solid" });
+  for (const mx of [nCx - 10, nCx, nCx + 10]) {
+    push({ d: `M ${r(mx)} ${r(naveApex + 34)} L ${r(mx)} ${r(yBase - 56)}`, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7 });
+  }
+  // Small rose/wheel window over the window head.
+  push({ d: ellipse(nCx, naveApex + 26, 6, 6), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(nCx - 6)} ${r(naveApex + 26)} L ${r(nCx + 6)} ${r(naveApex + 26)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  push({ d: `M ${r(nCx)} ${r(naveApex + 20)} L ${r(nCx)} ${r(naveApex + 32)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  // Deep pointed entrance in the gable base.
+  push({ d: lancet(nCx - 12, yBase - 44, 24, 44), fill: C.door, stroke: C.ink, strokeWidth: 1.5, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(nCx)} ${r(yBase - 28)} L ${r(nCx)} ${r(yBase)}`, stroke: C.bstoneTrim, strokeWidth: 0.8, roughness: 0.7 });
+  // Nave corner buttress on the far left + paired side-aisle lancets.
+  push({ d: rect(nL - 3, naveEave + 6, 5, yBase - naveEave - 6), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  for (const wx of [nL + 6, nR - 18]) {
+    push({ d: lancet(wx, naveEave + 14, 11, 40), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  }
+
+  // --- Tower (square, truncated) ---
+  push({ d: rect(tL, tTop, tR - tL, yBase - tTop), fill: C.bstone, stroke: C.ink, strokeWidth: 1.6, roughness: 1.1, bowing: 0.4, fillStyle: "solid" });
+  push({ d: rect(tR - 6, tTop, 6, yBase - tTop), fill: C.bstoneDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  // Corner buttresses.
+  push({ d: rect(tL - 3, tTop + 12, 5, yBase - tTop - 12), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(tR - 2, tTop + 12, 5, yBase - tTop - 12), fill: C.bstoneDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  // String courses.
+  for (const yy of [tTop + 40, tTop + 88]) {
+    push({ d: `M ${r(tL - 2)} ${r(yy)} L ${r(tR + 2)} ${r(yy)}`, stroke: C.bstoneTrim, strokeWidth: 1.2, roughness: 0.7 });
+  }
+  // Belfry: round-arched (Romanesque) paired louvers near the top.
+  push({ d: archWindow(tCx - 16, tTop + 10, 13, 28), fill: C.recess, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  push({ d: archWindow(tCx + 3, tTop + 10, 13, 28), fill: C.recess, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  // A round oculus mid-shaft.
+  push({ d: ellipse(tCx, tTop + 60, 7, 7), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(tCx - 7)} ${r(tTop + 60)} L ${r(tCx + 7)} ${r(tTop + 60)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  // Entrance porch in the tower base (the church's main entrance).
+  push({ d: lancet(tCx - 13, yBase - 40, 26, 40), fill: C.door, stroke: C.ink, strokeWidth: 1.5, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(yBase - 24)} L ${r(tCx)} ${r(yBase)}`, stroke: C.bstoneTrim, strokeWidth: 0.8, roughness: 0.7 });
+
+  // --- Truncated top where the lost 1944 spire once rose ---
+  // Battlemented parapet band.
+  push({ d: rect(tL - 2, parTop, tR - tL + 4, tTop - parTop), fill: C.bstoneTrim, stroke: C.ink, strokeWidth: 1.3, roughness: 0.9, fillStyle: "solid" });
+  for (const mx of spread(tL - 1, tR + 1, 4, 8)) {
+    push({ d: rect(mx, parTop - 5, 8, 6), fill: C.bstoneTrim, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  }
+  // Low hipped lid capping the open tower (the post-1944 truncation).
+  push({ d: `M ${r(tL + 2)} ${r(parTop)} L ${r(tCx)} ${r(lidApex)} L ${r(tR - 2)} ${r(parTop)} Z`, fill: C.slate, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(lidApex)} L ${r(tR - 2)} ${r(parTop)} L ${r(tCx)} ${r(parTop)} Z`, fill: C.slateDark, stroke: "none", strokeWidth: 0, roughness: 0.9, fillStyle: "solid" });
+  // Stub corner pinnacles flanking where the spire stood.
+  pinnacle(tL + 2, parTop + 1, 16, 6);
+  pinnacle(tR - 2, parTop + 1, 16, 6);
+
+  return { width: W, height: yWater + 6, anchorX: W / 2, anchorY: yWater, scale: 0.25, parts };
+}
+
+/**
+ * St. Francis Xavier Roman Catholic Church (1900–1904, Thomas Houghton),
+ * Sixth Avenue at Carroll Street: an Early English Gothic Revival church in
+ * rough-cut granite ashlar trimmed with Indiana limestone. Drawn from Sixth
+ * Avenue: a lower gabled nave on the left whose great rose window and pointed
+ * entrance face the avenue, and a massive corner tower on the right rising
+ * through an open belfry and broached octagonal spire ringed by gargoyles and
+ * corner pinnacles.
+ */
+function stFrancisXavier(): BuildingDrawing {
+  const W = 128;
+  const parts: BuildingPart[] = [];
+
+  let seed = 1040;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const yWater = 248; // sidewalk
+  const yBase = 241;
+
+  // Corner tower (right) + broached spire.
+  const tL = 66;
+  const tR = 122;
+  const tCx = (tL + tR) / 2; // 94
+  const tTop = 88; // base of the spire / top of the belfry stage
+  const spireApex = 4;
+
+  // Nave (left), lower gabled granite front.
+  const nL = 0;
+  const nR = 66;
+  const nCx = (nL + nR) / 2; // 33
+  const naveEave = 148; // steep slate roof springs here
+  const naveApex = 102;
+
+  const pinnacle = (cx: number, baseY: number, h: number, w: number) => {
+    const capH = h * 0.5;
+    const shaftTop = baseY - (h - capH);
+    push({ d: rect(cx - w / 2, shaftTop, w, h - capH), fill: C.granite, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+    push({ d: `M ${r(cx - w / 2)} ${r(shaftTop)} L ${r(cx)} ${r(baseY - h)} L ${r(cx + w / 2)} ${r(shaftTop)} Z`, fill: C.limeDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  };
+
+  // Ground shadow first.
+  push({ d: ellipse(W / 2, yWater + 2, W * 0.58, 9), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // --- Nave gable front (drawn first; the tower overlaps its right edge) ---
+  // Steep slate roof slope behind the gable parapet.
+  push({ d: `M ${r(nL - 3)} ${r(naveEave + 4)} L ${r(nCx)} ${r(naveApex - 6)} L ${r(nR + 6)} ${r(naveEave + 4)} Z`, fill: C.slate, stroke: C.ink, strokeWidth: 1.2, roughness: 1, fillStyle: "solid" });
+  // Granite gable wall.
+  push({
+    d: `M ${r(nL)} ${r(yBase)} L ${r(nL)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex)} ` +
+      `L ${r(nR)} ${r(naveEave)} L ${r(nR)} ${r(yBase)} Z`,
+    fill: C.granite,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1.1,
+    bowing: 0.5,
+    fillStyle: "solid",
+  });
+  // Limestone coping band along the eaves.
+  push({ d: rect(nL, naveEave - 5, nR - nL, 5), fill: C.lime, stroke: C.ink, strokeWidth: 1, roughness: 0.8, fillStyle: "solid" });
+  // Gable rake coping.
+  push({ d: `M ${r(nL - 1)} ${r(naveEave)} L ${r(nCx)} ${r(naveApex - 1)} L ${r(nR + 1)} ${r(naveEave)}`, stroke: C.lime, strokeWidth: 1.6, roughness: 0.8 });
+  // The great rose window high in the gable.
+  push({ d: ellipse(nCx, naveApex + 22, 14, 14), fill: C.glass, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4;
+    const x1 = nCx + Math.cos(a) * 14;
+    const y1 = naveApex + 22 + Math.sin(a) * 14;
+    const x2 = nCx + Math.cos(a + Math.PI / 8) * 7;
+    const y2 = naveApex + 22 + Math.sin(a + Math.PI / 8) * 7;
+    push({ d: `M ${r(x1)} ${r(y1)} L ${r(x2)} ${r(y2)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.6 });
+  }
+  push({ d: ellipse(nCx, naveApex + 22, 4, 4), fill: C.glass, stroke: C.ink, strokeWidth: 0.8, roughness: 0.7, fillStyle: "solid" });
+  // Flanking lancets beneath the rose.
+  for (const wx of [nL + 8, nR - 20]) {
+    push({ d: lancet(wx, naveEave + 10, 12, 52), fill: C.glass, stroke: C.ink, strokeWidth: 1.2, roughness: 0.8, fillStyle: "solid" });
+    push({ d: `M ${r(wx + 6)} ${r(naveEave + 22)} L ${r(wx + 6)} ${r(yBase - 10)}`, stroke: C.ink, strokeWidth: 0.7, roughness: 0.6 });
+  }
+  // Deep pointed entrance in the gable base.
+  push({ d: lancet(nCx - 13, yBase - 42, 26, 42), fill: C.door, stroke: C.ink, strokeWidth: 1.5, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(nCx)} ${r(yBase - 26)} L ${r(nCx)} ${r(yBase)}`, stroke: C.lime, strokeWidth: 0.8, roughness: 0.7 });
+  // Nave corner buttress on the far left.
+  push({ d: rect(nL - 3, naveEave + 6, 5, yBase - naveEave - 6), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  pinnacle(nL, naveEave + 6, 22, 6);
+
+  // --- Tower ---
+  push({ d: rect(tL, tTop, tR - tL, yBase - tTop), fill: C.granite, stroke: C.ink, strokeWidth: 1.6, roughness: 1.1, bowing: 0.4, fillStyle: "solid" });
+  push({ d: rect(tR - 7, tTop, 7, yBase - tTop), fill: C.graniteDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  // Corner buttresses.
+  push({ d: rect(tL - 3, tTop + 12, 5, yBase - tTop - 12), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  push({ d: rect(tR - 2, tTop + 12, 5, yBase - tTop - 12), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1, roughness: 0.9, fillStyle: "solid" });
+  // Limestone string courses.
+  for (const yy of [tTop + 42, tTop + 88]) {
+    push({ d: `M ${r(tL - 2)} ${r(yy)} L ${r(tR + 2)} ${r(yy)}`, stroke: C.lime, strokeWidth: 1.2, roughness: 0.7 });
+  }
+  // Open twin-arched belfry near the top.
+  push({ d: lancet(tCx - 16, tTop + 6, 14, 32), fill: C.recess, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  push({ d: lancet(tCx + 2, tTop + 6, 14, 32), fill: C.recess, stroke: C.ink, strokeWidth: 1.3, roughness: 0.8, fillStyle: "solid" });
+  // Tall lancet mid-tower.
+  push({ d: lancet(tCx - 7, tTop + 50, 14, 34), fill: C.glass, stroke: C.ink, strokeWidth: 1.1, roughness: 0.8, fillStyle: "solid" });
+  // Side entrance at the tower base.
+  push({ d: lancet(tCx - 12, yBase - 38, 24, 38), fill: C.door, stroke: C.ink, strokeWidth: 1.5, roughness: 0.8, fillStyle: "solid" });
+
+  // --- Broached octagonal spire (limestone) ---
+  push({ d: `M ${r(tL + 1)} ${r(tTop)} L ${r(tL + 12)} ${r(tTop - 20)} L ${r(tL + 12)} ${r(tTop)} Z`, fill: C.limeDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tR - 1)} ${r(tTop)} L ${r(tR - 12)} ${r(tTop - 20)} L ${r(tR - 12)} ${r(tTop)} Z`, fill: C.limeDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tL + 10)} ${r(tTop - 2)} L ${r(tCx)} ${r(spireApex)} L ${r(tR - 10)} ${r(tTop - 2)} Z`, fill: C.lime, stroke: C.ink, strokeWidth: 1.4, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(spireApex)} L ${r(tR - 10)} ${r(tTop - 2)} L ${r(tCx)} ${r(tTop - 2)} Z`, fill: C.limeDark, stroke: "none", strokeWidth: 0, roughness: 0.9, fillStyle: "solid" });
+  push({ d: `M ${r(tCx)} ${r(spireApex)} L ${r(tCx)} ${r(tTop - 2)}`, stroke: C.limeDark, strokeWidth: 0.8, roughness: 0.7 });
+  // Cross finial.
+  push({ d: `M ${r(tCx)} ${r(spireApex)} L ${r(tCx)} ${r(spireApex - 10)}`, stroke: C.ink, strokeWidth: 1.5, roughness: 0.7 });
+  push({ d: `M ${r(tCx - 3.5)} ${r(spireApex - 6)} L ${r(tCx + 3.5)} ${r(spireApex - 6)}`, stroke: C.ink, strokeWidth: 1.5, roughness: 0.7 });
+  // Gargoyles projecting from the spire base (the tower's signature detail).
+  for (const gx of [tL + 6, tR - 6]) {
+    push({ d: `M ${r(gx)} ${r(tTop + 2)} L ${r(gx + (gx < tCx ? -5 : 5))} ${r(tTop + 10)} L ${r(gx)} ${r(tTop + 8)} Z`, fill: C.graniteDark, stroke: C.ink, strokeWidth: 0.9, roughness: 0.9, fillStyle: "solid" });
+  }
+  // Corner pinnacles ringing the spire base.
+  pinnacle(tL + 2, tTop + 2, 26, 7);
+  pinnacle(tR - 2, tTop + 2, 26, 7);
+  pinnacle(tCx - 18, tTop, 18, 6);
+  pinnacle(tCx + 18, tTop, 18, 6);
+
+  return { width: W, height: yWater + 6, anchorX: W / 2, anchorY: yWater, scale: 0.25, parts };
 }
 
 /**
@@ -3036,6 +3284,8 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "old-first-reformed": oldFirstReformed,
   "st-augustine": stAugustine,
   "memorial-presbyterian": memorialPresbyterian,
+  "grace-methodist": graceMethodist,
+  "st-francis-xavier": stFrancisXavier,
   "park-slope-library": parkSlopeLibrary,
   "sanders-theatre": sandersTheatre,
   "long-meadow": longMeadowFlower,

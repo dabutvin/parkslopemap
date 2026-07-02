@@ -87,12 +87,6 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
     )
     .join("")}
   <g font-family="sans-serif">
-    ${model.pois
-      .map(
-        (poi) =>
-          `<text x="${poi.labelX}" y="${poi.labelY}" font-size="15" font-weight="700" fill="#a8412f" text-anchor="middle">${esc(poi.name)}</text>`
-      )
-      .join("")}
     <text x="${model.parkLabel.x}" y="${model.parkLabel.y}" font-size="30" font-weight="700" fill="#5a6f49" text-anchor="middle" transform="rotate(${model.parkLabel.angle} ${model.parkLabel.x} ${model.parkLabel.y})">${esc(model.parkLabel.name)}</text>
     ${model.northGreenLabels
       .map(

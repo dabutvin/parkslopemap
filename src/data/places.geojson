@@ -174,6 +174,40 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "grace-methodist",
+        "name": "Grace United Methodist Church",
+        "category": "Church",
+        "building": "grace-methodist",
+        "description": "A Victorian Gothic church at 33 Seventh Avenue and St. John's Place, designed by the Parfitt Brothers (architects of nearby St. Augustine's) and built 1882\u20131883 for a congregation founded in 1866. It stands diagonally across the intersection from Memorial Presbyterian, built of sandstone with terra-cotta trim and Romanesque and Moorish details, its big stained-glass window and gable facing Seventh Avenue and a long buttressed nave running back along St. John's Place. Note the missing steeple: the square corner tower was originally crowned by a tall octagonal cone spire, but it was blown off in the hurricane of September 15, 1944 and never replaced \u2014 the tower has stood truncated ever since.",
+        "photo": "/photos/grace-methodist-church.jpg",
+        "photoAlt": "Grace United Methodist Church at Seventh Avenue and St. John's Place, its square corner tower standing truncated where the octagonal spire was lost in the 1944 hurricane",
+        "photoCredit": "Beyond My Ken, 2013 \u00b7 Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.97355, 40.6762]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "st-francis-xavier",
+        "name": "St. Francis Xavier Church",
+        "category": "Church",
+        "building": "st-francis-xavier",
+        "description": "A granite-and-limestone Early English Gothic Revival church at 225 Sixth Avenue and Carroll Street, designed by Thomas Houghton and dedicated on May 15, 1904. Houghton trained in the office of Patrick Keely, America's most prolific Catholic church architect, and the parish he served was founded in 1886 by the Rev. David J. Hickey — who named it for his alma mater, Manhattan's Jesuit college. The congregation's first church, a small galvanized-metal \"tin church\" erected that same year, was moved to President Street when this permanent building replaced it; it still serves as the parish Lyceum. The great corner bell tower, ringed with gargoyles and crowned by a broached octagonal spire, received a 25-note chime in 1932. Today the church shares a parish with St. Augustine's down Sixth Avenue.",
+        "photo": "/photos/st-francis-xavier-church.jpg",
+        "photoAlt": "The granite corner tower and broached spire of St. Francis Xavier Church rising above Sixth Avenue and Carroll Street",
+        "photoCredit": "Jim Henderson, 2008 \u00b7 Wikimedia Commons (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.978385, 40.674281]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "park-slope-library",
         "name": "Park Slope Library",
         "category": "Landmark",
