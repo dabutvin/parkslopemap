@@ -1,0 +1,77 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "subway-7th-avenue",
+        "name": "7th Avenue",
+        "lines": "F,G"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9791, 40.6663]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "subway-15th-street",
+        "name": "15th Street–Prospect Park",
+        "lines": "F,G"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9795, 40.6604]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "subway-bergen-street",
+        "name": "Bergen Street",
+        "lines": "2,3"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9751, 40.6808]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "subway-prospect-park",
+        "name": "Prospect Park",
+        "lines": "B,Q,S"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9709, 40.6749]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "subway-union-street",
+        "name": "Union Street",
+        "lines": "R"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9831, 40.6773]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "subway-9th-street",
+        "name": "9th Street",
+        "lines": "R"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9883, 40.6708]
+      }
+    }
+  ]
+}

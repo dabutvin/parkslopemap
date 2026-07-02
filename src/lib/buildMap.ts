@@ -11,6 +11,7 @@ import { createProjection, DEFAULT_ANGLE } from "./projection";
 import { roughen, type RoughOptions, type RoughSubPath } from "./roughen";
 import { BUILDINGS } from "./buildings";
 import type { PlaceProperties } from "./places";
+import { buildSubwayMarker, type SubwayStopProperties } from "./subway";
 
 // Hand-drawn palette: warm paper, sage park, soft ink.
 export const COLORS = {
@@ -92,6 +93,25 @@ export interface PoiModel {
   labelY: number;
 }
 
+/** Non-clickable subway line bullets (MTA-style decoration). */
+export interface SubwayStopModel {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  scale: number;
+  anchorX: number;
+  anchorY: number;
+  bullets: {
+    line: string;
+    cx: number;
+    cy: number;
+    r: number;
+    fill: string;
+    parts: KeyedSubPath[];
+  }[];
+}
+
 export interface MapModel {
   width: number;
   height: number;
@@ -138,6 +158,8 @@ export interface MapModel {
   plazaLabel: ParkLabel;
   /** Points of interest (hand-drawn landmark buildings). */
   pois: PoiModel[];
+  /** Subway stops as small MTA line bullets (decorative, not clickable). */
+  subwayStops: SubwayStopModel[];
   /** Screen-space heading (degrees) that points to true north. */
   northAngle: number;
 }
@@ -159,6 +181,7 @@ export interface BuildMapInput {
   /** Prospect Park's water bodies (Lake, Lullwater, pools). */
   parkWater?: FeatureCollection<Polygon | MultiPolygon>;
   places?: FeatureCollection<Point, PlaceProperties>;
+  subwayStops?: FeatureCollection<Point, SubwayStopProperties>;
 }
 
 export interface BuildMapOptions {
@@ -173,7 +196,7 @@ export interface BuildMapOptions {
  * serializable model of everything that needs to be drawn.
  */
 export function buildMapModel(
-  { boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places }: BuildMapInput,
+  { boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places, subwayStops }: BuildMapInput,
   { width, padding = 60, angle = DEFAULT_ANGLE }: BuildMapOptions
 ): MapModel {
   // Reserve room on the right so Prospect Park reads as a band on the east, and
@@ -393,9 +416,13 @@ export function buildMapModel(
   });
 
   const pois = buildPois(places, project);
+  const subwayStopModels = buildSubwayStops(subwayStops, project);
   // Keep street/avenue labels clear of the POI buildings by feeding their
   // on-map footprints in as points to avoid.
-  const poiAvoid = pois.map((p) => [p.x, p.y - (p.anchorY * p.scale) / 2] as [number, number]);
+  const poiAvoid = [
+    ...pois.map((p) => [p.x, p.y - (p.anchorY * p.scale) / 2] as [number, number]),
+    ...subwayStopModels.map((s) => [s.x, s.y - (s.anchorY * s.scale) / 2] as [number, number]),
+  ];
   const avenueLabels = buildStreetLabels(streets, project, "avenue", poiAvoid);
   const streetLabels = buildStreetLabels(streets, project, "street", poiAvoid);
 
@@ -467,8 +494,54 @@ export function buildMapModel(
     parkLabel,
     plazaLabel,
     pois,
+    subwayStops: subwayStopModels,
     northAngle,
   };
+}
+
+/** Turn each subway-stop feature into roughened MTA line bullets. */
+function buildSubwayStops(
+  stops: FeatureCollection<Point, SubwayStopProperties> | undefined,
+  project: (coord: [number, number]) => [number, number]
+): SubwayStopModel[] {
+  if (!stops) return [];
+  const models: SubwayStopModel[] = [];
+
+  for (const feature of stops.features) {
+    const props = feature.properties;
+    const drawing = buildSubwayMarker(props.lines.split(","));
+    const [x, y] = project(feature.geometry.coordinates as [number, number]);
+
+    const bullets = drawing.bullets.map((bullet, i) => ({
+      line: bullet.line,
+      cx: bullet.cx,
+      cy: bullet.cy,
+      r: bullet.r,
+      fill: bullet.fill,
+      parts: roughen(bullet.d, {
+        fill: bullet.fill,
+        fillStyle: "solid",
+        stroke: COLORS.ink,
+        strokeWidth: 0.8,
+        roughness: 0.9,
+        bowing: 0.6,
+        seed: 1200 + i,
+      }).map((p, j) => ({ ...p, key: `${props.id}-${i}-${j}` })),
+    }));
+
+    models.push({
+      id: props.id,
+      name: props.name,
+      x,
+      y,
+      scale: drawing.scale,
+      anchorX: drawing.anchorX,
+      anchorY: drawing.anchorY,
+      bullets,
+    });
+  }
+
+  return models;
 }
 
 /**

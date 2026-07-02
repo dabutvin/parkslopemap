@@ -17,6 +17,7 @@ import type {
   MultiPolygon,
 } from "geojson";
 import type { PlaceProperties } from "../src/lib/places";
+import type { SubwayStopProperties } from "../src/lib/subway";
 import { buildMapModel, COLORS } from "../src/lib/buildMap";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -41,6 +42,7 @@ try {
   northStreets = undefined;
 }
 const places = read("places.geojson") as FeatureCollection<Point, PlaceProperties>;
+const subwayStops = read("subway-stops.geojson") as FeatureCollection<Point, SubwayStopProperties>;
 let parkTrails: FeatureCollection<LineString | MultiLineString> | undefined;
 try {
   parkTrails = read("prospect-park-paths.geojson") as FeatureCollection<LineString | MultiLineString>;
@@ -55,7 +57,7 @@ try {
 }
 
 const angle = process.argv[2] === undefined ? NaN : Number(process.argv[2]);
-const model = buildMapModel({ boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
+const model = buildMapModel({ boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places, subwayStops }, { width: 1000, ...(Number.isFinite(angle) ? { angle } : {}) });
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -79,6 +81,24 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
   <g>${model.boundaryOutline.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`).join("")}</g>
   <g>${model.plazaPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}" stroke-linecap="round"/>`).join("")}</g>
   <g${model.northClip ? ` clip-path="url(#north)"` : ""}>${model.northStreetPaths.map((p) => `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="none" stroke-linecap="round"/>`).join("")}</g>
+  ${model.subwayStops
+    .map(
+      (stop) =>
+        `<g transform="translate(${stop.x} ${stop.y}) scale(${stop.scale}) translate(${-stop.anchorX} ${-stop.anchorY})">${stop.bullets
+          .map(
+            (bullet) =>
+              `${bullet.parts
+                .map(
+                  (p) =>
+                    `<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.strokeWidth}" fill="${p.fill ?? "none"}" stroke-linecap="round" stroke-linejoin="round"/>`
+                )
+                .join("")}<text x="${bullet.cx}" y="${bullet.cy + 1}" font-family="sans-serif" font-size="11" font-weight="700" fill="#f7f0df" text-anchor="middle" dominant-baseline="middle">${esc(
+                bullet.line
+              )}</text>`
+          )
+          .join("")}</g>`
+    )
+    .join("")}
   ${model.pois
     .map(
       (poi) =>

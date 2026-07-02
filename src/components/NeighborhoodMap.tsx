@@ -9,6 +9,7 @@ import type {
   MultiPolygon,
 } from "geojson";
 import type { PlaceProperties } from "../lib/places";
+import type { SubwayStopProperties } from "../lib/subway";
 import { buildMapModel } from "../lib/buildMap";
 
 import boundaryRaw from "../data/park-slope-boundary.geojson?raw";
@@ -21,6 +22,7 @@ import northGreensRaw from "../data/north-greens.geojson?raw";
 import northStreetsRaw from "../data/north-streets.geojson?raw";
 import streetsRaw from "../data/streets.geojson?raw";
 import placesRaw from "../data/places.geojson?raw";
+import subwayStopsRaw from "../data/subway-stops.geojson?raw";
 
 const boundary = JSON.parse(boundaryRaw) as Feature<Polygon>;
 const park = JSON.parse(parkRaw) as Feature<Polygon | MultiPolygon>;
@@ -32,6 +34,7 @@ const northGreens = JSON.parse(northGreensRaw) as FeatureCollection<Polygon | Mu
 const northStreets = JSON.parse(northStreetsRaw) as FeatureCollection<LineString | MultiLineString>;
 const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLineString>;
 const places = JSON.parse(placesRaw) as FeatureCollection<Point, PlaceProperties>;
+const subwayStops = JSON.parse(subwayStopsRaw) as FeatureCollection<Point, SubwayStopProperties>;
 
 const DESIGN_WIDTH = 1000;
 
@@ -45,7 +48,7 @@ const clamp = (value: number, min: number, max: number) =>
 
 export function NeighborhoodMap() {
   const model = useMemo(
-    () => buildMapModel({ boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places }, { width: DESIGN_WIDTH }),
+    () => buildMapModel({ boundary, park, greens, greenSpaces, northGreens, northStreets, streets, parkTrails, parkWater, places, subwayStops }, { width: DESIGN_WIDTH }),
     []
   );
 
@@ -463,6 +466,35 @@ export function NeighborhoodMap() {
       >
         {model.northStreetPaths.map((p) => (
           <path key={p.key} d={p.d} stroke={p.stroke} strokeWidth={p.strokeWidth} fill="none" strokeLinecap="round" />
+        ))}
+      </g>
+
+      <g className="ps-layer ps-layer--subway" aria-hidden="true">
+        {model.subwayStops.map((stop) => (
+          <g
+            key={stop.id}
+            className="ps-subway"
+            transform={`translate(${stop.x} ${stop.y}) scale(${stop.scale}) translate(${-stop.anchorX} ${-stop.anchorY})`}
+          >
+            {stop.bullets.map((bullet) => (
+              <g key={bullet.line}>
+                {bullet.parts.map((p) => (
+                  <path
+                    key={p.key}
+                    d={p.d}
+                    stroke={p.stroke}
+                    strokeWidth={p.strokeWidth}
+                    fill={p.fill ?? "none"}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ))}
+                <text className="ps-subway__line" x={bullet.cx} y={bullet.cy + 1}>
+                  {bullet.line}
+                </text>
+              </g>
+            ))}
+          </g>
         ))}
       </g>
 
