@@ -5214,7 +5214,7 @@ function barclaysCenter(): BuildingDrawing {
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
-export const BUILDINGS: Record<string, BuildingBuilder> = {
+export const BUILDINGS = {
   "montauk-club": montaukClub,
   "obama-brownstone": brownstone,
   "plane-crash": airliner,
@@ -5245,4 +5245,6 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "cronyn-house": cronynHouse,
   "eccentric-house": eccentricHouse,
   "barclays-center": barclaysCenter,
-};
+} as const satisfies Record<string, BuildingBuilder>;
+
+export type BuildingKey = keyof typeof BUILDINGS;

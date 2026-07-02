@@ -3,12 +3,17 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
-import { BUILDINGS } from "../src/lib/buildings";
+import { BUILDINGS, type BuildingKey } from "../src/lib/buildings";
 import { roughen } from "../src/lib/roughen";
 import { COLORS } from "../src/lib/buildMap";
 
-const key = process.argv[2] ?? "montauk-club";
-const drawing = BUILDINGS[key]();
+const key = (process.argv[2] ?? "montauk-club") as BuildingKey;
+const builder = BUILDINGS[key];
+if (!builder) {
+  console.error(`Unknown building '${String(process.argv[2])}'. Known keys: ${Object.keys(BUILDINGS).join(", ")}`);
+  process.exit(1);
+}
+const drawing = builder();
 const S = 4;
 const pad = 30;
 const W = drawing.width * S + pad * 2;

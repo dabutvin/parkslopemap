@@ -10,6 +10,7 @@ import type {
 import { createProjection, DEFAULT_ANGLE } from "./projection";
 import { roughen, type RoughOptions, type RoughSubPath } from "./roughen";
 import { BUILDINGS } from "./buildings";
+import type { PlaceProperties } from "./places";
 
 // Hand-drawn palette: warm paper, sage park, soft ink.
 export const COLORS = {
@@ -157,7 +158,7 @@ export interface BuildMapInput {
   parkTrails?: FeatureCollection<LineString | MultiLineString>;
   /** Prospect Park's water bodies (Lake, Lullwater, pools). */
   parkWater?: FeatureCollection<Polygon | MultiPolygon>;
-  places?: FeatureCollection<Point>;
+  places?: FeatureCollection<Point, PlaceProperties>;
 }
 
 export interface BuildMapOptions {
@@ -475,22 +476,22 @@ export function buildMapModel(
  * skipped if it lacks a known `building` builder, so data can outrun art.
  */
 function buildPois(
-  places: FeatureCollection<Point> | undefined,
+  places: FeatureCollection<Point, PlaceProperties> | undefined,
   project: (coord: [number, number]) => [number, number]
 ): PoiModel[] {
   if (!places) return [];
   const pois: PoiModel[] = [];
 
   for (const feature of places.features) {
-    const props = feature.properties ?? {};
-    const buildingKey = props.building as string | undefined;
-    const builder = buildingKey ? BUILDINGS[buildingKey] : undefined;
+    const props = feature.properties;
+    const buildingKey = props.building;
+    const builder = BUILDINGS[buildingKey];
     if (!builder) continue;
 
     const drawing = builder();
     const [x, y] = project(feature.geometry.coordinates as [number, number]);
-    const offsetX = (props.displayOffsetX as number) ?? 0;
-    const offsetY = (props.displayOffsetY as number) ?? 0;
+    const offsetX = props.displayOffsetX ?? 0;
+    const offsetY = props.displayOffsetY ?? 0;
     const px = x + offsetX;
     const py = y + offsetY;
 
@@ -507,13 +508,13 @@ function buildPois(
     );
 
     pois.push({
-      id: (props.id as string) ?? buildingKey ?? "poi",
-      name: (props.name as string) ?? "",
-      category: (props.category as string) ?? "",
-      description: (props.description as string) ?? "",
-      photo: (props.photo as string) ?? undefined,
-      photoAlt: (props.photoAlt as string) ?? undefined,
-      photoCredit: (props.photoCredit as string) ?? undefined,
+      id: props.id,
+      name: props.name,
+      category: props.category,
+      description: props.description,
+      photo: props.photo,
+      photoAlt: props.photoAlt,
+      photoCredit: props.photoCredit,
       x: px,
       y: py,
       scale: drawing.scale,

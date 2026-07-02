@@ -16,6 +16,7 @@ import type {
   Polygon,
   MultiPolygon,
 } from "geojson";
+import type { PlaceProperties } from "../src/lib/places";
 import { buildMapModel, COLORS } from "../src/lib/buildMap";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -39,7 +40,7 @@ try {
 } catch {
   northStreets = undefined;
 }
-const places = read("places.geojson") as FeatureCollection<Point>;
+const places = read("places.geojson") as FeatureCollection<Point, PlaceProperties>;
 let parkTrails: FeatureCollection<LineString | MultiLineString> | undefined;
 try {
   parkTrails = read("prospect-park-paths.geojson") as FeatureCollection<LineString | MultiLineString>;

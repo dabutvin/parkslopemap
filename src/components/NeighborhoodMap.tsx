@@ -8,6 +8,7 @@ import type {
   Polygon,
   MultiPolygon,
 } from "geojson";
+import type { PlaceProperties } from "../lib/places";
 import { buildMapModel } from "../lib/buildMap";
 
 import boundaryRaw from "../data/park-slope-boundary.geojson?raw";
@@ -30,7 +31,7 @@ const greenSpaces = JSON.parse(greenSpacesRaw) as FeatureCollection<Polygon | Mu
 const northGreens = JSON.parse(northGreensRaw) as FeatureCollection<Polygon | MultiPolygon>;
 const northStreets = JSON.parse(northStreetsRaw) as FeatureCollection<LineString | MultiLineString>;
 const streets = JSON.parse(streetsRaw) as FeatureCollection<LineString | MultiLineString>;
-const places = JSON.parse(placesRaw) as FeatureCollection<Point>;
+const places = JSON.parse(placesRaw) as FeatureCollection<Point, PlaceProperties>;
 
 const DESIGN_WIDTH = 1000;
 
