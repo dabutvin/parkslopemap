@@ -106,6 +106,24 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "bailey-fountain",
+        "name": "Bailey Fountain",
+        "category": "Monument",
+        "building": "bailey-fountain",
+        "displayOffsetY": -14,
+        "description": "The bronze Art Deco fountain on the north side of Grand Army Plaza, the third waterwork to occupy the plaza's center. Financier Frank Bailey gave $125,000 in memory of his wife Mary Louise; architect Egerton Swartwout and sculptor Eugene Savage won the design competition, and the fountain was dedicated in 1932. At its summit, Wisdom steers the ship of Life while Felicity holds a cornucopia; Nereus and two trumpeting Nereids rise from the basin below. A popular gathering spot and backdrop for wedding photos, it was restored in 1956 and again in 2005.",
+        "photo": "/photos/bailey-fountain.jpg",
+        "photoAlt": "The Bailey Fountain at Grand Army Plaza with its bronze ship-of-Life sculpture group and circular basin",
+        "photoCredit": "Ad Meskens, April 2012 · Wikimedia Commons (CC BY-SA 3.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.97009, 40.67389]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "central-library",
         "name": "Brooklyn Public Library",
         "category": "Landmark",

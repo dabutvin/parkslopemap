@@ -502,7 +502,7 @@ function montaukClub(): BuildingDrawing {
     height: yWater + 6,
     anchorX: FW / 2,
     anchorY: yWater,
-    scale: 0.42,
+    scale: 0.36,
     parts,
   };
 }
@@ -1362,6 +1362,160 @@ function memorialArch(): BuildingDrawing {
     anchorX: W / 2,
     anchorY: yWater,
     scale: 0.4,
+    parts,
+  };
+}
+
+/**
+ * The Bailey Fountain (1932, Egerton Swartwout & Eugene Savage) on the north side
+ * of Grand Army Plaza — the third fountain to occupy the plaza's center. Drawn
+ * as its signature silhouette: a circular rockwork basin with green-blue water,
+ * bronze Nereids trumpeting from the sides, and the heroic ship-of-Life group
+ * at center (Wisdom at the tiller, Felicity with her cornucopia).
+ */
+function baileyFountain(): BuildingDrawing {
+  const W = 88;
+  const parts: BuildingPart[] = [];
+
+  let seed = 340;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const cx = W / 2; // 44
+  const yBasinTop = 52;
+  const yBasinBot = 88;
+  const yPedTop = 34;
+  const yPedBot = yBasinTop + 4;
+  const yFigTop = 8;
+  const yWater = 96;
+
+  // Ground shadow first.
+  push({
+    d: ellipse(cx, yWater + 2, W * 0.48, 8),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Basin water (drawn before the coping so rocks sit on the rim).
+  push({
+    d: ellipse(cx, (yBasinTop + yBasinBot) / 2, 38, 18),
+    fill: C.water,
+    stroke: C.waterDark,
+    strokeWidth: 1.2,
+    roughness: 1.1,
+    fillStyle: "solid",
+  });
+  // A few ripples across the pool.
+  for (const [rx, ry, rw, rh] of [[cx - 10, yBasinTop + 14, 14, 3], [cx + 8, yBasinTop + 22, 12, 2.5], [cx, yBasinTop + 30, 16, 3]] as const) {
+    push({ d: ellipse(rx, ry, rw, rh), fill: "none", stroke: C.waterDark, strokeWidth: 0.7, roughness: 0.9 });
+  }
+
+  // Rockwork coping ringing the basin.
+  for (let i = 0; i < 14; i++) {
+    const a = (i / 14) * Math.PI * 2 - Math.PI / 2;
+    const bx = cx + Math.cos(a) * 36;
+    const by = (yBasinTop + yBasinBot) / 2 + Math.sin(a) * 16;
+    push({
+      d: ellipse(bx, by, 5 + (i % 3), 4 + (i % 2)),
+      fill: i % 2 ? C.granite : C.graniteDark,
+      stroke: C.ink,
+      strokeWidth: 0.8,
+      roughness: 1.2,
+      fillStyle: "solid",
+    });
+  }
+
+  // Side Nereids emerging from the water, heads thrown back with conch shells.
+  const nereid = (nx: number, dir: 1 | -1) => {
+    push({
+      d: `M ${r(nx)} ${r(yBasinTop + 10)} Q ${r(nx + dir * 8)} ${r(yBasinTop + 2)} ${r(nx + dir * 5)} ${r(yBasinTop - 6)}`,
+      fill: C.bronze,
+      stroke: C.ink,
+      strokeWidth: 1.1,
+      roughness: 1,
+      fillStyle: "solid",
+    });
+    push({ d: ellipse(nx + dir * 5, yBasinTop - 8, 3.2, 3.6), fill: C.bronze, stroke: C.ink, strokeWidth: 0.8, roughness: 0.9, fillStyle: "solid" }); // head
+    // Conch shell raised to lips.
+    push({
+      d: `M ${r(nx + dir * 8)} ${r(yBasinTop - 10)} Q ${r(nx + dir * 14)} ${r(yBasinTop - 16)} ${r(nx + dir * 12)} ${r(yBasinTop - 8)}`,
+      stroke: C.bronzeDark,
+      strokeWidth: 1.6,
+      roughness: 1,
+      bowing: 1.2,
+    });
+    // Fish tail curling in the water.
+    push({
+      d: `M ${r(nx - dir * 2)} ${r(yBasinTop + 16)} Q ${r(nx + dir * 10)} ${r(yBasinTop + 24)} ${r(nx + dir * 16)} ${r(yBasinTop + 12)}`,
+      stroke: C.bronzeDark,
+      strokeWidth: 1.4,
+      roughness: 1.1,
+    });
+  };
+  nereid(cx - 28, -1);
+  nereid(cx + 28, 1);
+
+  // Central bronze pedestal / ship's prow rising from the basin.
+  push({
+    d: `M ${r(cx - 14)} ${r(yPedBot)} L ${r(cx)} ${r(yPedTop + 6)} L ${r(cx + 14)} ${r(yPedBot)} Z`,
+    fill: C.bronzeDark,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({
+    d: rect(cx - 10, yPedTop + 6, 20, yPedBot - yPedTop - 4),
+    fill: C.bronze,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+
+  // Nereus / reclining sea figure at the prow base.
+  push({ d: ellipse(cx, yPedTop + 14, 9, 4.5), fill: C.bronzeDark, stroke: C.ink, strokeWidth: 0.9, roughness: 1, fillStyle: "solid" });
+  push({ d: ellipse(cx - 6, yPedTop + 12, 2.2, 2.6), fill: C.bronze, stroke: C.ink, strokeWidth: 0.7, roughness: 0.9, fillStyle: "solid" });
+
+  // Standing figures atop the ship: Wisdom (left, at the tiller) and Felicity (right, cornucopia).
+  const standingFigure = (fx: number, armDir: 1 | -1) => {
+    push({ d: ellipse(fx, yFigTop + 4, 2.6, 3), fill: C.bronze, stroke: C.ink, strokeWidth: 0.7, roughness: 0.9, fillStyle: "solid" }); // head
+    push({
+      d: `M ${r(fx - 2.5)} ${r(yFigTop + 7)} L ${r(fx + 2.5)} ${r(yFigTop + 7)} L ${r(fx + 2)} ${r(yPedTop + 8)} L ${r(fx - 2)} ${r(yPedTop + 8)} Z`,
+      fill: C.bronze,
+      stroke: C.ink,
+      strokeWidth: 0.9,
+      roughness: 0.9,
+      fillStyle: "solid",
+    });
+    push({ d: `M ${r(fx + armDir * 2)} ${r(yFigTop + 10)} L ${r(fx + armDir * 8)} ${r(yFigTop + 6)}`, stroke: C.bronzeDark, strokeWidth: 1.2, roughness: 0.8 });
+  };
+  standingFigure(cx - 5, -1);
+  standingFigure(cx + 5, 1);
+
+  // Water jets arcing up from the basin toward the central group.
+  for (const [jx, jy, jdx, jdy] of [[cx - 18, yBasinTop + 8, cx - 8, yPedTop + 4], [cx + 18, yBasinTop + 8, cx + 8, yPedTop + 4], [cx, yBasinTop + 6, cx, yPedTop + 2]] as const) {
+    push({
+      d: `M ${r(jx)} ${r(jy)} Q ${r((jx + jdx) / 2)} ${r(jy - 10)} ${r(jdx)} ${r(jdy)}`,
+      stroke: "rgba(159,183,172,0.7)",
+      strokeWidth: 1.2,
+      roughness: 1.2,
+      bowing: 1.3,
+    });
+  }
+
+  // Low terrace the fountain sits on.
+  push({ d: rect(8, yBasinBot + 2, W - 16, yWater - yBasinBot - 2), fill: C.graniteDark, stroke: C.ink, strokeWidth: 1.1, roughness: 1, fillStyle: "solid" });
+
+  return {
+    width: W,
+    height: yWater + 4,
+    anchorX: cx,
+    anchorY: yWater,
+    scale: 0.38,
     parts,
   };
 }
@@ -4476,6 +4630,7 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "old-stone-house": oldStoneHouse,
   "litchfield-villa": litchfieldVilla,
   "memorial-arch": memorialArch,
+  "bailey-fountain": baileyFountain,
   "central-library": centralLibrary,
   "old-first-reformed": oldFirstReformed,
   "st-augustine": stAugustine,
