@@ -98,6 +98,16 @@ const C = {
   bloomCenterDark: "#5d3a22", // disc shade
   stem: "#5f7a45", // green stem
   leaf: "#86a85d", // lit leaf
+  // Dog Beach tones (a friendly golden retriever on the sandy shore).
+  dogFur: "#d4a85c", // warm golden coat
+  dogFurDark: "#b08840", // ears / shading
+  dogChest: "#e8c078", // lighter chest
+  dogNose: "#5b4a3a",
+  dogTongue: "#c87070",
+  ball: "#d4bc3a", // tennis ball at its feet
+  ballSeam: "rgba(255,255,255,0.75)",
+  sand: "#dcc89a", // sandy shore
+  sandDark: "#b8a476", // damp sand / edge
   // Brooklyn Botanic Garden tones (an abstract flowering bed + cherry branches).
   gPink: "#ecaac0", // cherry-blossom pink bloom
   gPinkDark: "#cd7f9c",
@@ -2751,6 +2761,205 @@ function longMeadowFlower(): BuildingDrawing {
 }
 
 /**
+ * Prospect Park Dog Beach — a happy golden retriever sitting on the sandy
+ * shore, facing the viewer: round head, floppy ears, closed smile-eyes, tongue
+ * out, and a tennis ball at its paws. Front-facing and blobby so it stays
+ * friendly at map scale (no stick legs or profile snout).
+ */
+function dogBeach(): BuildingDrawing {
+  const W = 76;
+  const H = 96;
+  const parts: BuildingPart[] = [];
+
+  let seed = 900;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const cx = W / 2; // 38
+  const groundY = H - 2;
+  const yWater = 68;
+
+  // Ground shadow first.
+  push({
+    d: ellipse(cx, groundY + 1, 30, 5),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Water band.
+  push({
+    d: rect(0, yWater, W, groundY - yWater + 2),
+    fill: "rgba(159,183,172,0.82)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.2,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(4)} ${r(yWater + 4)} Q ${r(cx)} ${r(yWater + 5)} ${r(W - 4)} ${r(yWater + 4)}`,
+    stroke: C.waterDark,
+    strokeWidth: 0.7,
+    roughness: 1.2,
+    bowing: 1.1,
+  });
+
+  // Sandy shore.
+  push({
+    d: `M 2 ${groundY} C 14 ${yWater + 5} 30 ${yWater + 3} ${cx} ${yWater + 5} C 46 ${yWater + 3} 62 ${yWater + 5} 74 ${groundY} Z`,
+    fill: C.sand,
+    stroke: C.sandDark,
+    strokeWidth: 1,
+    roughness: 1.2,
+    bowing: 1,
+    fillStyle: "solid",
+  });
+
+  const yBody = 58;
+  const yHead = 36;
+
+  // Tail wagging behind the body (drawn first).
+  push({
+    d: `M ${r(cx + 16)} ${r(yBody + 2)} Q ${r(cx + 28)} ${r(yBody - 14)} ${r(cx + 22)} ${r(yBody - 22)}`,
+    stroke: C.dogFur,
+    strokeWidth: 5,
+    roughness: 0.9,
+    bowing: 1.5,
+  });
+
+  // Sitting body — one round blob, wider at the base.
+  push({
+    d: ellipse(cx, yBody, 20, 17),
+    fill: C.dogFur,
+    stroke: C.dogFurDark,
+    strokeWidth: 1.1,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  // Lighter chest patch.
+  push({
+    d: ellipse(cx, yBody + 4, 12, 10),
+    fill: C.dogChest,
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 0.85,
+    fillStyle: "solid",
+  });
+
+  // Floppy ears (behind the head).
+  push({
+    d: ellipse(cx - 14, yHead + 2, 6, 11),
+    fill: C.dogFurDark,
+    stroke: C.dogFurDark,
+    strokeWidth: 0.8,
+    roughness: 0.85,
+    fillStyle: "solid",
+  });
+  push({
+    d: ellipse(cx + 14, yHead + 2, 6, 11),
+    fill: C.dogFurDark,
+    stroke: C.dogFurDark,
+    strokeWidth: 0.8,
+    roughness: 0.85,
+    fillStyle: "solid",
+  });
+
+  // Round head.
+  push({
+    d: ellipse(cx, yHead, 15, 14),
+    fill: C.dogFur,
+    stroke: C.dogFurDark,
+    strokeWidth: 1.1,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+
+  // Front paws — two soft bumps (no stick legs).
+  push({
+    d: ellipse(cx - 10, yBody + 14, 7, 5),
+    fill: C.dogFur,
+    stroke: C.dogFurDark,
+    strokeWidth: 0.9,
+    roughness: 0.85,
+    fillStyle: "solid",
+  });
+  push({
+    d: ellipse(cx + 10, yBody + 14, 7, 5),
+    fill: C.dogFur,
+    stroke: C.dogFurDark,
+    strokeWidth: 0.9,
+    roughness: 0.85,
+    fillStyle: "solid",
+  });
+
+  // Happy closed eyes (gentle upward arcs — no creepy dot stare).
+  push({
+    d: `M ${r(cx - 9)} ${r(yHead - 1)} Q ${r(cx - 6)} ${r(yHead - 4)} ${r(cx - 3)} ${r(yHead - 1)}`,
+    stroke: C.dogNose,
+    strokeWidth: 1.3,
+    roughness: 0.7,
+    bowing: 1,
+  });
+  push({
+    d: `M ${r(cx + 3)} ${r(yHead - 1)} Q ${r(cx + 6)} ${r(yHead - 4)} ${r(cx + 9)} ${r(yHead - 1)}`,
+    stroke: C.dogNose,
+    strokeWidth: 1.3,
+    roughness: 0.7,
+    bowing: 1,
+  });
+
+  // Nose and little smile.
+  push({
+    d: ellipse(cx, yHead + 3, 3.5, 2.8),
+    fill: C.dogNose,
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 0.7,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(cx - 4)} ${r(yHead + 6)} Q ${r(cx)} ${r(yHead + 9)} ${r(cx + 4)} ${r(yHead + 6)}`,
+    stroke: C.dogNose,
+    strokeWidth: 0.9,
+    roughness: 0.7,
+    bowing: 1.1,
+  });
+
+  // Tongue hanging out — the classic happy-dog tell.
+  push({
+    d: ellipse(cx, yHead + 11, 4, 5),
+    fill: C.dogTongue,
+    stroke: C.dogNose,
+    strokeWidth: 0.7,
+    roughness: 0.8,
+    fillStyle: "solid",
+  });
+
+  // Tennis ball at its feet.
+  const bx = cx + 22;
+  const by = yBody + 16;
+  push({
+    d: ellipse(bx, by, 7, 7),
+    fill: C.ball,
+    stroke: C.dogFurDark,
+    strokeWidth: 0.8,
+    roughness: 0.85,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(bx - 5)} ${r(by)} Q ${r(bx)} ${r(by - 6)} ${r(bx + 5)} ${r(by)}`,
+    stroke: C.ballSeam,
+    strokeWidth: 1,
+    roughness: 0.8,
+    bowing: 1,
+  });
+
+  return { width: W, height: H, anchorX: cx, anchorY: groundY, scale: 0.52, parts };
+}
+
+/**
  * The Prospect Park Boathouse (1905, Helmle & Huberty), a white glazed
  * terra-cotta Beaux-Arts pavilion on the Lullwater, modeled on Sansovino's
  * Library of St Mark in Venice. Drawn frontally as its signature: a grand
@@ -4614,6 +4823,152 @@ function eccentricHouse(): BuildingDrawing {
   push({ d: rect(14, yYard + 22, 10, 4), fill: C.gCoral, stroke: C.ink, strokeWidth: 0.8, roughness: 0.9, fillStyle: "solid" }); // prop crate
   push({ d: ellipse(62, yYard + 20, 3, 5), fill: C.gLilac, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
 
+  const pinwheel = (px: number, py: number, color: string) => {
+    push({ d: rect(px, py + 4, 1.5, 9), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+    push({ d: ellipse(px, py + 2, 5, 5), fill: color, stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+    push({ d: `M ${r(px - 2)} ${r(py + 2)} L ${r(px + 2)} ${r(py + 2)} M ${r(px)} ${r(py)} L ${r(px)} ${r(py + 4)}`, stroke: C.ink, strokeWidth: 0.5, roughness: 0.6 });
+  };
+  pinwheel(3, yYard + 4, C.gPink);
+  pinwheel(54, yYard + 16, C.gGold);
+  pinwheel(26, yYard + 2, C.gLilac);
+
+  const plasticBloom = (bx: number, by: number, color: string) => {
+    push({ d: rect(bx + 1, by + 4, 1.2, 6), fill: C.gPinkDark, stroke: C.ink, strokeWidth: 0.5, roughness: 0.6, fillStyle: "solid" });
+    push({ d: ellipse(bx, by, 3.5, 3.5), fill: color, stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+    push({ d: ellipse(bx + 2.5, by + 1, 2.5, 2.5), fill: color, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+    push({ d: ellipse(bx - 1.5, by + 2, 2.5, 2.5), fill: color, stroke: "none", strokeWidth: 0, roughness: 0.7, fillStyle: "solid" });
+  };
+  plasticBloom(32, yYard + 18, C.gPink);
+  plasticBloom(46, yYard + 22, C.gLilac);
+  plasticBloom(58, yYard + 12, C.gCoral);
+  plasticBloom(22, yYard + 2, C.gGold);
+  plasticBloom(6, yYard + 20, C.gPink);
+  plasticBloom(64, yYard + 6, C.gGold);
+
+  // Rubber duck, gnome, flamingo.
+  push({ d: ellipse(18, yYard + 10, 4, 3), fill: C.gGold, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(21, yYard + 9, 2, 1.5), fill: C.gGoldDark, stroke: C.ink, strokeWidth: 0.5, roughness: 0.7, fillStyle: "solid" });
+  push({ d: rect(28, yYard + 20, 4, 6), fill: C.gCoral, stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+  push({ d: `M ${r(26)} ${r(yYard + 20)} L ${r(30)} ${r(yYard + 20)} L ${r(28)} ${r(yYard + 15)} Z`, fill: C.gCoralDark, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(30, yYard + 18, 3, 3), fill: "#f4efe0", stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+  push({ d: rect(6, yYard + 12, 1.5, 12), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.65, fillStyle: "solid" });
+  push({ d: `M ${r(7)} ${r(yYard + 10)} L ${r(12)} ${r(yYard + 8)} L ${r(7)} ${r(yYard + 14)} Z`, fill: C.gPink, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(11, yYard + 8, 5, 1.2), fill: C.gPinkDark, stroke: C.ink, strokeWidth: 0.5, roughness: 0.7, fillStyle: "solid" });
+
+  // Flags, signs, planters.
+  push({ d: rect(64, yYard + 2, 1.2, 14), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.65, fillStyle: "solid" });
+  push({ d: `M ${r(65)} ${r(yYard + 2)} L ${r(70)} ${r(yYard + 5)} L ${r(65)} ${r(yYard + 8)} Z`, fill: C.gCoral, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(38, yYard + 6, 6, 5), fill: "#b56e41", stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+  push({ d: ellipse(41, yYard + 4, 5, 4), fill: C.gLilac, stroke: C.ink, strokeWidth: 0.6, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(48, yYard + 24, 5, 4), fill: "#b56e41", stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+  push({ d: ellipse(50.5, yYard + 22, 4, 3), fill: C.gPink, stroke: C.ink, strokeWidth: 0.6, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(18, yYard + 14, 1.2, 10), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.65, fillStyle: "solid" });
+  push({ d: rect(14, yYard + 12, 9, 5), fill: "#f4efe0", stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+  push({ d: `M ${r(15)} ${r(yYard + 14.5)} L ${r(22)} ${r(yYard + 14.5)} M ${r(15)} ${r(yYard + 16)} L ${r(20)} ${r(yYard + 16)}`, stroke: C.ink, strokeWidth: 0.45, roughness: 0.55 });
+  push({ d: rect(56, yYard + 2, 1.2, 8), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.65, fillStyle: "solid" });
+  push({ d: rect(52, yYard + 1, 7, 4), fill: C.gGold, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+
+  // Beach ball, crates, cutout, lawn chair.
+  push({ d: ellipse(52, yYard + 4, 4, 4), fill: C.gGold, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(49)} ${r(yYard + 4)} L ${r(55)} ${r(yYard + 4)} M ${r(52)} ${r(yYard + 1)} L ${r(52)} ${r(yYard + 7)}`, stroke: C.gCoral, strokeWidth: 0.45, roughness: 0.55 });
+  push({ d: rect(34, yYard + 24, 8, 4), fill: C.gCoralDark, stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+  push({ d: rect(35, yYard + 22, 6, 3), fill: "#7e9498", stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(44, yYard + 1, 1.2, 8), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.65, fillStyle: "solid" });
+  push({ d: `M ${r(42)} ${r(yYard + 1)} L ${r(47)} ${r(yYard + 1)} L ${r(46)} ${r(yYard + 7)} L ${r(43)} ${r(yYard + 7)} Z`, fill: C.brownTrim, stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+  push({ d: rect(10, yYard + 26, 7, 1.5), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+  push({ d: rect(10, yYard + 22, 1, 5), fill: C.rail, stroke: C.ink, strokeWidth: 0.55, roughness: 0.65, fillStyle: "solid" });
+  push({ d: rect(16, yYard + 22, 1, 5), fill: C.rail, stroke: C.ink, strokeWidth: 0.55, roughness: 0.65, fillStyle: "solid" });
+  push({ d: `M ${r(10)} ${r(yYard + 22)} L ${r(12)} ${r(yYard + 18)} L ${r(15)} ${r(yYard + 18)} L ${r(17)} ${r(yYard + 22)} Z`, fill: C.gLilac, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+
+  // Wind spinner, sidewalk spill.
+  push({ d: rect(60, yYard + 1, 1.2, 11), fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.65, fillStyle: "solid" });
+  push({ d: ellipse(61, yYard, 6, 2.5), fill: C.gLilac, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(61, yYard, 2.5, 6), fill: C.gPink, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(1, yYard + 24, 3, 2.5), fill: C.petal, stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+  push({ d: rect(66, yYard + 24, 3, 2), fill: C.gGoldDark, stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+  push({ d: ellipse(40, yYard + 26, 2.5, 2), fill: C.gPinkDark, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+
+  // Second wave — even more seasonal / junk pile.
+  // Jack-o-lantern + witch hat.
+  push({ d: ellipse(33, yYard + 10, 4.5, 4), fill: C.petal, stroke: C.ink, strokeWidth: 0.7, roughness: 0.85, fillStyle: "solid" });
+  push({ d: `M ${r(31)} ${r(yYard + 11)} L ${r(35)} ${r(yYard + 11)} M ${r(32.5)} ${r(yYard + 12.5)} L ${r(33.5)} ${r(yYard + 12.5)}`, stroke: C.ink, strokeWidth: 0.45, roughness: 0.55 });
+  push({ d: `M ${r(31)} ${r(yYard + 8)} L ${r(35)} ${r(yYard + 8)} L ${r(33)} ${r(yYard + 4)} Z`, fill: C.rail, stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+
+  // Teddy bear / stuffed animal.
+  push({ d: ellipse(24, yYard + 24, 4, 3.5), fill: C.brownTrim, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(22, yYard + 22, 2, 2), fill: C.brownTrim, stroke: C.ink, strokeWidth: 0.55, roughness: 0.75, fillStyle: "solid" });
+  push({ d: ellipse(26, yYard + 22, 2, 2), fill: C.brownTrim, stroke: C.ink, strokeWidth: 0.55, roughness: 0.75, fillStyle: "solid" });
+
+  // Toy wagon.
+  push({ d: rect(42, yYard + 18, 10, 4), fill: C.gCoral, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(44, yYard + 23, 2.5, 2.5), fill: C.rail, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  push({ d: ellipse(50, yYard + 23, 2.5, 2.5), fill: C.rail, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  push({ d: rect(51, yYard + 16, 1, 4), fill: C.rail, stroke: C.ink, strokeWidth: 0.5, roughness: 0.65, fillStyle: "solid" });
+
+  // Bird bath bowl on a pedestal.
+  push({ d: rect(2, yYard + 14, 1.5, 8), fill: C.rail, stroke: C.ink, strokeWidth: 0.55, roughness: 0.65, fillStyle: "solid" });
+  push({ d: ellipse(3, yYard + 12, 5, 3), fill: "#e8e4dc", stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+
+  // Tiki torch.
+  push({ d: rect(67, yYard + 10, 1.2, 12), fill: C.brownDark, stroke: C.ink, strokeWidth: 0.55, roughness: 0.65, fillStyle: "solid" });
+  push({ d: ellipse(67.5, yYard + 8, 3, 4), fill: C.gCoral, stroke: C.ink, strokeWidth: 0.6, roughness: 0.8, fillStyle: "solid" });
+
+  // Mushroom cluster (fairy-garden vibe).
+  push({ d: rect(55, yYard + 20, 1, 4), fill: "#f4efe0", stroke: C.ink, strokeWidth: 0.5, roughness: 0.65, fillStyle: "solid" });
+  push({ d: ellipse(55.5, yYard + 19, 4, 2.5), fill: C.gCoral, stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+  push({ d: rect(59, yYard + 22, 0.8, 3), fill: "#f4efe0", stroke: C.ink, strokeWidth: 0.45, roughness: 0.6, fillStyle: "solid" });
+  push({ d: ellipse(59.5, yYard + 21, 3, 2), fill: C.gLilac, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+
+  // Leaning umbrella.
+  push({ d: rect(12, yYard + 6, 1, 14), fill: C.rail, stroke: C.ink, strokeWidth: 0.5, roughness: 0.6, fillStyle: "solid" });
+  push({ d: `M ${r(8)} ${r(yYard + 6)} Q ${r(14)} ${r(yYard + 2)} ${r(20)} ${r(yYard + 6)} L ${r(12)} ${r(yYard + 8)} Z`, fill: C.gPink, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+
+  // Angel / statue figurine.
+  push({ d: rect(36, yYard + 14, 3, 8), fill: "#e8e4dc", stroke: C.ink, strokeWidth: 0.6, roughness: 0.8, fillStyle: "solid" });
+  push({ d: ellipse(37.5, yYard + 12, 3, 3), fill: "#e8e4dc", stroke: C.ink, strokeWidth: 0.55, roughness: 0.75, fillStyle: "solid" });
+  push({ d: `M ${r(34)} ${r(yYard + 16)} L ${r(32)} ${r(yYard + 12)} M ${r(41)} ${r(yYard + 16)} L ${r(43)} ${r(yYard + 12)}`, stroke: C.ink, strokeWidth: 0.45, roughness: 0.55 });
+
+  // Coiled garden hose.
+  push({ d: ellipse(30, yYard + 26, 5, 2.5), fill: C.glass, stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+  push({ d: ellipse(30, yYard + 26, 2.5, 1.5), fill: "rgba(143,185,95,0.35)", stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+
+  // String of lights draped across the yard.
+  push({ d: `M ${r(4)} ${r(yYard + 3)} Q ${r(20)} ${r(yYard + 7)} ${r(35)} ${r(yYard + 3)} Q ${r(50)} ${r(yYard - 1)} ${r(66)} ${r(yYard + 4)}`, stroke: C.rail, strokeWidth: 0.5, roughness: 0.55 });
+  for (const lx of [8, 18, 28, 38, 48, 58]) {
+    push({ d: ellipse(lx, yYard + (lx < 35 ? 4 : 3), 1.8, 1.8), fill: lx % 3 === 0 ? C.gGold : lx % 3 === 1 ? C.gPink : C.gCoral, stroke: "none", strokeWidth: 0, roughness: 0.6, fillStyle: "solid" });
+  }
+
+  // More figurines and junk on the sidewalk edge.
+  push({ d: ellipse(16, yYard + 27, 2, 2.5), fill: C.gLilac, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  push({ d: rect(22, yYard + 27, 4, 2), fill: C.gGoldDark, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  push({ d: ellipse(48, yYard + 27, 2.5, 2), fill: C.petalDark, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  push({ d: rect(54, yYard + 26, 3, 3), fill: "#7e9498", stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  push({ d: ellipse(62, yYard + 26, 2, 2), fill: C.gPink, stroke: C.ink, strokeWidth: 0.5, roughness: 0.65, fillStyle: "solid" });
+
+  // Small ladder leaning against nothing.
+  push({ d: rect(4, yYard + 8, 1.5, 14), fill: C.brownTrim, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  push({ d: rect(8, yYard + 10, 1.5, 12), fill: C.brownTrim, stroke: C.ink, strokeWidth: 0.55, roughness: 0.7, fillStyle: "solid" });
+  for (let ly = yYard + 11; ly < yYard + 20; ly += 3) {
+    push({ d: `M ${r(4)} ${r(ly)} L ${r(9)} ${r(ly + 1)}`, stroke: C.brownDark, strokeWidth: 0.5, roughness: 0.55 });
+  }
+
+  // Toy dinosaur (simple blob + tail).
+  push({ d: ellipse(46, yYard + 8, 5, 3.5), fill: C.gPinkDark, stroke: C.ink, strokeWidth: 0.65, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(41)} ${r(yYard + 8)} L ${r(38)} ${r(yYard + 6)} L ${r(41)} ${r(yYard + 10)} Z`, fill: C.gPinkDark, stroke: C.ink, strokeWidth: 0.55, roughness: 0.75, fillStyle: "solid" });
+
+  // Snowman head (seasonal mix — sits among the Halloween stuff).
+  push({ d: ellipse(20, yYard + 6, 3.5, 3.5), fill: "#f4efe0", stroke: C.ink, strokeWidth: 0.6, roughness: 0.75, fillStyle: "solid" });
+  push({ d: ellipse(19, yYard + 5, 0.8, 0.8), fill: C.rail, stroke: "none", strokeWidth: 0, roughness: 0.5, fillStyle: "solid" });
+  push({ d: ellipse(21, yYard + 5, 0.8, 0.8), fill: C.rail, stroke: "none", strokeWidth: 0, roughness: 0.5, fillStyle: "solid" });
+  push({ d: rect(19.5, yYard + 6.5, 2, 0.6), fill: C.gCoral, stroke: "none", strokeWidth: 0, roughness: 0.5, fillStyle: "solid" });
+
+  // Wind chime hanging from a stake.
+  push({ d: rect(40, yYard + 1, 1, 6), fill: C.rail, stroke: C.ink, strokeWidth: 0.5, roughness: 0.6, fillStyle: "solid" });
+  push({ d: `M ${r(36)} ${r(yYard + 7)} L ${r(44)} ${r(yYard + 7)}`, stroke: C.rail, strokeWidth: 0.45, roughness: 0.55 });
+  for (const cx of [37, 39.5, 42, 44.5]) {
+    push({ d: rect(cx, yYard + 7, 0.8, 5), fill: C.gGold, stroke: C.ink, strokeWidth: 0.4, roughness: 0.6, fillStyle: "solid" });
+  }
+
   return {
     width: W,
     height: yWater + 4,
@@ -4626,14 +4981,13 @@ function eccentricHouse(): BuildingDrawing {
 
 /**
  * Barclays Center (2012, SHoP Architects / AECOM): Brooklyn's arena at Atlantic
- * Yards, clad in weathering steel whose lattice facade reads like a giant woven
- * basket. Drawn as the Flatbush Avenue elevation — a low, wide corten bowl
- * bulging at mid-height, a deep cantilevered roof ring with the elliptical
- * oculus cut through it, basket-weave panel diamonds, and the blue entrance
- * sign over a glass arcade.
+ * Yards. Drawn as the Flatbush Avenue elevation — a low, wide horseshoe of
+ * weathering steel: two side piers joined by a deep cantilevered roof ring,
+ * open plaza recess beneath, elliptical oculus, blue LED sign, and a glass
+ * entrance band at street level.
  */
 function barclaysCenter(): BuildingDrawing {
-  const W = 192;
+  const W = 220;
   const parts: BuildingPart[] = [];
 
   let seed = 1480;
@@ -4641,28 +4995,23 @@ function barclaysCenter(): BuildingDrawing {
   const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
 
   const cx = W / 2;
-  const yWater = 162;
-  const yBase = 151;
-  const yEntTop = 132;
-  const yBelly = 88;
-  const yShoulder = 54;
-  const yBowlTop = 34;
-  const yCantBot = 30;
-  const yCantTop = 8;
+  const yWater = 138;
+  const yBase = 130;
+  const yGlassTop = 116;
 
-  const xBaseL = 34;
-  const xBaseR = 158;
-  const xBellyL = 18;
-  const xBellyR = 174;
-  const xShoulderL = 40;
-  const xShoulderR = 152;
-  const xBowlTopL = 54;
-  const xBowlTopR = 138;
-  const xCantL = 8;
-  const xCantR = 184;
+  // Horseshoe anchors — low and wide; the overhang is the widest element.
+  const xOutL = 28;
+  const xOutR = 192;
+  const xCantL = 4;
+  const xCantR = 216;
+  const xInL = 70;
+  const xInR = 150;
+  const yCantTop = 14;
+  const yCantOuter = 36;
+  const yCantInner = 38;
 
   push({
-    d: ellipse(cx, yWater + 2, W * 0.48, 11),
+    d: ellipse(cx, yWater + 2, W * 0.48, 9),
     fill: "rgba(91,74,58,0.16)",
     stroke: "none",
     strokeWidth: 0,
@@ -4670,131 +5019,143 @@ function barclaysCenter(): BuildingDrawing {
     fillStyle: "solid",
   });
 
-  // Main corten bowl — ship-hull profile, bulging at mid-height.
+  // Plaza void beneath the overhang — the open recess you walk into.
   push({
     d:
-      `M ${r(xBaseL)} ${r(yBase)} ` +
-      `C ${r(xBaseL - 4)} ${r(yEntTop + 6)} ${r(xBellyL + 2)} ${r(yBelly + 8)} ${r(xBellyL)} ${r(yBelly)} ` +
-      `C ${r(xBellyL - 2)} ${r(yShoulder + 6)} ${r(xShoulderL - 2)} ${r(yShoulder)} ${r(xShoulderL)} ${r(yShoulder)} ` +
-      `C ${r(xShoulderL + 2)} ${r(yBowlTop + 4)} ${r(xBowlTopL - 2)} ${r(yBowlTop)} ${r(xBowlTopL)} ${r(yBowlTop)} ` +
-      `L ${r(xBowlTopR)} ${r(yBowlTop)} ` +
-      `C ${r(xBowlTopR + 2)} ${r(yBowlTop + 4)} ${r(xShoulderR - 2)} ${r(yShoulder)} ${r(xShoulderR)} ${r(yShoulder)} ` +
-      `C ${r(xShoulderR + 2)} ${r(yShoulder + 6)} ${r(xBellyR + 2)} ${r(yBelly + 8)} ${r(xBellyR)} ${r(yBelly)} ` +
-      `C ${r(xBellyR - 2)} ${r(yEntTop + 6)} ${r(xBaseR + 4)} ${r(yEntTop + 2)} ${r(xBaseR)} ${r(yBase)} Z`,
+      `M ${r(xInL + 2)} ${r(yCantInner + 2)} ` +
+      `L ${r(xInR - 2)} ${r(yCantInner + 2)} ` +
+      `L ${r(xInR - 4)} ${r(yGlassTop)} ` +
+      `L ${r(xInL + 4)} ${r(yGlassTop)} Z`,
+    fill: C.recess,
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 0.75,
+    fillStyle: "solid",
+  });
+
+  // Single corten horseshoe — side legs + sweeping overhang, one continuous band.
+  push({
+    d:
+      `M ${r(xOutL)} ${r(yBase)} ` +
+      `C ${r(xOutL - 10)} ${r(yGlassTop + 4)} ${r(xCantL + 2)} ${r(yCantOuter + 18)} ${r(xCantL)} ${r(yCantOuter)} ` +
+      `L ${r(xCantL)} ${r(yCantTop)} ` +
+      `Q ${r(cx)} ${r(yCantTop - 8)} ${r(xCantR)} ${r(yCantTop)} ` +
+      `L ${r(xCantR)} ${r(yCantOuter)} ` +
+      `C ${r(xCantR - 2)} ${r(yCantOuter + 18)} ${r(xOutR + 10)} ${r(yGlassTop + 4)} ${r(xOutR)} ${r(yBase)} ` +
+      `L ${r(xInR)} ${r(yBase)} ` +
+      `L ${r(xInR + 2)} ${r(yGlassTop)} ` +
+      `L ${r(xInR - 2)} ${r(yCantInner + 8)} ` +
+      `L ${r(xInR - 10)} ${r(yCantInner)} ` +
+      `L ${r(xInL + 10)} ${r(yCantInner)} ` +
+      `L ${r(xInL + 2)} ${r(yCantInner + 8)} ` +
+      `L ${r(xInL - 2)} ${r(yGlassTop)} ` +
+      `L ${r(xInL)} ${r(yBase)} Z`,
     fill: C.corten,
     stroke: C.ink,
     strokeWidth: 1.6,
     roughness: 1,
-    bowing: 0.35,
+    bowing: 0.3,
     fillStyle: "solid",
   });
 
-  // Shaded right return and underside of the cantilever.
+  // Shaded right pier return.
   push({
     d:
-      `M ${r(xBellyR - 8)} ${r(yBelly - 4)} L ${r(xBellyR)} ${r(yBelly)} L ${r(xShoulderR)} ${r(yShoulder)} ` +
-      `L ${r(xBowlTopR)} ${r(yBowlTop)} L ${r(xBowlTopR - 10)} ${r(yBowlTop + 2)} L ${r(xShoulderR - 8)} ${r(yShoulder + 4)} Z`,
+      `M ${r(xOutR - 6)} ${r(yGlassTop + 10)} L ${r(xOutR)} ${r(yBase)} L ${r(xInR)} ${r(yBase)} ` +
+      `L ${r(xInR + 2)} ${r(yGlassTop)} L ${r(xInR - 6)} ${r(yCantInner + 12)} L ${r(xOutR - 14)} ${r(yCantInner + 18)} Z`,
     fill: C.cortenDark,
     stroke: "none",
     strokeWidth: 0,
     roughness: 1,
     fillStyle: "solid",
   });
+
+  // Underside shadow of the overhang lip.
   push({
-    d: `M ${r(xBowlTopL)} ${r(yBowlTop)} L ${r(xBowlTopR)} ${r(yBowlTop)} L ${r(xCantR - 4)} ${r(yCantBot)} L ${r(xCantL + 4)} ${r(yCantBot)} Z`,
-    fill: "rgba(63,51,39,0.35)",
+    d:
+      `M ${r(xCantL + 10)} ${r(yCantOuter)} L ${r(xCantR - 10)} ${r(yCantOuter)} ` +
+      `L ${r(xInR - 10)} ${r(yCantInner)} L ${r(xInL + 10)} ${r(yCantInner)} Z`,
+    fill: "rgba(63,51,39,0.45)",
     stroke: "none",
     strokeWidth: 0,
     roughness: 0.8,
     fillStyle: "solid",
   });
 
-  // Horizontal panel bands — the weathering-steel courses read as stripes.
-  for (let i = 0; i < 7; i++) {
-    const t = i / 6;
-    const yy = yEntTop + 4 + t * (yBowlTop - yEntTop - 8);
-    const inset = 6 + t * 18;
+  // Horizontal lattice bands on the left pier.
+  for (let i = 0; i < 5; i++) {
+    const t = i / 4;
+    const yy = yGlassTop + 6 + t * (yCantInner + 4 - yGlassTop);
+    const xOut = xOutL - 4 - t * 6;
+    const xIn = xInL + 4 + t * 4;
     push({
-      d: `M ${r(xBaseL + inset)} ${r(yy)} L ${r(xBaseR - inset)} ${r(yy)}`,
+      d: `M ${r(xOut)} ${r(yy)} L ${r(xIn)} ${r(yy - 1)}`,
       stroke: C.cortenDark,
       strokeWidth: 0.65,
       roughness: 0.65,
     });
   }
 
-  // Basket-weave diamonds — SHoP's signature diagrid of rust panels.
-  const weaveTop = yEntTop + 10;
-  const weaveBot = yShoulder + 6;
-  const rows = 4;
-  const cols = 6;
-  const rowH = (weaveBot - weaveTop) / rows;
-  for (let row = 0; row < rows; row++) {
-    const yt = weaveTop + row * rowH;
-    const yb = yt + rowH;
-    const t = row / (rows - 1 || 1);
-    const xl = xBellyL + 8 + t * 22;
-    const xr = xBellyR - 8 - t * 22;
-    const colW = (xr - xl) / cols;
-    for (let col = 0; col < cols; col++) {
-      const x0 = xl + col * colW;
-      const x1 = x0 + colW;
-      if ((row + col) % 2 === 0) {
-        push({ d: `M ${r(x0)} ${r(yt)} L ${r(x1)} ${r(yb)}`, stroke: C.cortenDark, strokeWidth: 0.75, roughness: 0.7 });
-        push({ d: `M ${r(x1)} ${r(yt)} L ${r(x0)} ${r(yb)}`, stroke: C.cortenDark, strokeWidth: 0.75, roughness: 0.7 });
-      }
-    }
+  // Horizontal lattice bands on the right pier.
+  for (let i = 0; i < 5; i++) {
+    const t = i / 4;
+    const yy = yGlassTop + 6 + t * (yCantInner + 4 - yGlassTop);
+    const xOut = xOutR + 4 + t * 6;
+    const xIn = xInR - 4 - t * 4;
+    push({
+      d: `M ${r(xIn)} ${r(yy - 1)} L ${r(xOut)} ${r(yy)}`,
+      stroke: C.cortenDark,
+      strokeWidth: 0.65,
+      roughness: 0.65,
+    });
   }
 
-  // Cantilevered roof ring — the great overhang with the oculus cut through.
+  // Bands across the overhang crown.
+  for (let i = 0; i < 3; i++) {
+    const yy = yCantTop + 4 + i * 7;
+    const inset = 18 + i * 12;
+    push({
+      d: `M ${r(xCantL + inset)} ${r(yy)} Q ${r(cx)} ${r(yy - 1)} ${r(xCantR - inset)} ${r(yy)}`,
+      stroke: C.cortenDark,
+      strokeWidth: 0.6,
+      roughness: 0.6,
+    });
+  }
+
+  // Oculus — bright horizontal opening in the overhang.
   push({
-    d:
-      `M ${r(xCantL)} ${r(yCantBot)} L ${r(xCantL + 6)} ${r(yCantTop + 2)} ` +
-      `Q ${r(cx - 22)} ${r(yCantTop - 2)} ${r(cx - 20)} ${r(yCantTop)} ` +
-      `L ${r(cx + 20)} ${r(yCantTop)} ` +
-      `Q ${r(cx + 22)} ${r(yCantTop - 2)} ${r(xCantR - 6)} ${r(yCantTop + 2)} ` +
-      `L ${r(xCantR)} ${r(yCantBot)} Z`,
-    fill: C.cortenLight,
-    stroke: C.ink,
-    strokeWidth: 1.5,
-    roughness: 0.95,
-    fillStyle: "solid",
-  });
-  push({
-    d: ellipse(cx, yCantTop + 4, 22, 8),
-    fill: C.recess,
+    d: ellipse(cx - 6, yCantTop + 10, 24, 8),
+    fill: "#e8eef0",
     stroke: C.cortenDark,
-    strokeWidth: 1.3,
+    strokeWidth: 1.1,
     roughness: 0.75,
     fillStyle: "solid",
   });
   push({
-    d: ellipse(cx, yCantTop + 4, 12, 4.5),
-    fill: "rgba(126,148,152,0.45)",
+    d: ellipse(cx - 6, yCantTop + 10, 15, 5),
+    fill: "rgba(184,212,224,0.55)",
     stroke: "none",
     strokeWidth: 0,
     roughness: 0.6,
     fillStyle: "solid",
   });
-  push({
-    d: `M ${r(xCantL + 10)} ${r(yCantBot)} L ${r(xCantR - 10)} ${r(yCantBot)}`,
-    stroke: C.cortenDark,
-    strokeWidth: 1.2,
-    roughness: 0.7,
-  });
 
-  // Blue "Barclays Center" sign band on the upper facade.
+  // Blue "Barclays Center" sign on the overhang face (upper right).
+  const signL = 118;
+  const signW = 78;
+  const signY = yCantTop + 18;
   push({
-    d: rect(46, yShoulder + 10, 58, 9),
-    fill: C.planeTrim,
+    d: rect(signL, signY, signW, 7),
+    fill: "#2a8fc4",
     stroke: C.ink,
-    strokeWidth: 0.9,
-    roughness: 0.7,
+    strokeWidth: 0.8,
+    roughness: 0.65,
     fillStyle: "solid",
   });
-  for (const tx of spread(50, 98, 6, 5)) {
+  for (const tx of spread(signL + 4, signL + signW - 4, 8, 5)) {
     push({
-      d: rect(tx, yShoulder + 12, 4.5, 5),
-      fill: "#c8dce4",
+      d: rect(tx, signY + 1, 4.5, 5),
+      fill: "#c8e4f4",
       stroke: "none",
       strokeWidth: 0,
       roughness: 0.5,
@@ -4802,46 +5163,50 @@ function barclaysCenter(): BuildingDrawing {
     });
   }
 
-  // Glass entrance arcade beneath the bowl.
+  // Glass entrance band between the two piers.
   push({
-    d: `M ${r(xBaseL + 8)} ${r(yBase)} L ${r(xBaseL + 4)} ${r(yEntTop)} L ${r(xBaseR - 4)} ${r(yEntTop)} L ${r(xBaseR - 8)} ${r(yBase)} Z`,
+    d:
+      `M ${r(xInL)} ${r(yBase)} L ${r(xInL - 2)} ${r(yGlassTop)} ` +
+      `L ${r(xInR + 2)} ${r(yGlassTop)} L ${r(xInR)} ${r(yBase)} Z`,
     fill: C.glass,
     stroke: C.ink,
-    strokeWidth: 1.3,
+    strokeWidth: 1.2,
     roughness: 0.9,
     fillStyle: "solid",
   });
-  for (const gx of spread(52, 140, 6, 11)) {
+  for (const gx of spread(xInL + 8, xInR - 8, 5, 9)) {
     push({
-      d: rect(gx, yEntTop + 3, 11, yBase - yEntTop - 5),
+      d: rect(gx, yGlassTop + 3, 9, yBase - yGlassTop - 5),
       fill: C.recess,
       stroke: C.ink,
-      strokeWidth: 0.85,
+      strokeWidth: 0.8,
       roughness: 0.7,
       fillStyle: "solid",
     });
     push({
-      d: `M ${r(gx + 5.5)} ${r(yEntTop + 3)} L ${r(gx + 5.5)} ${r(yBase - 2)}`,
+      d: `M ${r(gx + 4.5)} ${r(yGlassTop + 3)} L ${r(gx + 4.5)} ${r(yBase - 2)}`,
       stroke: C.glass,
       strokeWidth: 0.5,
       roughness: 0.5,
     });
   }
-  push({
-    d: `M ${r(xBaseL + 4)} ${r(yEntTop)} Q ${r(cx)} ${r(yEntTop - 6)} ${r(xBaseR - 4)} ${r(yEntTop)}`,
-    stroke: C.cortenLight,
-    strokeWidth: 1.4,
-    roughness: 0.8,
-  });
 
-  push({ d: rect(xCantL, yBase, xCantR - xCantL, yWater - yBase), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.1, roughness: 1, fillStyle: "solid" });
+  // Planted berm in the entry plaza.
+  push({
+    d: ellipse(cx, yBase - 2, 26, 6),
+    fill: "rgba(111,154,85,0.4)",
+    stroke: C.ink,
+    strokeWidth: 0.65,
+    roughness: 1,
+    fillStyle: "solid",
+  });
 
   return {
     width: W,
     height: yWater + 4,
     anchorX: cx,
     anchorY: yWater,
-    scale: 0.36,
+    scale: 0.38,
     parts,
   };
 }
@@ -4866,6 +5231,7 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "park-slope-library": parkSlopeLibrary,
   "sanders-theatre": sandersTheatre,
   "long-meadow": longMeadowFlower,
+  "dog-beach": dogBeach,
   "botanic-garden": botanicGarden,
   "prospect-park-zoo": prospectParkZoo,
   "boathouse": boathouse,

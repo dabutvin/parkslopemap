@@ -29,6 +29,8 @@ export const COLORS = {
 // Roads (by OSM name) that belong to Grand Army Plaza. They're pulled out of the
 // clipped street layer so the plaza can complete past the NE corner of the map.
 const PLAZA_STREETS = new Set(["Grand Army Plaza", "Plaza Street West", "Plaza Street East"]);
+// Streets that still draw but shouldn't get a floating name label.
+const STREET_LABEL_SKIP = new Set(["Times Plaza"]);
 // The two roads that actually trace the oval; an ellipse is fitted to them. The
 // other plaza roads are connectors that would only clutter the shape.
 const PLAZA_OVAL = new Set(["Plaza Street West", "Plaza Street East"]);
@@ -664,7 +666,7 @@ function buildStreetLabels(
 
   for (const f of collection.features) {
     const name = f.properties?.name as string | undefined;
-    if (!name || f.properties?.kind !== kind || PLAZA_STREETS.has(name)) continue;
+    if (!name || f.properties?.kind !== kind || PLAZA_STREETS.has(name) || STREET_LABEL_SKIP.has(name)) continue;
     const lines =
       f.geometry.type === "LineString" ? [f.geometry.coordinates] : f.geometry.coordinates;
     for (const line of lines) {

@@ -485,6 +485,23 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "dog-beach",
+        "name": "Dog Beach",
+        "category": "Park",
+        "building": "dog-beach",
+        "description": "The only place in Prospect Park where dogs are allowed to swim — a shallow cove at the Upper Pool on the Lake, just off the Peninsula near the 95 Prospect Park West entrance. During off-leash hours (5\u20139 a.m. and 9 p.m.\u20131 a.m.), dogs may wade and splash here while their owners watch from the sandy shore; at all other times they must stay on leash and out of the water. The beach was renovated and reopened by the Prospect Park Alliance in 2011, with a new fence, ramp, and improved drainage so the pool stays cleaner after heavy use. On a hot summer morning the scene is all wagging tails, tennis balls, and dogs shaking lake water onto delighted humans.",
+        "photo": "/photos/dog-beach.jpg",
+        "photoAlt": "Dogs playing and splashing at Prospect Park Dog Beach on a warm day in May",
+        "photoCredit": "RHeredia.817, May 2021 \u00b7 Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.97184, 40.66259]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "prospect-park-zoo",
         "name": "Prospect Park Zoo",
         "category": "Zoo",
