@@ -161,6 +161,7 @@
         "name": "Memorial Presbyterian Church",
         "category": "Church",
         "building": "memorial-presbyterian",
+        "displayOffsetY": -10,
         "description": "A Late Victorian Gothic Revival church at 186 St. John's Place and Seventh Avenue, designed by Pugin & Walter and opened in 1883. Built of warm Belleville brownstone with a blue-slate roof, it rises from a buttressed corner tower through an open belfry to a broached octagonal spire. Much of its glorious stained glass is by Tiffany Studios. It has been part of the Park Slope Historic District since 1973.",
         "photo": "/photos/memorial-presbyterian-church.jpg",
         "photoAlt": "The brownstone corner tower and broached spire of Memorial Presbyterian Church at Seventh Avenue and St. John's Place",
@@ -327,6 +328,109 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "beth-elohim",
+        "name": "Congregation Beth Elohim",
+        "category": "Synagogue",
+        "building": "beth-elohim",
+        "description": "A Reform Jewish congregation founded in 1861, known as the \"Garfield Temple\" or \"Eighth Avenue Temple\" at 274 Garfield Place and Eighth Avenue. Its sanctuary, designed by Simon Eisendrath and B. Horowitz and completed in 1910, is a Classical Revival landmark in Indiana limestone crowned by one of the great copper domes on the Brooklyn skyline — a monumental portico of Corinthian columns carrying a pediment and entablature, with a windowed drum beneath the hemisphere. Across Garfield Place, the congregation's 1929 Temple House (Romanesque Revival and Art Deco) served as a cultural center for the neighborhood. Both buildings are New York City landmarks within the Park Slope Historic District. In March 2021, Beth Elohim merged with Union Temple of Brooklyn.",
+        "photo": "/photos/beth-elohim-synagogue.jpg",
+        "photoAlt": "Congregation Beth Elohim on Garfield Place in Park Slope, its Classical Revival limestone facade and great copper dome seen from the street",
+        "photoCredit": "David Shankbone, August 2008 · Wikimedia Commons (CC BY-SA 3.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.974361, 40.671222]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "park-slope-jewish-center",
+        "name": "Park Slope Jewish Center",
+        "category": "Synagogue",
+        "building": "park-slope-jewish-center",
+        "description": "An egalitarian Conservative synagogue at 1320 Eighth Avenue and Fourteenth Street, housed in a 1925 Romanesque Revival and Baroque-style brick building designed by Allen A. Blaustein. It was built for Congregation B'nai Jacob and rose from the 1960 merger of three South Brooklyn congregations — B'nai Jacob-Tifereth Israel, Tifereth Israel, and B'nai Sholaum — into the institution that bears its name today. The broad Eighth Avenue front carries a great rose window, round-arched stained-glass lancets, and a small copper dome over the sanctuary. Listed individually on the National Register of Historic Places in 2002, PSJC has been part of the neighborhood's Jewish revival since the 1970s brownstone renaissance.",
+        "photo": "/photos/park-slope-jewish-center.jpg",
+        "photoAlt": "The red-brick Romanesque front of the Park Slope Jewish Center at Eighth Avenue and Fourteenth Street, with its rose window and round-arched windows",
+        "photoCredit": "Beyond My Ken, February 2013 · Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.98167, 40.662972]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "brooklyn-conservatory",
+        "name": "Brooklyn Conservatory of Music",
+        "category": "Landmark",
+        "building": "brooklyn-conservatory",
+        "displayOffsetY": 12,
+        "description": "A music school at 58 Seventh Avenue and Lincoln Place, housed since 1945 in an 1881 Victorian High Gothic mansion designed by S. F. Evelette for oilcloth manufacturer William M. Brasher \u2014 a red-brick and brownstone corner pile whose conical turret and gabled wings recall the Park Slope of the 1880s. The house served as the Park Slope Masonic Club from 1924 until the conservatory bought it; the school itself was founded in 1897 by German immigrants as a European-style classical conservatory (after merging with the Queens Conservatory), and today teaches everything from voice and piano to jazz, gospel, Latin jazz, and African drumming.",
+        "photo": "/photos/brooklyn-conservatory-of-music.jpg",
+        "photoAlt": "The Brooklyn Conservatory of Music at the corner of Seventh Avenue and Lincoln Place, its red-brick Victorian mansion crowned by a conical corner turret",
+        "photoCredit": "Beyond My Ken, 2013 \u00b7 Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9747228, 40.6759573]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "ansonia-clock-factory",
+        "name": "Ansonia Clock Factory",
+        "category": "Landmark",
+        "building": "ansonia-clock-factory",
+        "description": "The Ansonia Clock Company factory at 420 12th Street — a block-square German Romanesque Revival brick complex designed by Samuel Curtiss, Jr. and completed in 1881 after an earlier plant on the same site burned in 1880. The company consolidated here from Ansonia, Connecticut, occupying the entire block between Seventh and Eighth Avenues and Twelfth and Thirteenth Streets; the Brooklyn Eagle called it the largest clock factory in the world. At its peak the firm offered more than 440 clock models and exported to Europe, Asia, and Australia. In 1929, amid the shift to electric timekeeping, Ansonia sold its Brooklyn machinery to the Soviet Union's Amtorg Trading Corporation — American workers helped install it in Moscow — and U.S. manufacturing ended. The building stood empty for decades before conversion in the early 1980s to Ansonia Court, a residential co-op that still wraps a central courtyard.",
+        "photo": "/photos/ansonia-clock-factory.jpg",
+        "photoAlt": "A Brooklyn Eagle postcard of the Ansonia Clock Company factory, captioned the largest clock factory in the world, showing the block-square brick complex with smoking chimneys",
+        "photoCredit": "Brooklyn Eagle Postcard collection, c. 1910 · Brooklyn Public Library, Center for Brooklyn History (public domain)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.98245, 40.66458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "cronyn-house",
+        "name": "William B. Cronyn House",
+        "category": "Landmark",
+        "building": "cronyn-house",
+        "description": "A French Second Empire suburban villa at 271 Ninth Street between Fourth and Fifth Avenues, designed by Patrick Charles Keely and built in 1856\u201357 for William B. Cronyn, a prosperous Wall Street merchant. When it went up, Park Slope was still country retreat \u2014 this freestanding mansion predates the brownstone blocks that would soon surround it. Its slate mansard roof carries ornamental iron cresting and a central half-story cupola with clerestory windows. The Cronyns sold in 1862; by 1898 Charles M. Higgins had made the house his India-ink company offices, with the factory directly behind. Designated a New York City landmark in 1978 and listed on the National Register in 1982, it has housed Slope Music since 1981.",
+        "photo": "/photos/william-b-cronyn-house.jpg",
+        "photoAlt": "The William B. Cronyn House at 271 Ninth Street, its mansard roof crowned by iron cresting and a central cupola, seen from the front lawn",
+        "photoCredit": "Beyond My Ken, March 2013 \u00b7 Wikimedia Commons (CC BY-SA 4.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.987465, 40.669802]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "eccentric-house",
+        "name": "Everything and a Bathtub",
+        "category": "Residence",
+        "building": "eccentric-house",
+        "description": "410 Third Street, between Fifth and Sixth Avenues — a plain 1920 four-story walk-up whose fame is entirely in the front yard. Neighbors know it as \"Everything and a Bathtub\": a year-round jumble of figurines, signs, seasonal props, and lawn ornaments that spills from the stoop toward the sidewalk, with a clawfoot tub holding pride of place. Featured on StoopDecor's must-see lists and a regular stop on the Park Slope Halloween parade route, it is the block's always-cluttered front-yard house.",
+        "photo": "/photos/eccentric-house.jpg",
+        "photoAlt": "The cluttered front yard of 410 Third Street on a sunny day, with pinwheels, plastic flowers, signs, and lawn ornaments spilling toward the sidewalk",
+        "photoCredit": "Google Street View · 410 Third Street"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9820376, 40.6718734]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "botanic-garden",
         "name": "Brooklyn Botanic Garden",
         "category": "Garden",
@@ -339,6 +443,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [-73.96412, 40.6682]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "prospect-park-zoo",
+        "name": "Prospect Park Zoo",
+        "category": "Zoo",
+        "building": "prospect-park-zoo",
+        "description": "A 12-acre zoo on the eastern edge of Prospect Park at 450 Flatbush Avenue, operated by the Wildlife Conservation Society. Its roots go back to an informal menagerie that opened in 1890; the zoo Brooklyn knows today was built in 1934\u20131935 with CWA and WPA funding to designs by Aymar Embury II and opened on July 3, 1935. The limestone buildings carry Art Deco zigzag bands and F. G. R. Roth bas-reliefs drawn from Kipling\u2019s Jungle Book. The sea-lion pool at the Flatbush Avenue entrance \u2014 where California sea lions still perform daily training sessions \u2014 has been the zoo\u2019s signature greeting since opening day.",
+        "photo": "/photos/prospect-park-zoo-postcard.jpg",
+        "photoAlt": "A vintage linen postcard captioned 'Prospect Park Zoo, Brooklyn, N. Y.,' showing the zoo grounds and buildings, c. 1930\u20131945",
+        "photoCredit": "Tichnor Brothers Postcard Collection, c. 1930\u20131945 \u00b7 Boston Public Library, Digital Commonwealth (no known copyright restrictions)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9651, 40.6654]
       }
     }
   ]

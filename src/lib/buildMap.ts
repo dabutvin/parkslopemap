@@ -465,6 +465,10 @@ function buildPois(
 
     const drawing = builder();
     const [x, y] = project(feature.geometry.coordinates as [number, number]);
+    const offsetX = (props.displayOffsetX as number) ?? 0;
+    const offsetY = (props.displayOffsetY as number) ?? 0;
+    const px = x + offsetX;
+    const py = y + offsetY;
 
     const parts: KeyedSubPath[] = drawing.parts.flatMap((part, i) =>
       roughen(part.d, {
@@ -486,16 +490,16 @@ function buildPois(
       photo: (props.photo as string) ?? undefined,
       photoAlt: (props.photoAlt as string) ?? undefined,
       photoCredit: (props.photoCredit as string) ?? undefined,
-      x,
-      y,
+      x: px,
+      y: py,
       scale: drawing.scale,
       anchorX: drawing.anchorX,
       anchorY: drawing.anchorY,
       width: drawing.width,
       height: drawing.height,
       parts,
-      labelX: x,
-      labelY: y - drawing.anchorY * drawing.scale - 9,
+      labelX: px,
+      labelY: py - drawing.anchorY * drawing.scale - 9,
     });
   }
 
