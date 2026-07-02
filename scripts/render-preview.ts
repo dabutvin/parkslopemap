@@ -88,6 +88,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
     .join("")}
   <g font-family="sans-serif">
     <text x="${model.parkLabel.x}" y="${model.parkLabel.y}" font-size="30" font-weight="700" fill="#5a6f49" text-anchor="middle" transform="rotate(${model.parkLabel.angle} ${model.parkLabel.x} ${model.parkLabel.y})">${esc(model.parkLabel.name)}</text>
+    <text x="${model.plazaLabel.x}" y="${model.plazaLabel.y}" font-size="18" font-weight="700" fill="#5a6f49" text-anchor="middle" transform="rotate(${model.plazaLabel.angle} ${model.plazaLabel.x} ${model.plazaLabel.y})">${esc(model.plazaLabel.name)}</text>
     ${model.northGreenLabels
       .map(
         (l) =>
@@ -102,24 +103,7 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${model.width}
       )
       .join("")}
   </g>
-  ${compass(model.northAngle)}
 </svg>`;
-
-function compass(northAngle: number): string {
-  const x = 88,
-    y = 96,
-    r = 40;
-  const rad = (northAngle * Math.PI) / 180;
-  const tip = [x + Math.cos(rad) * r, y + Math.sin(rad) * r];
-  const tail = [x - Math.cos(rad) * r * 0.7, y - Math.sin(rad) * r * 0.7];
-  const lbl = [x + Math.cos(rad) * (r + 16), y + Math.sin(rad) * (r + 16)];
-  return `<g font-family="sans-serif">
-    <circle cx="${x}" cy="${y}" r="${r}" fill="rgba(247,240,223,0.55)" stroke="${COLORS.ink}" stroke-width="2"/>
-    <line x1="${tail[0]}" y1="${tail[1]}" x2="${tip[0]}" y2="${tip[1]}" stroke="#a8412f" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="${x}" cy="${y}" r="3" fill="${COLORS.ink}"/>
-    <text x="${lbl[0]}" y="${lbl[1]}" font-size="22" font-weight="700" fill="${COLORS.ink}" text-anchor="middle" dominant-baseline="middle">N</text>
-  </g>`;
-}
 
 const png = new Resvg(svg, { fitTo: { mode: "width", value: 1000 } }).render().asPng();
 const suffix = Number.isFinite(angle) ? `-${angle}` : "-default";

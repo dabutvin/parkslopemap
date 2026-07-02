@@ -129,7 +129,10 @@ export interface MapModel {
   avenueLabels: AvenueLabel[];
   /** Cross-street labels, revealed progressively via each label's minZoom. */
   streetLabels: AvenueLabel[];
+  /** The "Prospect Park" label — horizontal, clickable, opens the detail drawer. */
   parkLabel: ParkLabel;
+  /** The "Grand Army Plaza" label — same treatment as the park label. */
+  plazaLabel: ParkLabel;
   /** Points of interest (hand-drawn landmark buildings). */
   pois: PoiModel[];
   /** Screen-space heading (degrees) that points to true north. */
@@ -364,7 +367,7 @@ export function buildMapModel(
       : { stroke: COLORS.street, strokeWidth: 1.1, roughness: 1.4, bowing: 1, seed: i + 100 };
     streetPaths.push(...roughen(d, opts).map((p, j) => ({ ...p, key: `${i}-${j}` })));
   });
-  const plazaPaths = buildPlazaOval(plazaPts);
+  const { paths: plazaPaths, cx: plazaCx, cy: plazaCy } = buildPlazaOval(plazaPts);
 
   // Prospect Park's internal circulation: fine footpaths + the bolder loop drive.
   // Both are roughened polylines; the renderer clips them to the park polygon and
@@ -414,6 +417,24 @@ export function buildMapModel(
       "Calvert Vaux & Frederick Law Olmsted, 'Design for Prospect Park,' 1870 \u00b7 Geographicus / Wikimedia Commons (public domain)",
   };
 
+  // "Grand Army Plaza" sits in the fitted oval at the NE corner. Horizontal and
+  // clickable like the park label; the raw street label is suppressed below.
+  const plazaLabel: ParkLabel = {
+    id: "grand-army-plaza",
+    name: "Grand Army Plaza",
+    x: plazaCx + 88,
+    y: plazaCy - 22,
+    angle: 0,
+    category: "Plaza",
+    description:
+      "The oval entrance to Prospect Park at Flatbush Avenue and Eastern Parkway \u2014 one of the first features Olmsted and Vaux laid out when the park opened in 1867, and the terminus of the world\u2019s first parkway. Concentric rings of Plaza Street carry traffic around the green, with eight radial roads fanning out into Brooklyn. At its center stand the Soldiers\u2019 and Sailors\u2019 Memorial Arch (1889\u20131892), the Bailey Fountain (1932), and, facing the plaza from the north, the Brooklyn Public Library\u2019s great limestone facade.",
+    photo: "/photos/grand-army-plaza.jpg",
+    photoAlt:
+      "Grand Army Plaza around 1904, seen from above: horse-drawn traffic in the oval, the Memorial Arch at left, and the four eagle-topped columns at the Prospect Park entrance",
+    photoCredit:
+      "Detroit Publishing Co., c. 1904 \u00b7 Library of Congress (public domain)",
+  };
+
   // Heading that points to true north, so the compass rose is accurate.
   const n0 = project([-73.982, 40.665]);
   const n1 = project([-73.982, 40.67]);
@@ -441,6 +462,7 @@ export function buildMapModel(
     avenueLabels,
     streetLabels,
     parkLabel,
+    plazaLabel,
     pois,
     northAngle,
   };
@@ -574,8 +596,8 @@ function projectedPoints(
  * single ellipse path so it matches the illustrated look without the clutter of
  * the raw road segments.
  */
-function buildPlazaOval(pts: [number, number][]): KeyedSubPath[] {
-  if (pts.length < 4) return [];
+function buildPlazaOval(pts: [number, number][]): { paths: KeyedSubPath[]; cx: number; cy: number } {
+  if (pts.length < 4) return { paths: [], cx: 0, cy: 0 };
   const n = pts.length;
   let cx = 0;
   let cy = 0;
@@ -617,15 +639,19 @@ function buildPlazaOval(pts: [number, number][]): KeyedSubPath[] {
   const by = cy - rx * sa;
   const d = `M ${ax} ${ay} A ${rx} ${ry} ${deg} 0 1 ${bx} ${by} A ${rx} ${ry} ${deg} 0 1 ${ax} ${ay} Z`;
 
-  return roughen(d, {
-    fill: COLORS.park,
-    fillStyle: "solid",
-    stroke: COLORS.parkInk,
-    strokeWidth: 2,
-    roughness: 1.6,
-    bowing: 1.2,
-    seed: 99,
-  }).map((p, j) => ({ ...p, key: `plaza-${j}` }));
+  return {
+    paths: roughen(d, {
+      fill: COLORS.park,
+      fillStyle: "solid",
+      stroke: COLORS.parkInk,
+      strokeWidth: 2,
+      roughness: 1.6,
+      bowing: 1.2,
+      seed: 99,
+    }).map((p, j) => ({ ...p, key: `plaza-${j}` })),
+    cx,
+    cy,
+  };
 }
 
 function buildStreetLabels(
@@ -638,7 +664,7 @@ function buildStreetLabels(
 
   for (const f of collection.features) {
     const name = f.properties?.name as string | undefined;
-    if (!name || f.properties?.kind !== kind) continue;
+    if (!name || f.properties?.kind !== kind || PLAZA_STREETS.has(name)) continue;
     const lines =
       f.geometry.type === "LineString" ? [f.geometry.coordinates] : f.geometry.coordinates;
     for (const line of lines) {

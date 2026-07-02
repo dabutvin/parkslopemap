@@ -54,6 +54,7 @@ export function NeighborhoodMap() {
     const urls = new Set<string>();
     for (const poi of model.pois) if (poi.photo) urls.add(poi.photo);
     if (model.parkLabel.photo) urls.add(model.parkLabel.photo);
+    if (model.plazaLabel.photo) urls.add(model.plazaLabel.photo);
     for (const url of urls) {
       const img = new Image();
       img.src = url;
@@ -76,7 +77,8 @@ export function NeighborhoodMap() {
   // The detail drawer is fed by either a POI building or the clickable park label.
   const selectedPoi =
     model.pois.find((p) => p.id === selectedPoiId) ??
-    (model.parkLabel.id === selectedPoiId ? model.parkLabel : null);
+    (model.parkLabel.id === selectedPoiId ? model.parkLabel : null) ??
+    (model.plazaLabel.id === selectedPoiId ? model.plazaLabel : null);
   // Live mirror of `view` so gesture handlers can read the latest value without
   // being torn down/recreated on every frame.
   const viewRef = useRef(view);
@@ -530,6 +532,25 @@ export function NeighborhoodMap() {
         >
           {model.parkLabel.name}
         </text>
+        <text
+          className={`ps-label ps-label--park ps-label--plaza ps-label--clickable${model.plazaLabel.id === selectedPoiId ? " ps-label--selected" : ""}`}
+          x={model.plazaLabel.x}
+          y={model.plazaLabel.y}
+          transform={`rotate(${model.plazaLabel.angle} ${model.plazaLabel.x} ${model.plazaLabel.y})`}
+          data-poi-id={model.plazaLabel.id}
+          role="button"
+          tabIndex={0}
+          aria-label={`${model.plazaLabel.name}, ${model.plazaLabel.category}`}
+          aria-pressed={model.plazaLabel.id === selectedPoiId}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setSelectedPoiId(model.plazaLabel.id);
+            }
+          }}
+        >
+          {model.plazaLabel.name}
+        </text>
         {model.greenLabel && (
           <text
             className="ps-label ps-label--green"
@@ -584,8 +605,6 @@ export function NeighborhoodMap() {
           </text>
         ))}
       </g>
-
-      <Compass x={88} y={96} radius={40} northAngle={model.northAngle} />
     </svg>
 
       {/* Paper grain lives outside the zooming SVG so the costly feTurbulence
@@ -654,32 +673,5 @@ export function NeighborhoodMap() {
         )}
       </aside>
     </div>
-  );
-}
-
-function Compass({
-  x,
-  y,
-  radius,
-  northAngle,
-}: {
-  x: number;
-  y: number;
-  radius: number;
-  northAngle: number;
-}) {
-  const rad = (northAngle * Math.PI) / 180;
-  const tip: [number, number] = [x + Math.cos(rad) * radius, y + Math.sin(rad) * radius];
-  const tail: [number, number] = [x - Math.cos(rad) * radius * 0.7, y - Math.sin(rad) * radius * 0.7];
-  const label: [number, number] = [x + Math.cos(rad) * (radius + 16), y + Math.sin(rad) * (radius + 16)];
-  return (
-    <g className="ps-compass" aria-hidden="true">
-      <circle cx={x} cy={y} r={radius} className="ps-compass__ring" />
-      <line x1={tail[0]} y1={tail[1]} x2={tip[0]} y2={tip[1]} className="ps-compass__needle" />
-      <circle cx={x} cy={y} r={3} className="ps-compass__hub" />
-      <text x={label[0]} y={label[1]} className="ps-compass__n">
-        N
-      </text>
-    </g>
   );
 }

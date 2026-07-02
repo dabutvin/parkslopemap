@@ -466,6 +466,25 @@
     {
       "type": "Feature",
       "properties": {
+        "id": "barclays-center",
+        "name": "Barclays Center",
+        "category": "Arena",
+        "building": "barclays-center",
+        "displayOffsetX": -110,
+        "displayOffsetY": -55,
+        "description": "Brooklyn's arena at 620 Atlantic Avenue, opened in September 2012 on the Atlantic Yards site at Flatbush and Atlantic Avenues. Designed by SHoP Architects with AECOM as architect of record, it is wrapped in about 12,000 panels of weathering steel whose lattice facade was meant to evoke the borough's brownstone stoops and industrial past. A great elliptical oculus skylight crowns the roof. Home to the Brooklyn Nets since 2012 and the New York Liberty since 2020, it replaced a swath of low-rise blocks — including the Ward Bakery and several rowhouses — that had stood for a century.",
+        "photo": "/photos/barclays-center.jpg",
+        "photoAlt": "Barclays Center seen from Flatbush Avenue, its rust-colored weathering-steel lattice facade rising above the glass entrance band",
+        "photoCredit": "AEMoreira042281, September 2012 · Wikimedia Commons (CC BY-SA 3.0)"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-73.9753587, 40.6825812]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
         "id": "prospect-park-zoo",
         "name": "Prospect Park Zoo",
         "category": "Zoo",

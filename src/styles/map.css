@@ -250,6 +250,15 @@ body {
   fill: #a8412f;
 }
 
+.ps-label--plaza {
+  font-size: 18px;
+  letter-spacing: 0.03em;
+}
+
+.ps-label--plaza.ps-label--selected {
+  fill: #a8412f;
+}
+
 .ps-label--green {
   font-size: 13px;
   font-weight: 700;
@@ -454,29 +463,4 @@ body {
     border-radius: 12px 12px 0 0;
     overflow: hidden;
   }
-}
-
-.ps-compass__ring {
-  fill: rgba(247, 240, 223, 0.55);
-  stroke: var(--ink);
-  stroke-width: 2;
-}
-
-.ps-compass__needle {
-  stroke: #a8412f;
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-
-.ps-compass__hub {
-  fill: var(--ink);
-}
-
-.ps-compass__n {
-  font-family: "Caveat", cursive;
-  font-size: 22px;
-  font-weight: 700;
-  fill: var(--ink);
-  text-anchor: middle;
-  dominant-baseline: middle;
 }

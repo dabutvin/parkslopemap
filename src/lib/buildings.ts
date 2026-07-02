@@ -141,6 +141,10 @@ const C = {
   cronynGrey: "#a59a92",
   cronynGreyDark: "#827870",
   cronynOrange: "#e07828",
+  // Barclays Center tones (2012 SHoP weathering-steel arena at Atlantic Yards).
+  corten: "#9a6848",
+  cortenDark: "#6f452c",
+  cortenLight: "#b88462",
 };
 
 const rect = (x: number, y: number, w: number, h: number): string =>
@@ -4620,6 +4624,228 @@ function eccentricHouse(): BuildingDrawing {
   };
 }
 
+/**
+ * Barclays Center (2012, SHoP Architects / AECOM): Brooklyn's arena at Atlantic
+ * Yards, clad in weathering steel whose lattice facade reads like a giant woven
+ * basket. Drawn as the Flatbush Avenue elevation — a low, wide corten bowl
+ * bulging at mid-height, a deep cantilevered roof ring with the elliptical
+ * oculus cut through it, basket-weave panel diamonds, and the blue entrance
+ * sign over a glass arcade.
+ */
+function barclaysCenter(): BuildingDrawing {
+  const W = 192;
+  const parts: BuildingPart[] = [];
+
+  let seed = 1480;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const cx = W / 2;
+  const yWater = 162;
+  const yBase = 151;
+  const yEntTop = 132;
+  const yBelly = 88;
+  const yShoulder = 54;
+  const yBowlTop = 34;
+  const yCantBot = 30;
+  const yCantTop = 8;
+
+  const xBaseL = 34;
+  const xBaseR = 158;
+  const xBellyL = 18;
+  const xBellyR = 174;
+  const xShoulderL = 40;
+  const xShoulderR = 152;
+  const xBowlTopL = 54;
+  const xBowlTopR = 138;
+  const xCantL = 8;
+  const xCantR = 184;
+
+  push({
+    d: ellipse(cx, yWater + 2, W * 0.48, 11),
+    fill: "rgba(91,74,58,0.16)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1.6,
+    fillStyle: "solid",
+  });
+
+  // Main corten bowl — ship-hull profile, bulging at mid-height.
+  push({
+    d:
+      `M ${r(xBaseL)} ${r(yBase)} ` +
+      `C ${r(xBaseL - 4)} ${r(yEntTop + 6)} ${r(xBellyL + 2)} ${r(yBelly + 8)} ${r(xBellyL)} ${r(yBelly)} ` +
+      `C ${r(xBellyL - 2)} ${r(yShoulder + 6)} ${r(xShoulderL - 2)} ${r(yShoulder)} ${r(xShoulderL)} ${r(yShoulder)} ` +
+      `C ${r(xShoulderL + 2)} ${r(yBowlTop + 4)} ${r(xBowlTopL - 2)} ${r(yBowlTop)} ${r(xBowlTopL)} ${r(yBowlTop)} ` +
+      `L ${r(xBowlTopR)} ${r(yBowlTop)} ` +
+      `C ${r(xBowlTopR + 2)} ${r(yBowlTop + 4)} ${r(xShoulderR - 2)} ${r(yShoulder)} ${r(xShoulderR)} ${r(yShoulder)} ` +
+      `C ${r(xShoulderR + 2)} ${r(yShoulder + 6)} ${r(xBellyR + 2)} ${r(yBelly + 8)} ${r(xBellyR)} ${r(yBelly)} ` +
+      `C ${r(xBellyR - 2)} ${r(yEntTop + 6)} ${r(xBaseR + 4)} ${r(yEntTop + 2)} ${r(xBaseR)} ${r(yBase)} Z`,
+    fill: C.corten,
+    stroke: C.ink,
+    strokeWidth: 1.6,
+    roughness: 1,
+    bowing: 0.35,
+    fillStyle: "solid",
+  });
+
+  // Shaded right return and underside of the cantilever.
+  push({
+    d:
+      `M ${r(xBellyR - 8)} ${r(yBelly - 4)} L ${r(xBellyR)} ${r(yBelly)} L ${r(xShoulderR)} ${r(yShoulder)} ` +
+      `L ${r(xBowlTopR)} ${r(yBowlTop)} L ${r(xBowlTopR - 10)} ${r(yBowlTop + 2)} L ${r(xShoulderR - 8)} ${r(yShoulder + 4)} Z`,
+    fill: C.cortenDark,
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(xBowlTopL)} ${r(yBowlTop)} L ${r(xBowlTopR)} ${r(yBowlTop)} L ${r(xCantR - 4)} ${r(yCantBot)} L ${r(xCantL + 4)} ${r(yCantBot)} Z`,
+    fill: "rgba(63,51,39,0.35)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 0.8,
+    fillStyle: "solid",
+  });
+
+  // Horizontal panel bands — the weathering-steel courses read as stripes.
+  for (let i = 0; i < 7; i++) {
+    const t = i / 6;
+    const yy = yEntTop + 4 + t * (yBowlTop - yEntTop - 8);
+    const inset = 6 + t * 18;
+    push({
+      d: `M ${r(xBaseL + inset)} ${r(yy)} L ${r(xBaseR - inset)} ${r(yy)}`,
+      stroke: C.cortenDark,
+      strokeWidth: 0.65,
+      roughness: 0.65,
+    });
+  }
+
+  // Basket-weave diamonds — SHoP's signature diagrid of rust panels.
+  const weaveTop = yEntTop + 10;
+  const weaveBot = yShoulder + 6;
+  const rows = 4;
+  const cols = 6;
+  const rowH = (weaveBot - weaveTop) / rows;
+  for (let row = 0; row < rows; row++) {
+    const yt = weaveTop + row * rowH;
+    const yb = yt + rowH;
+    const t = row / (rows - 1 || 1);
+    const xl = xBellyL + 8 + t * 22;
+    const xr = xBellyR - 8 - t * 22;
+    const colW = (xr - xl) / cols;
+    for (let col = 0; col < cols; col++) {
+      const x0 = xl + col * colW;
+      const x1 = x0 + colW;
+      if ((row + col) % 2 === 0) {
+        push({ d: `M ${r(x0)} ${r(yt)} L ${r(x1)} ${r(yb)}`, stroke: C.cortenDark, strokeWidth: 0.75, roughness: 0.7 });
+        push({ d: `M ${r(x1)} ${r(yt)} L ${r(x0)} ${r(yb)}`, stroke: C.cortenDark, strokeWidth: 0.75, roughness: 0.7 });
+      }
+    }
+  }
+
+  // Cantilevered roof ring — the great overhang with the oculus cut through.
+  push({
+    d:
+      `M ${r(xCantL)} ${r(yCantBot)} L ${r(xCantL + 6)} ${r(yCantTop + 2)} ` +
+      `Q ${r(cx - 22)} ${r(yCantTop - 2)} ${r(cx - 20)} ${r(yCantTop)} ` +
+      `L ${r(cx + 20)} ${r(yCantTop)} ` +
+      `Q ${r(cx + 22)} ${r(yCantTop - 2)} ${r(xCantR - 6)} ${r(yCantTop + 2)} ` +
+      `L ${r(xCantR)} ${r(yCantBot)} Z`,
+    fill: C.cortenLight,
+    stroke: C.ink,
+    strokeWidth: 1.5,
+    roughness: 0.95,
+    fillStyle: "solid",
+  });
+  push({
+    d: ellipse(cx, yCantTop + 4, 22, 8),
+    fill: C.recess,
+    stroke: C.cortenDark,
+    strokeWidth: 1.3,
+    roughness: 0.75,
+    fillStyle: "solid",
+  });
+  push({
+    d: ellipse(cx, yCantTop + 4, 12, 4.5),
+    fill: "rgba(126,148,152,0.45)",
+    stroke: "none",
+    strokeWidth: 0,
+    roughness: 0.6,
+    fillStyle: "solid",
+  });
+  push({
+    d: `M ${r(xCantL + 10)} ${r(yCantBot)} L ${r(xCantR - 10)} ${r(yCantBot)}`,
+    stroke: C.cortenDark,
+    strokeWidth: 1.2,
+    roughness: 0.7,
+  });
+
+  // Blue "Barclays Center" sign band on the upper facade.
+  push({
+    d: rect(46, yShoulder + 10, 58, 9),
+    fill: C.planeTrim,
+    stroke: C.ink,
+    strokeWidth: 0.9,
+    roughness: 0.7,
+    fillStyle: "solid",
+  });
+  for (const tx of spread(50, 98, 6, 5)) {
+    push({
+      d: rect(tx, yShoulder + 12, 4.5, 5),
+      fill: "#c8dce4",
+      stroke: "none",
+      strokeWidth: 0,
+      roughness: 0.5,
+      fillStyle: "solid",
+    });
+  }
+
+  // Glass entrance arcade beneath the bowl.
+  push({
+    d: `M ${r(xBaseL + 8)} ${r(yBase)} L ${r(xBaseL + 4)} ${r(yEntTop)} L ${r(xBaseR - 4)} ${r(yEntTop)} L ${r(xBaseR - 8)} ${r(yBase)} Z`,
+    fill: C.glass,
+    stroke: C.ink,
+    strokeWidth: 1.3,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  for (const gx of spread(52, 140, 6, 11)) {
+    push({
+      d: rect(gx, yEntTop + 3, 11, yBase - yEntTop - 5),
+      fill: C.recess,
+      stroke: C.ink,
+      strokeWidth: 0.85,
+      roughness: 0.7,
+      fillStyle: "solid",
+    });
+    push({
+      d: `M ${r(gx + 5.5)} ${r(yEntTop + 3)} L ${r(gx + 5.5)} ${r(yBase - 2)}`,
+      stroke: C.glass,
+      strokeWidth: 0.5,
+      roughness: 0.5,
+    });
+  }
+  push({
+    d: `M ${r(xBaseL + 4)} ${r(yEntTop)} Q ${r(cx)} ${r(yEntTop - 6)} ${r(xBaseR - 4)} ${r(yEntTop)}`,
+    stroke: C.cortenLight,
+    strokeWidth: 1.4,
+    roughness: 0.8,
+  });
+
+  push({ d: rect(xCantL, yBase, xCantR - xCantL, yWater - yBase), fill: C.stoneDark, stroke: C.ink, strokeWidth: 1.1, roughness: 1, fillStyle: "solid" });
+
+  return {
+    width: W,
+    height: yWater + 4,
+    anchorX: cx,
+    anchorY: yWater,
+    scale: 0.36,
+    parts,
+  };
+}
+
 export type BuildingBuilder = () => BuildingDrawing;
 
 /** Registry of POI building illustrations, keyed by the feature's `building`. */
@@ -4652,4 +4878,5 @@ export const BUILDINGS: Record<string, BuildingBuilder> = {
   "ansonia-clock-factory": ansoniaClockFactory,
   "cronyn-house": cronynHouse,
   "eccentric-house": eccentricHouse,
+  "barclays-center": barclaysCenter,
 };
