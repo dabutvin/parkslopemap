@@ -111,17 +111,18 @@ export function NeighborhoodMap() {
   // Keep the view within the map bounds and within the allowed zoom range.
   const clampView = useCallback(
     (next: ViewBox): ViewBox => {
+      const { panExtent } = model;
       const minW = model.width / MAX_ZOOM;
       const w = clamp(next.w, minW, model.width);
       const h = w * (model.height / model.width);
       return {
         w,
         h,
-        x: clamp(next.x, 0, model.width - w),
-        y: clamp(next.y, 0, model.height - h),
+        x: clamp(next.x, panExtent.minX, panExtent.maxX - w),
+        y: clamp(next.y, panExtent.minY, panExtent.maxY - h),
       };
     },
-    [model.width, model.height]
+    [model]
   );
 
   // Write the camera straight to the SVG attribute (no React render). Gestures
