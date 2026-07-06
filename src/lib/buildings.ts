@@ -4980,6 +4980,107 @@ function eccentricHouse(): BuildingDrawing {
 }
 
 /**
+ * The Great Pumpkin of Park Slope (Charlie Pigott, 69 Eighth Avenue): a
+ * limestone-trimmed brownstone whose stoop is crowned each fall by a
+ * neighborhood-famous gourd — drawn here at parade-season scale.
+ */
+function greatPumpkin(): BuildingDrawing {
+  const W = 78;
+  const parts: BuildingPart[] = [];
+
+  let seed = 1520;
+  const next = () => seed++;
+  const push = (p: Omit<BuildingPart, "seed">) => parts.push({ seed: next(), ...p });
+
+  const yCorTop = 4;
+  const yCorBot = 12;
+  const yF3 = 18;
+  const yF2 = 44;
+  const yF1 = 70;
+  const hWin = 18;
+  const yEntTop = 96;
+  const yEntBot = 116;
+  const yStoopTop = 116;
+  const yStoopBot = 132;
+  const yPumpkinCy = 118;
+  const yWater = 168;
+
+  const win = (x: number, y: number, w: number, h: number) => {
+    push({ d: rect(x, y, w, h), fill: C.glass, stroke: C.ink, strokeWidth: 1, roughness: 0.6, fillStyle: "solid" });
+    push({ d: `M ${r(x + w / 2)} ${r(y)} L ${r(x + w / 2)} ${r(y + h)}`, stroke: C.ink, strokeWidth: 0.5, roughness: 0.5 });
+    push({ d: `M ${r(x)} ${r(y + h / 2)} L ${r(x + w)} ${r(y + h / 2)}`, stroke: C.ink, strokeWidth: 0.5, roughness: 0.5 });
+  };
+
+  push({ d: ellipse(W / 2, yWater + 2, W * 0.7, 9), fill: "rgba(91,74,58,0.16)", stroke: "none", strokeWidth: 0, roughness: 1.6, fillStyle: "solid" });
+
+  // Limestone-trimmed walk-up brownstone.
+  push({ d: rect(8, yCorBot, W - 16, yStoopBot - yCorBot), fill: C.lime, stroke: C.ink, strokeWidth: 1.6, roughness: 1.1, bowing: 0.4, fillStyle: "solid" });
+  push({ d: rect(W - 14, yCorBot, 6, yStoopBot - yCorBot), fill: C.limeDark, stroke: "none", strokeWidth: 0, roughness: 1, fillStyle: "solid" });
+  push({ d: rect(6, yCorTop, W - 12, yCorBot - yCorTop), fill: C.bstoneTrim, stroke: C.ink, strokeWidth: 1.2, roughness: 0.9, fillStyle: "solid" });
+
+  for (const wy of [yF3, yF2, yF1]) {
+    win(16, wy, 14, hWin);
+    win(48, wy, 14, hWin);
+  }
+
+  // Entrance + short brownstone stoop.
+  push({ d: rect(32, yEntTop, 14, yEntBot - yEntTop), fill: C.door, stroke: C.ink, strokeWidth: 1.3, roughness: 0.9, fillStyle: "solid" });
+  push({
+    d: `M ${r(26)} ${r(yStoopBot)} L ${r(30)} ${r(yStoopTop)} L ${r(48)} ${r(yStoopTop)} L ${r(52)} ${r(yStoopBot)} Z`,
+    fill: C.bstoneTrim,
+    stroke: C.ink,
+    strokeWidth: 1.2,
+    roughness: 1,
+    fillStyle: "solid",
+  });
+  push({ d: rect(24, yStoopTop, 4, yStoopBot - yStoopTop), fill: C.rail, stroke: C.ink, strokeWidth: 0.8, roughness: 0.8, fillStyle: "solid" });
+  push({ d: rect(50, yStoopTop, 4, yStoopBot - yStoopTop), fill: C.rail, stroke: C.ink, strokeWidth: 0.8, roughness: 0.8, fillStyle: "solid" });
+  push({ d: `M ${r(28)} ${r(yStoopTop + 5)} L ${r(50)} ${r(yStoopTop + 5)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+  push({ d: `M ${r(28)} ${r(yStoopTop + 10)} L ${r(50)} ${r(yStoopTop + 10)}`, stroke: C.ink, strokeWidth: 0.6, roughness: 0.6 });
+
+  // The gourd — drawn wider than the facade so it reads at map scale.
+  const px = W / 2;
+  const prx = 30;
+  const pry = 28;
+  push({ d: ellipse(px, yPumpkinCy + 4, prx + 2, pry + 3), fill: C.petalDark, stroke: "none", strokeWidth: 0, roughness: 1.1, fillStyle: "solid" });
+  push({ d: ellipse(px, yPumpkinCy, prx, pry), fill: C.petal, stroke: C.ink, strokeWidth: 1.4, roughness: 1.1, bowing: 0.5, fillStyle: "solid" });
+  push({ d: ellipse(px - 10, yPumpkinCy + 2, 8, 10), fill: C.gCoral, stroke: "none", strokeWidth: 0, roughness: 0.9, fillStyle: "solid" });
+  push({ d: ellipse(px + 12, yPumpkinCy + 4, 7, 9), fill: C.gCoralDark, stroke: "none", strokeWidth: 0, roughness: 0.9, fillStyle: "solid" });
+  for (const ox of [-16, -6, 4, 14]) {
+    push({
+      d: `M ${r(px + ox)} ${r(yPumpkinCy - pry + 4)} Q ${r(px + ox + 2)} ${r(yPumpkinCy)} ${r(px + ox)} ${r(yPumpkinCy + pry - 2)}`,
+      stroke: C.petalDark,
+      strokeWidth: 0.7,
+      roughness: 0.8,
+    });
+  }
+  push({
+    d: `M ${r(px - 4)} ${r(yPumpkinCy - pry + 2)} L ${r(px + 2)} ${r(yPumpkinCy - pry - 10)} L ${r(px + 7)} ${r(yPumpkinCy - pry + 1)} Z`,
+    fill: C.stem,
+    stroke: C.ink,
+    strokeWidth: 1,
+    roughness: 0.9,
+    fillStyle: "solid",
+  });
+  push({ d: rect(px - 1, yPumpkinCy - pry - 12, 3, 4), fill: C.leaf, stroke: C.ink, strokeWidth: 0.7, roughness: 0.8, fillStyle: "solid" });
+
+  // Smaller gourds flanking the stoop.
+  push({ d: ellipse(14, yStoopBot - 2, 5, 4.5), fill: C.gCoral, stroke: C.ink, strokeWidth: 0.9, roughness: 0.85, fillStyle: "solid" });
+  push({ d: rect(13, yStoopBot - 8, 2, 3), fill: C.stem, stroke: C.ink, strokeWidth: 0.6, roughness: 0.7, fillStyle: "solid" });
+  push({ d: ellipse(64, yStoopBot - 1, 4.5, 4), fill: C.gGold, stroke: C.ink, strokeWidth: 0.85, roughness: 0.85, fillStyle: "solid" });
+  push({ d: rect(63, yStoopBot - 6, 2, 2.5), fill: C.stem, stroke: C.ink, strokeWidth: 0.55, roughness: 0.65, fillStyle: "solid" });
+
+  return {
+    width: W,
+    height: yWater + 4,
+    anchorX: W / 2,
+    anchorY: yWater,
+    scale: 0.4,
+    parts,
+  };
+}
+
+/**
  * Barclays Center (2012, SHoP Architects / AECOM): Brooklyn's arena at Atlantic
  * Yards. Drawn as the Flatbush Avenue elevation — a low, wide horseshoe of
  * weathering steel: two side piers joined by a deep cantilevered roof ring,
@@ -5244,6 +5345,7 @@ export const BUILDINGS = {
   "ansonia-clock-factory": ansoniaClockFactory,
   "cronyn-house": cronynHouse,
   "eccentric-house": eccentricHouse,
+  "great-pumpkin": greatPumpkin,
   "barclays-center": barclaysCenter,
 } as const satisfies Record<string, BuildingBuilder>;
 
