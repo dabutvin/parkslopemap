@@ -162,6 +162,11 @@ export interface MapModel {
   subwayStops: SubwayStopModel[];
   /** Screen-space heading (degrees) that points to true north. */
   northAngle: number;
+  /**
+   * Screen-space bounds the camera may pan over. Wider than the paper rect when
+   * landmark art spills past the edges (e.g. the boathouse on the park's east rim).
+   */
+  panExtent: { minX: number; minY: number; maxX: number; maxY: number };
 }
 
 export interface BuildMapInput {
@@ -470,9 +475,12 @@ export function buildMapModel(
   const n1 = project([-73.982, 40.67]);
   const northAngle = (Math.atan2(n1[1] - n0[1], n1[0] - n0[0]) * 180) / Math.PI;
 
+  const panExtent = computePanExtent(width, height, pois);
+
   return {
     width,
     height,
+    panExtent,
     boundaryD,
     parkD,
     parkPaths,
@@ -604,6 +612,29 @@ function buildPois(
   return pois;
 }
 
+// Local-space bleed for POI art that spills past its nominal width/height box
+// (water reflections, cornice overhangs, etc.).
+const POI_ART_BLEED = 12;
+
+/** Expand the pannable area when roughened buildings draw past the paper edge. */
+function computePanExtent(
+  width: number,
+  height: number,
+  pois: PoiModel[]
+): { minX: number; minY: number; maxX: number; maxY: number } {
+  let minX = 0;
+  let minY = 0;
+  let maxX = width;
+  let maxY = height;
+  for (const poi of pois) {
+    const s = poi.scale;
+    minX = Math.min(minX, poi.x - s * (poi.anchorX + POI_ART_BLEED));
+    maxX = Math.max(maxX, poi.x + s * (poi.width - poi.anchorX + POI_ART_BLEED));
+    minY = Math.min(minY, poi.y - s * (poi.anchorY + POI_ART_BLEED));
+    maxY = Math.max(maxY, poi.y + s * (poi.height - poi.anchorY + POI_ART_BLEED));
+  }
+  return { minX, minY, maxX, maxY };
+}
 
 // Cross-street labels fade in between these zoom factors: the longest street
 // appears first (near MIN), the shortest last (near MAX).
