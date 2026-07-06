@@ -506,6 +506,7 @@
         "name": "The Great Pumpkin",
         "category": "Tradition",
         "building": "great-pumpkin",
+        "displayOffsetY": 10,
         "description": "Each fall, a giant gourd takes over the stoop of 69 Eighth Avenue between Union and Berkeley Streets — a decade-long Halloween tradition by fourth-generation Park Sloper Charlie Pigott. What began with a 100-pound squash has grown into a neighborhood spectacle: recent pumpkins have weighed nearly 1,000 pounds and required a forklift (or ten neighbors with dollies and planks) to hoist into place. Pigott calls it 'the neighborhood's pumpkin,' and locals of every age stop for photos until Thanksgiving, when the gourd is chopped up for compost.",
         "photo": "/photos/great-pumpkin.jpg",
         "photoAlt": "The giant orange gourd on a hay bale at the foot of the stoop at 69 Eighth Avenue, with smaller pumpkins and gourds lining the steps up to the wrought-iron front door",
